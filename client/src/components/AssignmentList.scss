@@ -1,0 +1,266 @@
+@import '../index.scss';
+
+.assignment-list {
+  width: 100%;
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.assignment-list__title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #000000;
+  letter-spacing: -0.5px;
+
+  @include tablet {
+    font-size: 32px;
+    margin-bottom: 32px;
+  }
+
+  @include desktop {
+    font-size: 36px;
+  }
+}
+
+.assignment-list__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  animation: fadeIn 0.5s ease-out;
+
+  @include tablet {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+  }
+
+  @include desktop {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+}
+
+.assignment-card {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px 20px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  min-height: 180px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #3b82f6;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+
+  @include tablet {
+    padding: 28px 24px;
+    min-height: 200px;
+    margin-bottom: 20px;
+  }
+
+  &:hover {
+    background: #f8fafc;
+    border-color: #3b82f6;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+
+    &::before {
+      transform: scaleX(1);
+    }
+  }
+
+  &:active {
+    transform: translateY(-2px);
+  }
+
+  &:not(:last-child) {
+    margin-bottom: 20px;
+  }
+}
+
+.assignment-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.assignment-card__title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #000000;
+  flex: 1;
+  line-height: 1.3;
+  margin-bottom: 4px;
+
+  @include tablet {
+    font-size: 22px;
+  }
+}
+
+.assignment-card__difficulty {
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+
+  &--easy {
+    background: #22c55e;
+    color: white;
+  }
+
+  &--medium {
+    background: #f59e0b;
+    color: white;
+  }
+
+  &--hard {
+    background: #ef4444;
+    color: white;
+  }
+}
+
+.assignment-card__description {
+  font-size: 14px;
+  color: #1e293b;
+  line-height: 1.5;
+  flex: 1;
+  margin-bottom: 12px;
+
+  @include tablet {
+    font-size: 15px;
+  }
+}
+
+.assignment-card__footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 2px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.assignment-card__action {
+  font-size: 14px;
+  font-weight: 600;
+  color: #3b82f6;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+
+  &::after {
+    content: '→';
+    transition: transform 0.2s ease;
+  }
+
+  .assignment-card:hover & {
+    color: #60a5fa;
+
+    &::after {
+      transform: translateX(4px);
+    }
+  }
+
+  @include tablet {
+    font-size: 15px;
+  }
+}
+
+.assignment-list__loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: #1e293b;
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+
+  &::before {
+    content: '';
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(59, 130, 246, 0.2);
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @include tablet {
+    padding: 80px 40px;
+    font-size: 18px;
+  }
+}
+
+.assignment-list__empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #1e293b;
+  font-size: 16px;
+  font-weight: 500;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+
+  @include tablet {
+    padding: 80px 40px;
+    font-size: 18px;
+  }
+}
+
+.assignment-list__error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: 600;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+
+  @include tablet {
+    padding: 24px;
+  }
+}
+
+.assignment-list__retry-btn {
+  background: #3b82f6;
+  color: white;
+  width: 100%;
+  font-weight: 600;
+  border: none;
+
+  @include tablet {
+    width: auto;
+    min-width: 140px;
+  }
+
+  &:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+  }
+}

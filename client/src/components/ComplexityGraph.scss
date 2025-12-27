@@ -1,0 +1,162 @@
+@import '../index.scss';
+
+.complexity-graph {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.complexity-graph__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.complexity-graph__test-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.complexity-graph__test-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.complexity-graph__test-label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.complexity-graph__test-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.complexity-graph__pass-rate {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  max-width: 200px;
+}
+
+.complexity-graph__pass-rate-bar {
+  flex: 1;
+  height: 24px;
+  background: #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.complexity-graph__pass-rate-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+  transition: width 0.5s ease;
+  border-radius: 12px;
+}
+
+.complexity-graph__pass-rate-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+  min-width: 45px;
+}
+
+.complexity-graph__metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.complexity-graph__metric {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.complexity-graph__metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.complexity-graph__metric-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+}
+
+.complexity-graph__metric-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.complexity-graph__metric-bar {
+  height: 32px;
+  background: #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.complexity-graph__metric-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  transition: width 0.5s ease;
+  border-radius: 8px;
+  opacity: 0.8;
+}
+
+.complexity-graph__metric-percentage {
+  position: relative;
+  z-index: 1;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-left: auto;
+}
+
+.complexity-graph__complexity-score {
+  padding: 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 12px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.complexity-graph__score-label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  opacity: 0.9;
+}
+
+.complexity-graph__score-value {
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+
