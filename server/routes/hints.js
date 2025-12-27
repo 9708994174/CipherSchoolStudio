@@ -2,11 +2,29 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const Assignment = require('../models/Assignment');
-const OpenAI = require('openai');
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+// Lazy initialization of OpenAI client - only require and create if API key is available
+let openai = null;
+let OpenAI = null; // Will be loaded only when needed
+
+function getOpenAIClient() {
+  // Only load OpenAI module if API key is available
+  if (!openai && process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.trim() !== '') {
+    try {
+      // Dynamically require OpenAI only when we have an API key
+      if (!OpenAI) {
+        OpenAI = require('openai');
+      }
+      openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY
+      });
+    } catch (error) {
+      console.error('Failed to initialize OpenAI client:', error.message);
+      return null;
+    }
+  }
+  return openai;
+}
 
 /**
  * Generate a fallback hint based on assignment difficulty and question
@@ -61,7 +79,8 @@ function generateFallbackHint(assignment, userQuery) {
  */
 async function generateHint(assignment, userQuery) {
   // Try OpenAI first if API key is available
-  if (process.env.OPENAI_API_KEY) {
+  const client = getOpenAIClient();
+  if (client) {
     console.log('🤖 Using OpenAI API for hint generation');
     const prompt = `You are a SQL learning assistant. Your role is to provide helpful HINTS to guide students, NOT to give complete solutions.
 
@@ -92,7 +111,7 @@ IMPORTANT INSTRUCTIONS:
 Provide your hint now:`;
 
     try {
-      const completion = await openai.chat.completions.create({
+      const completion = await client.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [
           {
@@ -147,7 +166,7 @@ router.post('/', [
     const hint = await generateHint(assignment, query || '');
     
     // Include hint source in response for debugging
-    const hintSource = process.env.OPENAI_API_KEY ? 'openai' : 'built-in';
+    const hintSource = getOpenAIClient() ? 'openai' : 'built-in';
     
     res.json({ 
       hint,

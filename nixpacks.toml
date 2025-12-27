@@ -3,10 +3,10 @@ nixPkgs = ["nodejs-18_x", "npm-9_x"]
 
 [phases.install]
 cmds = [
-  "cd server && npm install --only=production",
-  "cd ../client && npm install --legacy-peer-deps && npm run build"
+  "sh -c 'cd server && npm install --only=production'",
+  "sh -c 'cd client && npm install --legacy-peer-deps && npm run build'"
 ]
 
 [start]
-cmd = "cd server && node index.js"
+cmd = "sh -c 'cd server && node index.js'"
 
