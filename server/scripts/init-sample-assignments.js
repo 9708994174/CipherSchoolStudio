@@ -688,10 +688,7 @@ const sampleAssignments = [
 async function initializeAssignments() {
   try {
     // Connect to MongoDB
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/ciphersqlstudio', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/ciphersqlstudio');
     console.log('✅ Connected to MongoDB');
 
     // Clear existing assignments (optional - comment out if you want to keep existing)
