@@ -2,24 +2,42 @@
 
 .assignment-list {
   width: 100%;
-  padding: 24px;
+  padding: 16px;
   max-width: 1400px;
   margin: 0 auto;
+
+  @include sm {
+    padding: 20px;
+  }
+
+  @include md {
+    padding: 24px;
+  }
 }
 
 .assignment-list__title {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 700;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   color: #000000;
   letter-spacing: -0.5px;
 
-  @include tablet {
+  @include sm {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  @include md {
+    font-size: 28px;
+    margin-bottom: 24px;
+  }
+
+  @include lg {
     font-size: 32px;
     margin-bottom: 32px;
   }
 
-  @include desktop {
+  @include xl {
     font-size: 36px;
   }
 }
@@ -30,12 +48,12 @@
   gap: 0;
   animation: fadeIn 0.5s ease-out;
 
-  @include tablet {
+  @include md {
     grid-template-columns: repeat(2, 1fr);
     gap: 0;
   }
 
-  @include desktop {
+  @include lg {
     grid-template-columns: repeat(3, 1fr);
     gap: 0;
   }
@@ -45,16 +63,17 @@
   background: #ffffff;
   border: 2px solid #e2e8f0;
   border-radius: 12px;
-  padding: 24px 20px;
+  padding: 16px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
-  min-height: 180px;
+  min-height: 160px;
   position: relative;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  margin-bottom: 16px;
+  margin-bottom: 12px;
+  touch-action: manipulation;
 
   &::before {
     content: '';
@@ -69,7 +88,18 @@
     transition: transform 0.3s ease;
   }
 
-  @include tablet {
+  @include sm {
+    padding: 20px;
+    min-height: 180px;
+    margin-bottom: 16px;
+  }
+
+  @include md {
+    padding: 24px 20px;
+    min-height: 180px;
+  }
+
+  @include lg {
     padding: 28px 24px;
     min-height: 200px;
     margin-bottom: 20px;

@@ -42,8 +42,16 @@
 .results-panel__table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 11px;
   min-width: 100%;
+
+  @include sm {
+    font-size: 12px;
+  }
+
+  @include md {
+    font-size: 13px;
+  }
 
   thead {
     background: #f8fafc;
@@ -54,14 +62,24 @@
   }
 
   th {
-    padding: 14px 16px;
+    padding: 10px 8px;
     text-align: left;
     font-weight: 600;
     color: #1e293b;
     white-space: nowrap;
-    font-size: 13px;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+
+    @include sm {
+      padding: 12px 12px;
+      font-size: 11px;
+    }
+
+    @include md {
+      padding: 14px 16px;
+      font-size: 13px;
+    }
   }
 
   tbody {
@@ -86,13 +104,23 @@
   }
 
   td {
-    padding: 14px 16px;
+    padding: 10px 8px;
     color: #1e293b;
     white-space: nowrap;
-    max-width: 300px;
+    max-width: 150px;
     overflow: hidden;
     text-overflow: ellipsis;
     font-weight: 400;
+
+    @include sm {
+      padding: 12px 12px;
+      max-width: 200px;
+    }
+
+    @include md {
+      padding: 14px 16px;
+      max-width: 300px;
+    }
   }
 }
 

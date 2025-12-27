@@ -11,19 +11,34 @@
 .app__header {
   background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
   border-bottom: 2px solid rgba(59, 130, 246, 0.3);
-  padding: 12px 24px;
+  padding: 8px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: sticky;
   top: 0;
   z-index: 100;
-  height: 64px;
+  min-height: 56px;
+  height: auto;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  @include md {
+    padding: 12px 24px;
+    min-height: 64px;
+    flex-wrap: nowrap;
+  }
 
   &--home {
     justify-content: center;
+    
+    @include mobile {
+      flex-direction: column;
+      padding: 12px;
+      gap: 12px;
+    }
   }
 }
 
@@ -41,8 +56,17 @@
 .app__header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
   position: relative;
+  flex: 1;
+  min-width: 0;
+  order: 1;
+
+  @include md {
+    gap: 16px;
+    flex: 0 1 auto;
+    order: 0;
+  }
 }
 
 .app__filter-menu {
@@ -137,13 +161,26 @@
 }
 
 .app__logo {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
   color: #ffffff;
   margin: 0;
   letter-spacing: 0.5px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+
+  @include sm {
+    font-size: 18px;
+    max-width: none;
+  }
+
+  @include md {
+    font-size: 20px;
+  }
 
   &:hover {
     transform: scale(1.05);
@@ -151,13 +188,22 @@
   }
 
   &--home {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 700;
     text-align: center;
     letter-spacing: 0.8px;
     color: #ffffff;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     position: relative;
+    max-width: 100%;
+
+    @include sm {
+      font-size: 22px;
+    }
+
+    @include md {
+      font-size: 24px;
+    }
 
     &:hover {
       transform: scale(1.05);
@@ -179,22 +225,42 @@
 
 .app__nav-arrows {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   align-items: center;
+
+  @include md {
+    gap: 8px;
+  }
+
+  &--mobile-hidden {
+    display: none;
+
+    @include sm {
+      display: flex;
+    }
+  }
 }
 
 .app__nav-btn {
   background: rgba(59, 130, 246, 0.1);
   border: 1px solid rgba(59, 130, 246, 0.3);
   color: #60a5fa;
-  padding: 8px 12px;
-  border-radius: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-width: 36px;
+  min-height: 36px;
+  touch-action: manipulation;
+
+  @include md {
+    padding: 8px 12px;
+    border-radius: 8px;
+  }
 
   &:hover:not(:disabled) {
     background: rgba(59, 130, 246, 0.2);
@@ -211,32 +277,69 @@
 
 .app__header-center {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   align-items: center;
   justify-content: center;
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1;
+  width: auto;
+
+  @include mobile {
+    position: static;
+    transform: none;
+    width: 100%;
+    order: 2;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  @include md {
+    gap: 8px;
+    position: absolute;
+    transform: translateX(-50%);
+    width: auto;
+    order: 0;
+    margin-top: 0;
+  }
 }
 
 .app__action-btn {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #e2e8f0;
-  padding: 8px 16px;
+  padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 14px;
+  gap: 4px;
+  font-size: 12px;
   font-weight: 500;
   transition: all 0.2s;
+  min-height: 36px;
+  touch-action: manipulation;
+
+  @include sm {
+    padding: 8px 14px;
+    font-size: 13px;
+    gap: 6px;
+  }
+
+  @include md {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
 
   svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
+
+    @include md {
+      width: 16px;
+      height: 16px;
+    }
   }
 
   &:hover {
@@ -270,34 +373,75 @@
 .app__header-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
   margin-left: auto;
+  flex-shrink: 0;
+  order: 3;
+
+  @include sm {
+    gap: 8px;
+  }
+
+  @include md {
+    gap: 12px;
+    order: 0;
+  }
 }
 
 .app__header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   margin-left: auto;
+
+  @include sm {
+    gap: 6px;
+  }
+
+  @include md {
+    gap: 8px;
+  }
 }
 
 .app__timer {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: #60a5fa;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
-  padding: 8px 16px;
+  padding: 6px 12px;
   background: rgba(59, 130, 246, 0.15);
   border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: 8px;
+  border-radius: 6px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+
+  @include md {
+    gap: 8px;
+    font-size: 14px;
+    padding: 8px 16px;
+    border-radius: 8px;
+  }
 
   svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     color: #60a5fa;
+    flex-shrink: 0;
+
+    @include md {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &--mobile-hidden {
+    display: none;
+
+    @include sm {
+      display: flex;
+    }
   }
 }
 
@@ -305,8 +449,8 @@
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #e2e8f0;
-  padding: 8px;
-  border-radius: 8px;
+  padding: 6px;
+  border-radius: 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -314,10 +458,23 @@
   position: relative;
   transition: all 0.2s;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-width: 36px;
+  min-height: 36px;
+  touch-action: manipulation;
+
+  @include md {
+    padding: 8px;
+    border-radius: 8px;
+  }
 
   svg {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
+
+    @include md {
+      width: 20px;
+      height: 20px;
+    }
   }
 
   &:hover {
@@ -331,6 +488,14 @@
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.2) 100%);
     border-color: rgba(59, 130, 246, 0.4);
     color: #60a5fa;
+  }
+
+  &--desktop-only {
+    display: none !important;
+
+    @include md {
+      display: flex !important;
+    }
   }
 }
 

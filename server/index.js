@@ -1,59 +1,66 @@
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const mongoose = require('mongoose');
+const express = require("express")
+const cors = require("cors")
+const mongoose = require("mongoose")
+const path = require("path")
 
-// Load environment variables
-dotenv.config();
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config()
+}
 
-// Import routes
-const assignmentRoutes = require('./routes/assignments');
-const queryRoutes = require('./routes/query');
-const hintRoutes = require('./routes/hints');
-const submitRoutes = require('./routes/submit');
+const assignmentRoutes = require("./routes/assignments")
+const queryRoutes = require("./routes/query")
+const hintRoutes = require("./routes/hints")
+const submitRoutes = require("./routes/submit")
 
-const app = express();
-const PORT = process.env.PORT || 5000;
+const app = express()
+const PORT = process.env.PORT || 5000
 
-// Middleware
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: ["http://localhost:3000", process.env.CLIENT_URL],
   credentials: true
-}));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+}))
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/ciphersqlstudio', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+// MongoDB
+mongoose
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
+  .then(() => console.log("✅ Connected to MongoDB"))
+  .catch(err => console.error("❌ MongoDB error:", err))
+
+// Serve React in production
+if (process.env.NODE_ENV === "production") {
+  const __dirname = path.resolve()
+  app.use(express.static(path.join(__dirname, "../client/build")))
+
+  app.get("/", (req, res) => {
+    res.sendFile(
+      path.join(__dirname, "../client/build/index.html")
+    )
+  })
+}
+
+// API Routes
+app.use("/api/assignments", assignmentRoutes)
+app.use("/api/query", queryRoutes)
+app.use("/api/hints", hintRoutes)
+app.use("/api/submit", submitRoutes)
+
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", message: "CipherSQLStudio API is running" })
 })
-.then(() => console.log('✅ Connected to MongoDB'))
-.catch((err) => console.error('❌ MongoDB connection error:', err));
 
-// Routes
-app.use('/api/assignments', assignmentRoutes);
-app.use('/api/query', queryRoutes);
-app.use('/api/hints', hintRoutes);
-app.use('/api/submit', submitRoutes);
-
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'CipherSQLStudio API is running' });
-});
-
-// Error handling middleware
 app.use((err, req, res, next) => {
-  console.error('Error:', err);
+  console.error(err)
   res.status(err.status || 500).json({
-    error: err.message || 'Internal server error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-  });
-});
+    error: err.message || "Internal server error"
+  })
+})
 
-// Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
-
-
+  console.log(`🚀 Server running on port ${PORT}`)
+})

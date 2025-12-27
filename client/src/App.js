@@ -117,7 +117,7 @@ function TopNavBarContent() {
           </h1>
         )}
         {isAssignmentPage && (
-          <div className="app__nav-arrows">
+          <div className="app__nav-arrows app__nav-arrows--mobile-hidden">
             <button 
               className="app__nav-btn" 
               title="Previous"
@@ -194,19 +194,19 @@ function TopNavBarContent() {
           </div>
         )}
         <div className="app__header-actions">
-          <button className="app__icon-btn" title="Settings" onClick={() => console.log('Settings clicked')}>
+          <button className="app__icon-btn app__icon-btn--desktop-only" title="Settings" onClick={() => console.log('Settings clicked')}>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
               <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" fill="currentColor"/>
               <path fillRule="evenodd" d="M.664 10.59a1.651 1.651 0 010-1.186A10.004 10.004 0 018.4 1.867c1.147.514 2.135.99 2.6 1.186a1.651 1.651 0 011.186 0c.465-.196 1.453-.672 2.6-1.186a10.004 10.004 0 017.736 7.537 1.651 1.651 0 010 1.186 10.004 10.004 0 01-7.736 7.537c-1.147-.514-2.135-.99-2.6-1.186a1.651 1.651 0 01-1.186 0c-.465.196-1.453.672-2.6 1.186A10.004 10.004 0 01.664 10.59zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd"/>
             </svg>
           </button>
-          <button className="app__icon-btn" title="Notifications" onClick={() => console.log('Notifications clicked')}>
+          <button className="app__icon-btn app__icon-btn--desktop-only" title="Notifications" onClick={() => console.log('Notifications clicked')}>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
               <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
             </svg>
             <span className="app__badge">0</span>
           </button>
-          <button className="app__icon-btn app__icon-btn--profile" title="Profile" onClick={() => console.log('Profile clicked')}>
+          <button className="app__icon-btn app__icon-btn--profile app__icon-btn--desktop-only" title="Profile" onClick={() => console.log('Profile clicked')}>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
             </svg>

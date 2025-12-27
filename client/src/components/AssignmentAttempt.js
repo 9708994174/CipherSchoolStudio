@@ -42,6 +42,10 @@ function AssignmentAttempt() {
     return localStorage.getItem('userId') || `user_${Date.now()}`;
   });
   const [leftPanelWidth, setLeftPanelWidth] = useState(() => {
+    // On mobile, use full width; on desktop, use saved or default
+    if (window.innerWidth < 1024) {
+      return 100; // Full width on mobile
+    }
     const saved = localStorage.getItem('leftPanelWidth');
     return saved ? parseFloat(saved) : 50; // Default 50%
   });
@@ -52,6 +56,16 @@ function AssignmentAttempt() {
   });
   const [isResizingVertical, setIsResizingVertical] = useState(false);
   const [showSubmissionDialog, setShowSubmissionDialog] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Initial check
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     fetchAllAssignments();
@@ -327,6 +341,8 @@ function AssignmentAttempt() {
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (!isResizing) return;
+      // Disable resizing on mobile
+      if (window.innerWidth < 1024) return;
       
       const container = document.querySelector('.assignment-attempt__container');
       if (!container) return;
@@ -362,6 +378,8 @@ function AssignmentAttempt() {
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (!isResizingVertical) return;
+      // Disable resizing on mobile
+      if (window.innerWidth < 1024) return;
       
       const container = document.querySelector('.assignment-attempt__right-panel');
       if (!container) return;
@@ -632,7 +650,9 @@ function AssignmentAttempt() {
 
           <div 
             className="editor-panel"
-            style={{ height: `${editorHeight}%` }}
+            style={{ 
+              height: isMobile ? '50%' : `${editorHeight}%`
+            }}
           >
             <div className="editor-panel__header">
               <div className="editor-panel__title">Code</div>
@@ -696,12 +716,14 @@ function AssignmentAttempt() {
                 theme={editorTheme}
                 options={{
                   minimap: { enabled: false },
-                  fontSize: 14,
+                  fontSize: window.innerWidth < 768 ? 12 : 14,
                   wordWrap: 'on',
                   automaticLayout: true,
                   lineNumbers: 'on',
                   scrollBeyondLastLine: false,
-                  padding: { top: 16, bottom: 16 }
+                  padding: { top: 16, bottom: 16 },
+                  overviewRulerLanes: 0,
+                  hideCursorInOverviewRuler: true
                 }}
               />
             </div>

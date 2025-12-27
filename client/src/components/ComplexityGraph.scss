@@ -4,28 +4,59 @@
   background: #ffffff;
   border: 2px solid #e2e8f0;
   border-radius: 12px;
-  padding: 24px;
+  padding: 16px;
   margin-top: 16px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  @include sm {
+    padding: 20px;
+  }
+
+  @include md {
+    padding: 24px;
+  }
 }
 
 .complexity-graph__title {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
   color: #000000;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   text-align: center;
+
+  @include sm {
+    font-size: 18px;
+    margin-bottom: 18px;
+  }
+
+  @include md {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
 }
 
 .complexity-graph__test-summary {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
-  padding: 16px;
+  margin-bottom: 20px;
+  padding: 12px;
   background: #f8fafc;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  @include sm {
+    padding: 14px;
+    margin-bottom: 22px;
+  }
+
+  @include md {
+    padding: 16px;
+    margin-bottom: 24px;
+    flex-wrap: nowrap;
+  }
 }
 
 .complexity-graph__test-stat {
@@ -41,9 +72,17 @@
 }
 
 .complexity-graph__test-value {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
   color: #000000;
+
+  @include sm {
+    font-size: 18px;
+  }
+
+  @include md {
+    font-size: 20px;
+  }
 }
 
 .complexity-graph__pass-rate {
@@ -154,9 +193,17 @@
 }
 
 .complexity-graph__score-value {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 800;
   line-height: 1;
+
+  @include sm {
+    font-size: 32px;
+  }
+
+  @include md {
+    font-size: 36px;
+  }
 }
 
 

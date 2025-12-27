@@ -5,7 +5,7 @@
   backdrop-filter: blur(10px);
   border: 1px solid rgba(226, 232, 240, 0.8);
   border-radius: $radius-lg;
-  padding: 24px 20px;
+  padding: 16px;
   overflow: hidden;
   box-shadow: $shadow-lg;
   position: relative;
@@ -20,26 +20,44 @@
     background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
   }
 
-  @include tablet {
+  @include sm {
+    padding: 20px;
+  }
+
+  @include md {
+    padding: 24px 20px;
+  }
+
+  @include lg {
     padding: 28px 24px;
   }
 }
 
 .sample-data-viewer__title {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
   color: $color-text;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 
   &::before {
     content: '📊';
-    font-size: 24px;
+    font-size: 20px;
   }
 
-  @include tablet {
+  @include sm {
+    font-size: 18px;
+    margin-bottom: 18px;
+  }
+
+  @include md {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
+  @include lg {
     font-size: 22px;
     margin-bottom: 24px;
   }

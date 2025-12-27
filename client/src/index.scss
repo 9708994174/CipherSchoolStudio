@@ -39,33 +39,59 @@ $radius-xl: 16px;
 $radius-2xl: 20px;
 $radius-full: 9999px;
 
-// Breakpoints
-$breakpoint-mobile: 320px;
-$breakpoint-tablet: 641px;
-$breakpoint-desktop: 1024px;
-$breakpoint-large: 1281px;
+// Breakpoints (Mobile-first approach)
+$breakpoint-xs: 320px;
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+$breakpoint-2xl: 1536px;
 
 // Mixins
+@mixin xs {
+  @media (min-width: $breakpoint-xs) {
+    @content;
+  }
+}
+
+@mixin sm {
+  @media (min-width: $breakpoint-sm) {
+    @content;
+  }
+}
+
+@mixin md {
+  @media (min-width: $breakpoint-md) {
+    @content;
+  }
+}
+
+@mixin lg {
+  @media (min-width: $breakpoint-lg) {
+    @content;
+  }
+}
+
+@mixin xl {
+  @media (min-width: $breakpoint-xl) {
+    @content;
+  }
+}
+
 @mixin mobile {
-  @media (min-width: $breakpoint-mobile) {
+  @media (max-width: $breakpoint-md - 1px) {
     @content;
   }
 }
 
 @mixin tablet {
-  @media (min-width: $breakpoint-tablet) {
+  @media (min-width: $breakpoint-md) and (max-width: $breakpoint-lg - 1px) {
     @content;
   }
 }
 
 @mixin desktop {
-  @media (min-width: $breakpoint-desktop) {
-    @content;
-  }
-}
-
-@mixin large {
-  @media (min-width: $breakpoint-large) {
+  @media (min-width: $breakpoint-lg) {
     @content;
   }
 }
