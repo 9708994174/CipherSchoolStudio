@@ -4,7 +4,7 @@
 FROM node:18-alpine AS client-builder
 WORKDIR /app/client
 COPY client/package*.json ./
-RUN npm ci
+RUN npm install --legacy-peer-deps
 COPY client/ ./
 RUN npm run build
 
@@ -12,7 +12,7 @@ RUN npm run build
 FROM node:18-alpine AS server-setup
 WORKDIR /app
 COPY server/package*.json ./
-RUN npm ci --only=production
+RUN npm install --only=production
 
 # Stage 3: Final image
 FROM node:18-alpine
