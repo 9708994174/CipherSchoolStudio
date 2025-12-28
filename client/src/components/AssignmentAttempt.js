@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { useQuery } from '../contexts/QueryContext';
 import { useNavigation } from '../contexts/NavigationContext';
+import { useAuth } from '../contexts/AuthContext';
 import { 
   getAssignment, 
   getAssignments,
@@ -10,7 +11,8 @@ import {
   saveAssignmentProgress,
   executeQuery,
   getHint,
-  submitQuery
+  submitQuery,
+  checkServerHealth
 } from '../services/api';
 import SchemaViewer from './SchemaViewer';
 import ResultsPanel from './ResultsPanel';
@@ -38,16 +40,33 @@ function AssignmentAttempt() {
   const [submitting, setSubmitting] = useState(false);
   const { registerExecute, registerSubmit } = useQuery();
   const { setAssignmentsList, setCurrentAssignmentIndex } = useNavigation();
+  const { user, isAuthenticated } = useAuth();
+  
+  // Use authenticated user ID if available, otherwise use anonymous session ID
   const [userId] = useState(() => {
+    if (isAuthenticated && user?.id) {
+      return user.id;
+    }
     return localStorage.getItem('userId') || `user_${Date.now()}`;
   });
+  
+  // Update userId when authentication state changes
+  useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      // User is authenticated, use their ID
+      // Note: userId state won't update automatically, but API calls will use token
+      // For localStorage operations, we can use user.id directly
+    } else {
+      // User is not authenticated, keep using session-based ID
+      localStorage.setItem('userId', userId);
+    }
+  }, [isAuthenticated, user, userId]);
   const [leftPanelWidth, setLeftPanelWidth] = useState(() => {
-    // On mobile, use full width; on desktop, use saved or default
+    // On mobile, use full width; on desktop, use 50% for equal split
     if (window.innerWidth < 1024) {
       return 100; // Full width on mobile
     }
-    const saved = localStorage.getItem('leftPanelWidth');
-    return saved ? parseFloat(saved) : 50; // Default 50%
+    return 50; // Fixed 50% for equal split
   });
   const [isResizing, setIsResizing] = useState(false);
   const [editorHeight, setEditorHeight] = useState(() => {
@@ -68,6 +87,22 @@ function AssignmentAttempt() {
   }, []);
 
   useEffect(() => {
+    // Reset state when assignment changes
+    setAssignment(null);
+    setQuery('');
+    setResults(null);
+    setError(null);
+    setHint(null);
+    setSubmissionResult(null);
+    setActiveTab('description');
+    setTestTab('testcase');
+    
+    // Check server health on mount
+    checkServerHealth().catch(err => {
+      console.warn('Server health check failed:', err);
+      // Don't show error to user, just log it
+    });
+    
     fetchAllAssignments();
     fetchAssignment();
     fetchProgress();
@@ -97,11 +132,46 @@ function AssignmentAttempt() {
   const fetchSubmissions = async () => {
     try {
       const response = await getAssignmentProgress(id, userId);
-      // Store submissions in localStorage for now (can be enhanced with backend)
-      const allSubmissions = JSON.parse(localStorage.getItem(`submissions_${id}_${userId}`) || '[]');
+      // Get submissions from localStorage
+      let allSubmissions = JSON.parse(localStorage.getItem(`submissions_${id}_${userId}`) || '[]');
+      
+      // If backend has lastSubmission, add it to the list if not already present
+      if (response.data && response.data.lastSubmission) {
+        const backendSubmission = response.data.lastSubmission;
+        const backendSubmissionId = backendSubmission.submittedAt || backendSubmission.timestamp;
+        
+        // Check if this submission already exists in localStorage
+        const exists = allSubmissions.some(sub => {
+          const subTime = new Date(sub.timestamp).getTime();
+          const backendTime = new Date(backendSubmissionId).getTime();
+          return Math.abs(subTime - backendTime) < 1000; // Within 1 second
+        });
+        
+        if (!exists && backendSubmissionId) {
+          // Add backend submission to the list
+          allSubmissions.unshift({
+            id: new Date(backendSubmissionId).getTime(),
+            query: backendSubmission.query || '',
+            timestamp: new Date(backendSubmissionId).toISOString(),
+            passed: backendSubmission.passed || false,
+            success: backendSubmission.passed || false,
+            testResults: backendSubmission.testResults || [],
+            complexity: backendSubmission.complexity || {},
+            rowCount: backendSubmission.rowCount || 0,
+            result: backendSubmission.result || []
+          });
+        }
+      }
+      
+      // Sort by timestamp (newest first)
+      allSubmissions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      
       setSubmissions(allSubmissions);
     } catch (err) {
       console.error('Error fetching submissions:', err);
+      // Fallback to localStorage only
+      const allSubmissions = JSON.parse(localStorage.getItem(`submissions_${id}_${userId}`) || '[]');
+      setSubmissions(allSubmissions);
     }
   };
 
@@ -134,14 +204,14 @@ function AssignmentAttempt() {
   };
 
   const fetchAssignment = async () => {
+    if (!id) return;
+    
     try {
       setLoading(true);
+      setAssignment(null); // Clear previous assignment
       const response = await getAssignment(id);
       const assignmentData = response.data;
-      console.log('Assignment loaded:', assignmentData?.title);
-      console.log('Test cases array:', assignmentData?.testCases);
-      console.log('Test cases length:', assignmentData?.testCases?.length);
-      console.log('Is array?', Array.isArray(assignmentData?.testCases));
+      console.log('Assignment loaded:', assignmentData?.title, 'ID:', id);
       setAssignment(assignmentData);
       setError(null);
     } catch (err) {
@@ -192,7 +262,28 @@ function AssignmentAttempt() {
 
       await saveAssignmentProgress(id, { sqlQuery: query }, userId);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to execute query');
+      // Better error handling with user-friendly messages
+      let errorMessage = 'Failed to execute query';
+      
+      if (err.userMessage) {
+        errorMessage = err.userMessage;
+      } else if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        if (err.message.includes('Network Error') || err.message.includes('ECONNREFUSED')) {
+          errorMessage = 'Cannot connect to server. Please ensure the backend server is running on port 5000.';
+        } else if (err.message.includes('timeout')) {
+          errorMessage = 'Request timed out. The query is taking too long to execute.';
+        } else {
+          errorMessage = err.message;
+        }
+      } else if (err.code === 'ECONNREFUSED') {
+        errorMessage = 'Cannot connect to server. Please ensure the backend server is running.';
+      }
+      
+      setError(errorMessage);
       setTestTab('testresult');
       console.error('Error executing query:', err);
     } finally {
@@ -212,10 +303,22 @@ function AssignmentAttempt() {
         setError('No hint available. Please try again.');
       }
     } catch (err) {
-      const errorMessage = err.response?.data?.error || 
-                          err.response?.data?.message || 
-                          err.message || 
-                          'Failed to get hint. Please try again.';
+      let errorMessage = 'Failed to get hint. Please try again.';
+      
+      if (err.userMessage) {
+        errorMessage = err.userMessage;
+      } else if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        if (err.message.includes('Network Error') || err.message.includes('ECONNREFUSED')) {
+          errorMessage = 'Cannot connect to server. Please ensure the backend server is running.';
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
       setError(errorMessage);
       setHint(null);
       console.error('Error getting hint:', err);
@@ -236,7 +339,9 @@ function AssignmentAttempt() {
       setSubmissionResult(null);
       setResults(null);
 
-      const response = await submitQuery(id, query, userId);
+      // Use authenticated user ID if available, otherwise use session-based userId
+      const submitUserId = (isAuthenticated && user?.id) ? user.id : userId;
+      const response = await submitQuery(id, query, submitUserId);
       
       // Handle both success and failure responses
       const submissionData = response.data || {};
@@ -261,8 +366,11 @@ function AssignmentAttempt() {
         query: query,
         timestamp: new Date().toISOString(),
         passed: submissionData.passed || false,
+        success: submissionData.passed || false, // Also add success for backward compatibility
         testResults: submissionData.testResults || [],
-        complexity: submissionData.complexity || {}
+        complexity: submissionData.complexity || {},
+        rowCount: submissionData.rowCount || 0,
+        result: submissionData.result || []
       };
       const allSubmissions = JSON.parse(localStorage.getItem(`submissions_${id}_${userId}`) || '[]');
       allSubmissions.unshift(submission);
@@ -270,10 +378,28 @@ function AssignmentAttempt() {
       localStorage.setItem(`submissions_${id}_${userId}`, JSON.stringify(allSubmissions));
       setSubmissions(allSubmissions);
     } catch (err) {
-      const errorMessage = err.response?.data?.error || 
-                          err.response?.data?.errors?.[0]?.msg || 
-                          err.message || 
-                          'Failed to submit query';
+      let errorMessage = 'Failed to submit query';
+      
+      if (err.userMessage) {
+        errorMessage = err.userMessage;
+      } else if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      } else if (err.response?.data?.errors?.[0]?.msg) {
+        errorMessage = err.response.data.errors[0].msg;
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        if (err.message.includes('Network Error') || err.message.includes('ECONNREFUSED')) {
+          errorMessage = 'Cannot connect to server. Please ensure the backend server is running on port 5000.';
+        } else if (err.message.includes('timeout')) {
+          errorMessage = 'Request timed out. The submission is taking too long.';
+        } else {
+          errorMessage = err.message;
+        }
+      } else if (err.code === 'ECONNREFUSED') {
+        errorMessage = 'Cannot connect to server. Please ensure the backend server is running.';
+      }
+      
       setError(errorMessage);
       setSubmissionResult({
         passed: false,
@@ -331,11 +457,15 @@ function AssignmentAttempt() {
   const handleMouseDown = (e) => {
     setIsResizing(true);
     e.preventDefault();
+    e.stopPropagation();
+    // Prevent text selection during resize
+    e.target.style.userSelect = 'none';
   };
 
   const handleVerticalMouseDown = (e) => {
     setIsResizingVertical(true);
     e.preventDefault();
+    e.stopPropagation();
   };
 
   useEffect(() => {
@@ -350,8 +480,8 @@ function AssignmentAttempt() {
       const containerRect = container.getBoundingClientRect();
       const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
       
-      // Constrain between 20% and 80%
-      const constrainedWidth = Math.max(20, Math.min(80, newWidth));
+      // Constrain between 15% and 85% to allow more flexibility
+      const constrainedWidth = Math.max(15, Math.min(85, newWidth));
       setLeftPanelWidth(constrainedWidth);
       localStorage.setItem('leftPanelWidth', constrainedWidth.toString());
     };
@@ -361,10 +491,11 @@ function AssignmentAttempt() {
     };
 
     if (isResizing) {
-      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mousemove', handleMouseMove, { passive: false });
       document.addEventListener('mouseup', handleMouseUp);
       document.body.style.cursor = 'col-resize';
       document.body.style.userSelect = 'none';
+      document.body.style.pointerEvents = 'auto';
     }
 
     return () => {
@@ -372,6 +503,7 @@ function AssignmentAttempt() {
       document.removeEventListener('mouseup', handleMouseUp);
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
+      document.body.style.pointerEvents = '';
     };
   }, [isResizing]);
 
@@ -385,10 +517,16 @@ function AssignmentAttempt() {
       if (!container) return;
       
       const containerRect = container.getBoundingClientRect();
-      const newHeight = ((e.clientY - containerRect.top) / containerRect.height) * 100;
+      // Calculate the percentage from the top of the right panel
+      // Account for any hint banner at the top
+      const hintBanner = container.querySelector('.assignment-attempt__hint-banner');
+      const hintBannerHeight = hintBanner ? hintBanner.offsetHeight : 0;
+      const mouseY = e.clientY - containerRect.top - hintBannerHeight;
+      const availableHeight = containerRect.height - hintBannerHeight;
+      const newHeight = (mouseY / availableHeight) * 100;
       
-      // Constrain between 30% and 80%
-      const constrainedHeight = Math.max(30, Math.min(80, newHeight));
+      // Constrain between 25% and 85% to allow more flexibility
+      const constrainedHeight = Math.max(25, Math.min(85, newHeight));
       setEditorHeight(constrainedHeight);
       localStorage.setItem('editorHeight', constrainedHeight.toString());
     };
@@ -442,7 +580,6 @@ function AssignmentAttempt() {
         {/* Left Panel - Problem Description */}
         <div 
           className="assignment-attempt__left-panel"
-          style={{ width: `${leftPanelWidth}%` }}
         >
           <div className="problem-panel">
             {/* Tabs */}
@@ -588,26 +725,62 @@ function AssignmentAttempt() {
                     <p className="problem-panel__submissions-empty">No submissions yet. Run your query to see submissions here.</p>
                   ) : (
                     <div className="problem-panel__submissions-list">
-                      {submissions.map((submission) => (
-                        <div key={submission.id} className="problem-panel__submission-item">
-                          <div className="problem-panel__submission-header">
-                            <span className={`problem-panel__submission-status ${submission.success ? 'problem-panel__submission-status--success' : 'problem-panel__submission-status--error'}`}>
-                              {submission.success ? '✓ Accepted' : '✗ Error'}
-                            </span>
-                            <span className="problem-panel__submission-time">
-                              {new Date(submission.timestamp).toLocaleString()}
-                            </span>
-                          </div>
-                          <div className="problem-panel__submission-query">
-                            <code>{submission.query}</code>
-                          </div>
-                          {submission.success && (
-                            <div className="problem-panel__submission-info">
-                              Rows returned: {submission.rowCount}
+                      {submissions.map((submission) => {
+                        const isPassed = submission.passed || submission.success;
+                        const testResults = submission.testResults || [];
+                        const passedTests = testResults.filter(t => t.passed).length;
+                        const totalTests = testResults.length;
+                        
+                        return (
+                          <div key={submission.id} className="problem-panel__submission-item">
+                            <div className="problem-panel__submission-header">
+                              <span className={`problem-panel__submission-status ${isPassed ? 'problem-panel__submission-status--success' : 'problem-panel__submission-status--error'}`}>
+                                {isPassed ? '✓ Accepted' : '✗ Error'}
+                              </span>
+                              <span className="problem-panel__submission-time">
+                                {new Date(submission.timestamp).toLocaleString()}
+                              </span>
                             </div>
-                          )}
-                        </div>
-                      ))}
+                            <div className="problem-panel__submission-query">
+                              <code>{submission.query}</code>
+                            </div>
+                            {isPassed && submission.rowCount !== undefined && (
+                              <div className="problem-panel__submission-info">
+                                Rows returned: {submission.rowCount}
+                              </div>
+                            )}
+                            {testResults.length > 0 && (
+                              <div className="problem-panel__submission-test-results">
+                                <div className="problem-panel__submission-test-summary">
+                                  <strong>Test Results:</strong> {passedTests} / {totalTests} passed
+                                </div>
+                                <div className="problem-panel__submission-test-list">
+                                  {testResults.map((test, idx) => (
+                                    <div 
+                                      key={idx} 
+                                      className={`problem-panel__submission-test-item ${test.passed ? 'problem-panel__submission-test-item--passed' : 'problem-panel__submission-test-item--failed'}`}
+                                    >
+                                      <div className="problem-panel__submission-test-name">
+                                        {test.passed ? '✓' : '✗'} {test.name || `Test ${idx + 1}`}
+                                      </div>
+                                      {test.description && (
+                                        <div className="problem-panel__submission-test-desc">
+                                          {test.description}
+                                        </div>
+                                      )}
+                                      {test.error && (
+                                        <div className="problem-panel__submission-test-error">
+                                          Error: {test.error}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -627,7 +800,6 @@ function AssignmentAttempt() {
         {/* Right Panel - Code Editor */}
         <div 
           className="assignment-attempt__right-panel"
-          style={{ width: `${100 - leftPanelWidth}%` }}
         >
           {/* Hint Banner at Top */}
           {hint && (
@@ -651,7 +823,8 @@ function AssignmentAttempt() {
           <div 
             className="editor-panel"
             style={{ 
-              height: isMobile ? '50%' : `${editorHeight}%`
+              height: isMobile ? '50%' : `${editorHeight}%`,
+              flexShrink: 0
             }}
           >
             <div className="editor-panel__header">
@@ -711,7 +884,8 @@ function AssignmentAttempt() {
               <Editor
                 height="100%"
                 defaultLanguage="sql"
-                value={query || '# Write your MySQL query statement below\n'}
+                language="sql"
+                value={query || '-- Write your SQL query statement below\n-- Example: SELECT * FROM table_name;'}
                 onChange={handleQueryChange}
                 theme={editorTheme}
                 options={{
@@ -723,8 +897,39 @@ function AssignmentAttempt() {
                   scrollBeyondLastLine: false,
                   padding: { top: 16, bottom: 16 },
                   overviewRulerLanes: 0,
-                  hideCursorInOverviewRuler: true
+                  hideCursorInOverviewRuler: true,
+                  // SQL-specific Monaco Editor options
+                  suggestOnTriggerCharacters: true,
+                  quickSuggestions: {
+                    other: true,
+                    comments: false,
+                    strings: false
+                  },
+                  acceptSuggestionOnEnter: 'on',
+                  tabCompletion: 'on',
+                  wordBasedSuggestions: 'allDocuments',
+                  // SQL editor enhancements
+                  formatOnPaste: false,
+                  formatOnType: false,
+                  autoIndent: 'full',
+                  bracketPairColorization: {
+                    enabled: true
+                  },
+                  // SQL syntax highlighting
+                  folding: true,
+                  foldingStrategy: 'auto',
+                  showFoldingControls: 'always',
+                  // Better SQL editing experience
+                  renderWhitespace: 'selection',
+                  renderLineHighlight: 'all',
+                  cursorBlinking: 'smooth',
+                  cursorSmoothCaretAnimation: 'on',
+                  smoothScrolling: true,
+                  // SQL autocomplete
+                  suggestSelection: 'first',
+                  snippetSuggestions: 'top'
                 }}
+                loading={<div style={{ padding: '20px', textAlign: 'center' }}>Loading SQL Editor...</div>}
               />
             </div>
 
@@ -745,7 +950,10 @@ function AssignmentAttempt() {
           {/* Test Results Panel */}
           <div 
             className="test-panel"
-            style={{ height: `${100 - editorHeight}%` }}
+            style={{ 
+              height: isMobile ? '50%' : `${100 - editorHeight}%`,
+              flexShrink: 0
+            }}
           >
             <div className="test-panel__tabs">
               <button 

@@ -2,20 +2,42 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { QueryProvider, useQuery } from './contexts/QueryContext';
 import { NavigationProvider, useNavigation } from './contexts/NavigationContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import AssignmentList from './components/AssignmentList';
 import AssignmentAttempt from './components/AssignmentAttempt';
+import Login from './components/Login';
+import Signup from './components/Signup';
+import ProtectedRoute from './components/ProtectedRoute';
 import './App.scss';
+
+function AssignmentRouteWrapper() {
+  const location = useLocation();
+  const assignmentId = location.pathname.split('/assignment/')[1];
+  
+  return (
+    <>
+      <TopNavBarContent />
+      <main className="app__main">
+        <ProtectedRoute>
+          <AssignmentAttempt key={assignmentId} />
+        </ProtectedRoute>
+      </main>
+    </>
+  );
+}
 
 function TopNavBarContent() {
   const location = useLocation();
   const navigate = useNavigate();
   const [timer, setTimer] = useState(0);
-  const [filterMenuOpen, setFilterMenuOpen] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState('all');
+  const [questionPaletteOpen, setQuestionPaletteOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const isAssignmentPage = location.pathname.includes('/assignment/');
   const isHomePage = location.pathname === '/';
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
   const { execute, submit } = useQuery();
-  const { getNextAssignmentId, getPreviousAssignmentId, hasNext, hasPrevious } = useNavigation();
+  const { assignments, currentIndex, setCurrentAssignmentIndex, getNextAssignmentId, getPreviousAssignmentId, hasNext, hasPrevious } = useNavigation();
+  const { user, logout, isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (isAssignmentPage) {
@@ -34,82 +56,102 @@ function TopNavBarContent() {
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
-  const handleFilterChange = (filter) => {
-    setSelectedFilter(filter);
-    setFilterMenuOpen(false);
-    // Store filter in localStorage
-    localStorage.setItem('assignmentFilter', filter);
-    // Dispatch custom event to notify AssignmentList
-    window.dispatchEvent(new CustomEvent('filterChanged', { detail: { filter } }));
-  };
-
   useEffect(() => {
-    // Load saved filter preference
-    const savedFilter = localStorage.getItem('assignmentFilter') || 'all';
-    setSelectedFilter(savedFilter);
-  }, []);
-
-  useEffect(() => {
-    // Close filter menu when clicking outside
+    // Close question palette and user menu when clicking outside
     const handleClickOutside = (event) => {
-      if (filterMenuOpen && !event.target.closest('.app__filter-menu')) {
-        setFilterMenuOpen(false);
+      if (questionPaletteOpen && !event.target.closest('.app__question-palette')) {
+        setQuestionPaletteOpen(false);
+      }
+      if (userMenuOpen && !event.target.closest('.app__user-menu')) {
+        setUserMenuOpen(false);
       }
     };
 
-    if (filterMenuOpen) {
+    if (questionPaletteOpen || userMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [filterMenuOpen]);
+  }, [questionPaletteOpen, userMenuOpen]);
 
   return (
     <header className={`app__header ${isHomePage ? 'app__header--home' : ''}`}>
       <div className="app__header-left">
-        {isHomePage && (
-          <div className="app__filter-menu">
-            <button 
-              className="app__filter-btn"
-              onClick={() => setFilterMenuOpen(!filterMenuOpen)}
-              title="Filter by Difficulty"
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M3 3a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 5.707A1 1 0 013 5V3z"/>
-              </svg>
-              <span className="app__filter-label">Filter</span>
-            </button>
-            {filterMenuOpen && (
-              <div className="app__filter-dropdown">
-                <button 
-                  className={`app__filter-option ${selectedFilter === 'all' ? 'app__filter-option--active' : ''}`}
-                  onClick={() => handleFilterChange('all')}
-                >
-                  All
-                </button>
-                <button 
-                  className={`app__filter-option ${selectedFilter === 'Easy' ? 'app__filter-option--active' : ''}`}
-                  onClick={() => handleFilterChange('Easy')}
-                >
-                  Easy
-                </button>
-                <button 
-                  className={`app__filter-option ${selectedFilter === 'Medium' ? 'app__filter-option--active' : ''}`}
-                  onClick={() => handleFilterChange('Medium')}
-                >
-                  Medium
-                </button>
-                <button 
-                  className={`app__filter-option ${selectedFilter === 'Hard' ? 'app__filter-option--active' : ''}`}
-                  onClick={() => handleFilterChange('Hard')}
-                >
-                  Hard
-                </button>
-              </div>
+        {(isHomePage || isAssignmentPage) && (
+          <>
+            <div className="app__question-palette">
+              <button 
+                className="app__question-palette-btn"
+                onClick={() => setQuestionPaletteOpen(!questionPaletteOpen)}
+                title="Question Palette"
+              >
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M2 5h16M2 10h16M2 15h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </button>
+            </div>
+            {questionPaletteOpen && (
+              <>
+                <div 
+                  className="app__question-palette-overlay"
+                  onClick={() => setQuestionPaletteOpen(false)}
+                />
+                <div className={`app__question-palette-sidebar ${questionPaletteOpen ? 'app__question-palette-sidebar--open' : ''}`}>
+                  <div className="app__question-palette-header">
+                    <h3>Questions</h3>
+                    <button 
+                      className="app__question-palette-close"
+                      onClick={() => setQuestionPaletteOpen(false)}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                  {assignments.length > 0 ? (
+                    <div className="app__question-palette-list">
+                      {assignments.map((assignment, index) => {
+                        // Check if this is the current/active assignment
+                        const currentId = location.pathname.split('/assignment/')[1];
+                        const isActive = currentIndex === index || assignment._id === currentId;
+                        return (
+                          <button
+                            key={assignment._id}
+                            className={`app__question-palette-item ${isActive ? 'app__question-palette-item--active' : ''}`}
+                            onClick={async () => {
+                              if (isAuthenticated) {
+                                // Update current index before navigation
+                                setCurrentAssignmentIndex(index);
+                                // Close sidebar first
+                                setQuestionPaletteOpen(false);
+                                // Navigate to the assignment
+                                navigate(`/assignment/${assignment._id}`);
+                              } else {
+                                navigate(`/login?redirect=/assignment/${assignment._id}`);
+                                setQuestionPaletteOpen(false);
+                              }
+                            }}
+                          >
+                            <span className="app__question-palette-number">{index + 1}</span>
+                            <div className="app__question-palette-content">
+                              <span className="app__question-palette-title">{assignment.title}</span>
+                              <span className={`app__question-palette-difficulty app__question-palette-difficulty--${assignment.difficulty.toLowerCase()}`}>
+                                {assignment.difficulty}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="app__question-palette-empty">No questions available</div>
+                  )}
+                </div>
+              </>
             )}
-          </div>
+          </>
         )}
         {!isHomePage && (
           <h1 className="app__logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
@@ -194,23 +236,52 @@ function TopNavBarContent() {
           </div>
         )}
         <div className="app__header-actions">
-          <button className="app__icon-btn app__icon-btn--desktop-only" title="Settings" onClick={() => console.log('Settings clicked')}>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" fill="currentColor"/>
-              <path fillRule="evenodd" d="M.664 10.59a1.651 1.651 0 010-1.186A10.004 10.004 0 018.4 1.867c1.147.514 2.135.99 2.6 1.186a1.651 1.651 0 011.186 0c.465-.196 1.453-.672 2.6-1.186a10.004 10.004 0 017.736 7.537 1.651 1.651 0 010 1.186 10.004 10.004 0 01-7.736 7.537c-1.147-.514-2.135-.99-2.6-1.186a1.651 1.651 0 01-1.186 0c-.465.196-1.453.672-2.6 1.186A10.004 10.004 0 01.664 10.59zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd"/>
-            </svg>
-          </button>
-          <button className="app__icon-btn app__icon-btn--desktop-only" title="Notifications" onClick={() => console.log('Notifications clicked')}>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
-            </svg>
-            <span className="app__badge">0</span>
-          </button>
-          <button className="app__icon-btn app__icon-btn--profile app__icon-btn--desktop-only" title="Profile" onClick={() => console.log('Profile clicked')}>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
-            </svg>
-          </button>
+          {!isAuthPage && (
+            <>
+              {isAuthenticated ? (
+                <div className="app__user-menu">
+                  <button 
+                    className="app__user-btn" 
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    title={user?.username || 'User'}
+                  >
+                    <div className="app__user-avatar">
+                      {user?.username?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                    <span className="app__user-name">{user?.username || 'User'}</span>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M8 9.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                      <path fillRule="evenodd" d="M1.38 8.6a1 1 0 011.13.6c.4.15.84.25 1.3.3.46.05.92.05 1.38 0 .46-.05.9-.15 1.3-.3a1 1 0 011.13-.6c.5.2.9.6 1.1 1.1a1 1 0 01-.6 1.13c-.15.4-.25.84-.3 1.3-.05.46-.05.92 0 1.38.05.46.15.9.3 1.3a1 1 0 01-.6 1.13c-.5.2-1 .2-1.5 0a1 1 0 01-1.13-.6c-.4-.15-.84-.25-1.3-.3-.46-.05-.92-.05-1.38 0-.46.05-.9.15-1.3.3a1 1 0 01-1.13.6c-.5-.2-1-.2-1.5 0a1 1 0 01-.6-1.13c.15-.4.25-.84.3-1.3.05-.46.05-.92 0-1.38-.05-.46-.15-.9-.3-1.3a1 1 0 01.6-1.13c.5-.2 1-.2 1.5 0z" clipRule="evenodd"/>
+                    </svg>
+                  </button>
+                  {userMenuOpen && (
+                    <div className="app__user-dropdown">
+                      <div className="app__user-info">
+                        <div className="app__user-email">{user?.email}</div>
+                      </div>
+                      <button 
+                        className="app__user-menu-item"
+                        onClick={() => {
+                          logout();
+                          setUserMenuOpen(false);
+                          navigate('/');
+                        }}
+                      >
+                        Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button 
+                  className="app__auth-btn"
+                  onClick={() => navigate('/login')}
+                >
+                  Sign In
+                </button>
+              )}
+            </>
+          )}
         </div>
       </div>
     </header>
@@ -219,21 +290,37 @@ function TopNavBarContent() {
 
 function App() {
   return (
-    <QueryProvider>
-      <NavigationProvider>
-        <Router>
-          <div className="app">
-            <TopNavBarContent />
-            <main className="app__main">
+    <AuthProvider>
+      <QueryProvider>
+        <NavigationProvider>
+          <Router>
+            <div className="app">
               <Routes>
-                <Route path="/" element={<AssignmentList />} />
-                <Route path="/assignment/:id" element={<AssignmentAttempt />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route 
+                  path="/" 
+                  element={
+                    <>
+                      <TopNavBarContent />
+                      <main className="app__main">
+                        <AssignmentList />
+                      </main>
+                    </>
+                  } 
+                />
+                <Route 
+                  path="/assignment/:id" 
+                  element={
+                    <AssignmentRouteWrapper />
+                  } 
+                />
               </Routes>
-            </main>
-          </div>
-        </Router>
-      </NavigationProvider>
-    </QueryProvider>
+            </div>
+          </Router>
+        </NavigationProvider>
+      </QueryProvider>
+    </AuthProvider>
   );
 }
 

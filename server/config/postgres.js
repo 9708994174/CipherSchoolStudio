@@ -12,16 +12,27 @@ const pool = new Pool({
   database: process.env.PG_DATABASE || 'ciphersqlstudio_app',
   max: 20, // Maximum number of clients in the pool
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 10000, // Increased timeout to 10 seconds
 });
 
-// Test connection
-pool.on('connect', () => {
-  console.log('✅ Connected to PostgreSQL');
-});
+// Test connection on startup
+pool.connect()
+  .then((client) => {
+    console.log('✅ Connected to PostgreSQL');
+    client.release();
+  })
+  .catch((err) => {
+    console.error('❌ Failed to connect to PostgreSQL:', err.message);
+    console.error('   Please check your PostgreSQL connection settings in .env file');
+    console.error('   PG_HOST:', process.env.PG_HOST || 'localhost');
+    console.error('   PG_PORT:', process.env.PG_PORT || 5432);
+    console.error('   PG_DATABASE:', process.env.PG_DATABASE || 'ciphersqlstudio_app');
+    // Don't exit - allow server to start but queries will fail gracefully
+  });
 
+// Handle pool errors
 pool.on('error', (err) => {
-  console.error('❌ PostgreSQL connection error:', err);
+  console.error('❌ PostgreSQL pool error:', err.message);
 });
 
 /**
@@ -57,30 +68,66 @@ async function setSearchPath(schemaName) {
 
 /**
  * Execute a query in a specific schema
+ * REAL EXECUTION - No caching, always executes against PostgreSQL
  */
 async function executeQuery(schemaName, query) {
-  const client = await pool.connect();
+  let client;
+  const executionStart = Date.now();
+  
   try {
+    // Get client from pool with timeout handling
+    client = await Promise.race([
+      pool.connect(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('PostgreSQL connection timeout')), 10000)
+      )
+    ]);
+    
     // Set search path to the schema
     await client.query(`SET search_path TO ${schemaName}`);
     
-    // Execute the user's query
+    // Execute the user's query - REAL EXECUTION
+    console.log(`[REAL EXECUTION] Executing query in schema: ${schemaName}`);
+    console.log(`[REAL EXECUTION] Query: ${query.substring(0, 100)}...`);
+    
     const result = await client.query(query);
+    
+    const executionTime = Date.now() - executionStart;
+    console.log(`[REAL EXECUTION] Query executed in ${executionTime}ms, returned ${result.rows.length} rows`);
     
     return {
       success: true,
-      rows: result.rows,
-      rowCount: result.rowCount,
-      columns: result.fields ? result.fields.map(f => ({ name: f.name, type: f.dataTypeID })) : []
+      rows: result.rows, // Real PostgreSQL result rows
+      rowCount: result.rowCount, // Real row count from PostgreSQL
+      columns: result.fields ? result.fields.map(f => ({ name: f.name, type: f.dataTypeID })) : [],
+      executionTime: executionTime // Track execution time
     };
   } catch (error) {
+    const executionTime = Date.now() - executionStart;
+    console.error(`[REAL EXECUTION] Query failed after ${executionTime}ms:`, error.message);
+    
+    // Provide more helpful error messages
+    let errorMessage = error.message;
+    if (error.code === 'ECONNREFUSED') {
+      errorMessage = 'Cannot connect to PostgreSQL database. Please check your database connection settings.';
+    } else if (error.code === '28P01') {
+      errorMessage = 'PostgreSQL authentication failed. Please check your database credentials.';
+    } else if (error.code === '3D000') {
+      errorMessage = `Database "${process.env.PG_DATABASE || 'ciphersqlstudio_app'}" does not exist. Please create it first.`;
+    } else if (error.message.includes('timeout')) {
+      errorMessage = 'Database connection timeout. Please check if PostgreSQL is running.';
+    }
+    
     return {
       success: false,
-      error: error.message,
-      code: error.code
+      error: errorMessage,
+      code: error.code,
+      originalError: process.env.NODE_ENV === 'development' ? error.message : undefined
     };
   } finally {
-    client.release();
+    if (client) {
+      client.release();
+    }
   }
 }
 

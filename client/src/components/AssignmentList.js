@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigation } from '../contexts/NavigationContext';
 import { getAssignments } from '../services/api';
 import './AssignmentList.scss';
 
@@ -12,17 +14,11 @@ function AssignmentList() {
     return localStorage.getItem('assignmentFilter') || 'all';
   });
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const { setAssignmentsList } = useNavigation();
 
   useEffect(() => {
     fetchAssignments();
-    
-    // Listen for filter changes from navbar
-    const handleFilterChange = (event) => {
-      setFilter(event.detail.filter);
-    };
-    
-    window.addEventListener('filterChanged', handleFilterChange);
-    return () => window.removeEventListener('filterChanged', handleFilterChange);
   }, []);
 
   useEffect(() => {
@@ -38,7 +34,10 @@ function AssignmentList() {
     try {
       setLoading(true);
       const response = await getAssignments();
-      setAssignments(response.data);
+      const assignmentsData = response.data;
+      setAssignments(assignmentsData);
+      // Update navigation context with assignments list
+      setAssignmentsList(assignmentsData);
       setError(null);
     } catch (err) {
       setError('Failed to load assignments. Please try again later.');
@@ -53,7 +52,13 @@ function AssignmentList() {
   };
 
   const handleAssignmentClick = (id) => {
-    navigate(`/assignment/${id}`);
+    // Check if user is authenticated before allowing access to assignment
+    if (!isAuthenticated) {
+      // Redirect to login, and save the assignment ID to redirect after login
+      navigate(`/login?redirect=/assignment/${id}`);
+    } else {
+      navigate(`/assignment/${id}`);
+    }
   };
 
   if (loading) {
@@ -78,9 +83,42 @@ function AssignmentList() {
     );
   }
 
+  const handleFilterChange = (newFilter) => {
+    setFilter(newFilter);
+    localStorage.setItem('assignmentFilter', newFilter);
+  };
+
   return (
     <div className="assignment-list">
-      <h2 className="assignment-list__title">Available Assignments</h2>
+      <div className="assignment-list__header">
+        <h2 className="assignment-list__title">Available Assignments</h2>
+        <div className="assignment-list__filter">
+          <button 
+            className={`assignment-list__filter-btn ${filter === 'all' ? 'assignment-list__filter-btn--active' : ''}`}
+            onClick={() => handleFilterChange('all')}
+          >
+            All
+          </button>
+          <button 
+            className={`assignment-list__filter-btn ${filter === 'Easy' ? 'assignment-list__filter-btn--active' : ''}`}
+            onClick={() => handleFilterChange('Easy')}
+          >
+            Easy
+          </button>
+          <button 
+            className={`assignment-list__filter-btn ${filter === 'Medium' ? 'assignment-list__filter-btn--active' : ''}`}
+            onClick={() => handleFilterChange('Medium')}
+          >
+            Medium
+          </button>
+          <button 
+            className={`assignment-list__filter-btn ${filter === 'Hard' ? 'assignment-list__filter-btn--active' : ''}`}
+            onClick={() => handleFilterChange('Hard')}
+          >
+            Hard
+          </button>
+        </div>
+      </div>
       {filteredAssignments.length === 0 ? (
         <div className="assignment-list__empty">
           {assignments.length === 0 

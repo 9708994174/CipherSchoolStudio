@@ -167,6 +167,15 @@ const sampleAssignments = [
           ]
         },
         description: "Verify employees are sorted by salary in descending order"
+      },
+      {
+        name: "Test Case 2: Correct row count",
+        input: "",
+        expectedOutput: {
+          type: "count",
+          value: 4
+        },
+        description: "Verify all 4 employees are returned"
       }
     ],
     schemaName: "assignment_3"
@@ -262,6 +271,15 @@ const sampleAssignments = [
           value: 80000
         },
         description: "Verify the maximum salary is 80000"
+      },
+      {
+        name: "Test Case 2: Result is a single value",
+        input: "",
+        expectedOutput: {
+          type: "count",
+          value: 1
+        },
+        description: "Verify query returns exactly one row"
       }
     ],
     schemaName: "assignment_5"
@@ -310,6 +328,30 @@ const sampleAssignments = [
         { order_id: 3, customer_name: "Bob Johnson", product_name: "Laptop", quantity: 3 }
       ]
     },
+    testCases: [
+      {
+        name: "Test Case 1: All orders with product names",
+        input: "",
+        expectedOutput: {
+          type: "table",
+          value: [
+            { order_id: 1, customer_name: "John Doe", product_name: "Laptop", quantity: 2 },
+            { order_id: 2, customer_name: "Jane Smith", product_name: "Mouse", quantity: 1 },
+            { order_id: 3, customer_name: "Bob Johnson", product_name: "Laptop", quantity: 3 }
+          ]
+        },
+        description: "Verify all orders are joined with product names"
+      },
+      {
+        name: "Test Case 2: Correct row count",
+        input: "",
+        expectedOutput: {
+          type: "count",
+          value: 3
+        },
+        description: "Verify exactly 3 orders are returned"
+      }
+    ],
     schemaName: "assignment_6"
   },
   {
@@ -354,6 +396,30 @@ const sampleAssignments = [
         { order_id: 3, customer_name: "Bob Johnson", total_value: 2999.97 }
       ]
     },
+    testCases: [
+      {
+        name: "Test Case 1: Correct total values",
+        input: "",
+        expectedOutput: {
+          type: "table",
+          value: [
+            { order_id: 1, customer_name: "John Doe", total_value: 1999.98 },
+            { order_id: 2, customer_name: "Jane Smith", total_value: 29.99 },
+            { order_id: 3, customer_name: "Bob Johnson", total_value: 2999.97 }
+          ]
+        },
+        description: "Verify total value is calculated correctly for each order"
+      },
+      {
+        name: "Test Case 2: All orders included",
+        input: "",
+        expectedOutput: {
+          type: "count",
+          value: 3
+        },
+        description: "Verify all 3 orders are returned"
+      }
+    ],
     schemaName: "assignment_7"
   },
   {
@@ -387,6 +453,30 @@ const sampleAssignments = [
         { id: 4, name: "Diana", department: "Finance", salary: 70000 }
       ]
     },
+    testCases: [
+      {
+        name: "Test Case 1: Employees above average salary",
+        input: "",
+        expectedOutput: {
+          type: "table",
+          value: [
+            { id: 1, name: "Alice", department: "IT", salary: 75000 },
+            { id: 3, name: "Charlie", department: "IT", salary: 80000 },
+            { id: 4, name: "Diana", department: "Finance", salary: 70000 }
+          ]
+        },
+        description: "Verify only employees with salary above average are returned"
+      },
+      {
+        name: "Test Case 2: Correct count",
+        input: "",
+        expectedOutput: {
+          type: "count",
+          value: 3
+        },
+        description: "Verify exactly 3 employees are returned"
+      }
+    ],
     schemaName: "assignment_8"
   },
   {
@@ -419,6 +509,29 @@ const sampleAssignments = [
         { category: "Furniture", avg_price: 249.99 }
       ]
     },
+    testCases: [
+      {
+        name: "Test Case 1: Correct average prices",
+        input: "",
+        expectedOutput: {
+          type: "table",
+          value: [
+            { category: "Electronics", avg_price: 369.99 },
+            { category: "Furniture", avg_price: 249.99 }
+          ]
+        },
+        description: "Verify average price is calculated correctly for each category"
+      },
+      {
+        name: "Test Case 2: All categories included",
+        input: "",
+        expectedOutput: {
+          type: "count",
+          value: 2
+        },
+        description: "Verify both categories are returned"
+      }
+    ],
     schemaName: "assignment_9"
   },
   {
@@ -450,6 +563,28 @@ const sampleAssignments = [
         { customer_name: "John Doe", order_count: 3 }
       ]
     },
+    testCases: [
+      {
+        name: "Test Case 1: Customers with multiple orders",
+        input: "",
+        expectedOutput: {
+          type: "table",
+          value: [
+            { customer_name: "John Doe", order_count: 3 }
+          ]
+        },
+        description: "Verify only customers with more than 1 order are returned"
+      },
+      {
+        name: "Test Case 2: Correct order count",
+        input: "",
+        expectedOutput: {
+          type: "count",
+          value: 1
+        },
+        description: "Verify exactly 1 customer is returned"
+      }
+    ],
     schemaName: "assignment_10"
   },
 
@@ -498,6 +633,30 @@ const sampleAssignments = [
         { product_name: "Keyboard", total_quantity: 1 }
       ]
     },
+    testCases: [
+      {
+        name: "Test Case 1: Top 3 products by sales",
+        input: "",
+        expectedOutput: {
+          type: "table",
+          value: [
+            { product_name: "Mouse", total_quantity: 9 },
+            { product_name: "Laptop", total_quantity: 5 },
+            { product_name: "Keyboard", total_quantity: 1 }
+          ]
+        },
+        description: "Verify top 3 products by total quantity are returned in descending order"
+      },
+      {
+        name: "Test Case 2: Exactly 3 products",
+        input: "",
+        expectedOutput: {
+          type: "count",
+          value: 3
+        },
+        description: "Verify exactly 3 products are returned"
+      }
+    ],
     schemaName: "assignment_11"
   },
   {
@@ -532,6 +691,30 @@ const sampleAssignments = [
         { department: "Finance", name: "Frank", salary: 72000 }
       ]
     },
+    testCases: [
+      {
+        name: "Test Case 1: Highest salary per department",
+        input: "",
+        expectedOutput: {
+          type: "table",
+          value: [
+            { department: "IT", name: "Charlie", salary: 80000 },
+            { department: "HR", name: "Bob", salary: 60000 },
+            { department: "Finance", name: "Frank", salary: 72000 }
+          ]
+        },
+        description: "Verify employee with highest salary in each department is returned"
+      },
+      {
+        name: "Test Case 2: One per department",
+        input: "",
+        expectedOutput: {
+          type: "count",
+          value: 3
+        },
+        description: "Verify exactly 3 employees (one per department) are returned"
+      }
+    ],
     schemaName: "assignment_12"
   },
   {
@@ -576,6 +759,30 @@ const sampleAssignments = [
         { order_id: 3, customer_name: "Bob Johnson", order_value: 2999.97, running_total: 5029.94 }
       ]
     },
+    testCases: [
+      {
+        name: "Test Case 1: Correct running totals",
+        input: "",
+        expectedOutput: {
+          type: "table",
+          value: [
+            { order_id: 1, customer_name: "John Doe", order_value: 1999.98, running_total: 1999.98 },
+            { order_id: 2, customer_name: "Jane Smith", order_value: 29.99, running_total: 2029.97 },
+            { order_id: 3, customer_name: "Bob Johnson", order_value: 2999.97, running_total: 5029.94 }
+          ]
+        },
+        description: "Verify running total is calculated correctly for each order"
+      },
+      {
+        name: "Test Case 2: All orders included",
+        input: "",
+        expectedOutput: {
+          type: "count",
+          value: 3
+        },
+        description: "Verify all 3 orders are returned"
+      }
+    ],
     schemaName: "assignment_13"
   },
   {
@@ -681,6 +888,30 @@ const sampleAssignments = [
         { department: "Finance", min_salary: 70000, max_salary: 72000, avg_salary: 71000 }
       ]
     },
+    testCases: [
+      {
+        name: "Test Case 1: Correct salary statistics",
+        input: "",
+        expectedOutput: {
+          type: "table",
+          value: [
+            { department: "IT", min_salary: 75000, max_salary: 80000, avg_salary: 77666.67 },
+            { department: "HR", min_salary: 55000, max_salary: 60000, avg_salary: 57500 },
+            { department: "Finance", min_salary: 70000, max_salary: 72000, avg_salary: 71000 }
+          ]
+        },
+        description: "Verify min, max, and average salary are calculated correctly for each department"
+      },
+      {
+        name: "Test Case 2: All departments included",
+        input: "",
+        expectedOutput: {
+          type: "count",
+          value: 3
+        },
+        description: "Verify all 3 departments are returned"
+      }
+    ],
     schemaName: "assignment_15"
   }
 ];
@@ -701,15 +932,11 @@ async function initializeAssignments() {
       const existing = await Assignment.findOne({ schemaName: assignmentData.schemaName });
       
       if (existing) {
-        // Update existing assignment with test cases if missing
-        if (!existing.testCases || existing.testCases.length === 0) {
-          existing.testCases = assignmentData.testCases || [];
-          existing.expectedOutput = assignmentData.expectedOutput || existing.expectedOutput;
-          await existing.save();
-          console.log(`✅ Updated assignment "${assignmentData.title}" with ${assignmentData.testCases?.length || 0} test cases`);
-        } else {
-          console.log(`⏭️  Assignment "${assignmentData.title}" already exists with ${existing.testCases.length} test cases, skipping...`);
-        }
+        // Force update test cases for all assignments (ensure exactly 2 test cases)
+        existing.testCases = assignmentData.testCases || [];
+        existing.expectedOutput = assignmentData.expectedOutput || existing.expectedOutput;
+        await existing.save();
+        console.log(`✅ Updated assignment "${assignmentData.title}" with ${assignmentData.testCases?.length || 0} test cases`);
         continue;
       }
 

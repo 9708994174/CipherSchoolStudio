@@ -1,5 +1,9 @@
 # Quick Setup Guide - CipherSQLStudio
-mongodb+srv://kumar799024_db_user:QciQqSD0klP3nIKQ@cipherschool.sxjgvai.mongodb.net/?appName=CipherSchool
+
+## MongoDB Connection String (Example)
+mongodb+srv://kumar799024_db_user:QciQqSD0klP3nIKQ@cipherschool.sxjgvai.mongodb.net/ciphersqlstudio?retryWrites=true&w=majority
+
+**Note:** Make sure to include the database name (e.g., `ciphersqlstudio`) before the `?` in the connection string.
 
 ## Prerequisites Checklist
 

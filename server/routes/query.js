@@ -64,14 +64,17 @@ router.post('/execute', [
     
     res.json(result);
   } catch (error) {
+    console.error('Error in query execution:', error);
     res.status(500).json({ 
       success: false, 
-      error: error.message 
+      error: error.message || 'Internal server error',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
 
 module.exports = router;
+
 
 
 
