@@ -183,7 +183,7 @@ function AssignmentRouteWrapper() {
 //  Discuss Page
 // -----------------------------------------------------------------------------
 function DiscussPage() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState('latest');
