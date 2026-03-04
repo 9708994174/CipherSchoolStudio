@@ -2,6 +2,13 @@
 
 A browser-based SQL learning platform where students can practice SQL queries against pre-configured assignments with real-time execution and intelligent hints.
 
+#Photos
+
+<img width="1904" height="930" alt="Screenshot 2026-01-02 193158" src="https://github.com/user-attachments/assets/ba8a32b8-e14f-42f2-84c3-16af4c672089" />
+
+
+<img width="1905" height="929" alt="image" src="https://github.com/user-attachments/assets/202da3d3-8cef-4573-af99-ef30449a89d0" />
+
 ## Features
 
 - **Assignment Listing**: Browse and select from available SQL assignments
