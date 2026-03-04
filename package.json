@@ -3,17 +3,24 @@
   "version": "1.0.0",
   "description": "A browser-based SQL learning platform",
   "main": "server/index.js",
+  "workspaces": [
+    "client",
+    "server"
+  ],
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-
-    "server": "cd server && nodemon index.js",
-    "client": "cd client && npm start",
-
-    "install-all": "npm install --prefix server && npm install --prefix client",
-    "build": "npm run build --prefix client",
-    "start": "npm start --prefix server"
+    "server": "npm run dev --workspace=server",
+    "client": "npm run start --workspace=client",
+    "install-all": "npm install",
+    "build": "npm run build --workspace=client",
+    "vercel-build": "npm run build",
+    "start": "npm run start --workspace=server"
   },
-  "keywords": ["sql", "learning", "education"],
+  "keywords": [
+    "sql",
+    "learning",
+    "education"
+  ],
   "author": "",
   "license": "ISC",
   "devDependencies": {
