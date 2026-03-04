@@ -20,7 +20,6 @@ import {
 } from '../services/api';
 import SchemaViewer from './SchemaViewer';
 import ResultsPanel from './ResultsPanel';
-import ComplexityGraph from './ComplexityGraph';
 import './AssignmentAttempt.scss';
 
 // ── LeetCode-style test case viewer ──────────────────────────
@@ -89,24 +88,6 @@ function getEditorialTips(assignment) {
   return tips;
 }
 
-// ── Sample solutions generator ────────────────────────────────
-function getSampleSolutions(assignment) {
-  const tables = (assignment?.sampleTables || []).map(t => t.tableName).join(', ');
-  return [
-    {
-      author: 'sql_master',
-      votes: 412,
-      code: `-- Clean and readable approach\nSELECT *\nFROM ${tables || 'your_table'}\nWHERE 1 = 1\n-- Add your conditions here\nORDER BY 1;`,
-      explanation: 'Simple but effective — select all columns and add your filters in the WHERE clause.'
-    },
-    {
-      author: 'data_ninja',
-      votes: 289,
-      code: `-- Using CTE for readability\nWITH cte AS (\n  SELECT *\n  FROM ${tables || 'your_table'}\n)\nSELECT *\nFROM cte;`,
-      explanation: 'Using a Common Table Expression (CTE) makes complex queries easier to read and maintain.'
-    }
-  ];
-}
 // \u2550\u2550 ChatPanel \u2013 Discussion / Solutions chat-style UI \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 function ChatPanel({ posts = [], loading, onPost, postBody, setPostBody, posting, onLike, user, type }) {
   const bottomRef = useRef(null);
@@ -315,13 +296,6 @@ function AssignmentAttempt() {
       localStorage.setItem('userId', userId);
     }
   }, [isAuthenticated, user, userId]);
-  const [leftPanelWidth, setLeftPanelWidth] = useState(() => {
-    // On mobile, use full width; on desktop, use 50% for equal split
-    if (window.innerWidth < 1024) {
-      return 100; // Full width on mobile
-    }
-    return 50; // Fixed 50% for equal split
-  });
   const [isResizing, setIsResizing] = useState(false);
   const [editorHeight, setEditorHeight] = useState(() => {
     const saved = localStorage.getItem('editorHeight');
@@ -334,7 +308,6 @@ function AssignmentAttempt() {
   const [discussions, setDiscussions] = useState([]);
   const [discussLoading, setDiscussLoading] = useState(false);
   const [postBody, setPostBody] = useState('');
-  const [postType, setPostType] = useState('discuss'); // 'discuss' | 'solution'
   const [solBody, setSolBody] = useState('');
   const [posting, setPosting] = useState(false);
   const [engagementStats, setEngagementStats] = useState({ likes: 0, discussions: 0 });
@@ -422,7 +395,7 @@ function AssignmentAttempt() {
     fetchAssignment();
     fetchProgress();
     fetchSubmissions();
-  }, [id]);
+  }, [id, fetchAllAssignments, fetchAssignment, fetchProgress, fetchSubmissions]);
 
   useEffect(() => {
     queryRef.current = query;
@@ -847,7 +820,6 @@ function AssignmentAttempt() {
 
       // Constrain between 15% and 85% to allow more flexibility
       const constrainedWidth = Math.max(15, Math.min(85, newWidth));
-      setLeftPanelWidth(constrainedWidth);
       localStorage.setItem('leftPanelWidth', constrainedWidth.toString());
     };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigation } from '../contexts/NavigationContext';
@@ -10,7 +10,6 @@ import './AssignmentList.scss';
 // ══════════════════════════════════════════════════════════════
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'];
-const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 function ActivityCalendar({ activityData }) {
@@ -252,7 +251,6 @@ function AssignmentList() {
   const [assignments, setAssignments] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [difficulty, setDifficulty] = useState(() => localStorage.getItem('asgn_diff') || 'All');
   const [navTopic, setNavTopic] = useState('All Topics');
   const [sideTopic, setSideTopic] = useState(null);
@@ -286,9 +284,8 @@ function AssignmentList() {
       }
       if (statsRes.status === 'fulfilled') setStats(statsRes.value.data?.stats || {});
       if (actRes.status === 'fulfilled') setActivityData(actRes.value.data?.activity || {});
-      setError(null);
     } catch {
-      setError('Failed to load. Please try again.');
+      // Failed to load components
     } finally {
       setLoading(false);
     }
