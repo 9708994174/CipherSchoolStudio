@@ -2009,7 +2009,7 @@ pre {
 .lc-submission {
   width: 100%;
   max-width: 820px;
-  max-height: 92vh;
+  max-height: 85vh;
   background: #1a1a1a;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -2036,7 +2036,7 @@ pre {
 
 // ── Header: verdict + user info + action btns ──────────────
 .lc-submission__header {
-  padding: 28px 32px 20px;
+  padding: 18px 24px 14px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -2153,7 +2153,7 @@ pre {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
-  padding: 24px 32px 0;
+  padding: 16px 24px 12px;
 
   @media (max-width: 600px) {
     grid-template-columns: 1fr;

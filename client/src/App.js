@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { QueryProvider, useQuery } from './contexts/QueryContext';
 import { NavigationProvider, useNavigation } from './contexts/NavigationContext';
@@ -642,11 +642,18 @@ function TopNavBar() {
                           key={a._id}
                           className={`app__question-palette-item${active ? ' app__question-palette-item--active' : ''}`}
                           onClick={(e) => {
+                            console.log('Palette: clicking assignment', a._id, 'index', idx);
                             e.preventDefault();
                             e.stopPropagation();
                             setQPaletteOpen(false);
-                            setCurrentAssignmentIndex(idx);
-                            navigate(`/assignment/${a._id}`);
+                            try {
+                              console.log('Palette: navigating to /assignment/' + a._id);
+                              setCurrentAssignmentIndex(idx);
+                              navigate(`/assignment/${a._id}`);
+                              console.log('Palette: navigation called.');
+                            } catch (err) {
+                              console.error('Palette: navigation error:', err);
+                            }
                           }}
                         >
                           <div className="app__question-palette-status-col">
