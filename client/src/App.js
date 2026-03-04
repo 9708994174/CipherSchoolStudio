@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { QueryProvider, useQuery } from './contexts/QueryContext';
 import { NavigationProvider, useNavigation } from './contexts/NavigationContext';
@@ -7,13 +7,14 @@ import AssignmentList from './components/AssignmentList';
 import AssignmentAttempt from './components/AssignmentAttempt';
 import Login from './components/Login';
 import Signup from './components/Signup';
+import Profile from './components/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
-import { getAssignments } from './services/api';
+import { getAssignments, getAllDiscussions, createPost as apiCreatePost, likePost as apiLikePost } from './services/api';
 import './App.scss';
 
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 //  STREAK BADGE  (header component)
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function StreakBadge() {
   const [open, setOpen] = useState(false);
   const [checked, setChecked] = useState(false);
@@ -105,7 +106,7 @@ function StreakBadge() {
         onClick={() => setOpen(v => !v)}
         title={`${streak} day streak`}
       >
-        <span className="streak-badge__fire">🔥</span>
+        <span className="streak-badge__fire">ðŸ”¥</span>
         <span className="streak-badge__count">{streak}</span>
       </button>
 
@@ -113,7 +114,7 @@ function StreakBadge() {
         <div className="streak-popup">
           {/* Header */}
           <div className="streak-popup__top">
-            <div className="streak-popup__flame">🔥</div>
+            <div className="streak-popup__flame">ðŸ”¥</div>
             <div>
               <div className="streak-popup__number">{streak}</div>
               <div className="streak-popup__label">Day Streak</div>
@@ -157,11 +158,11 @@ function StreakBadge() {
                   <circle cx="8" cy="8" r="7" fill="#2cbb5d" />
                   <path d="M5 8l2.5 2.5L11 6" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                Solved today! Streak maintained 🎉
+                Solved today! Streak maintained ðŸŽ‰
               </div>
             ) : (
               <button className="streak-popup__checkin-btn" onClick={handleStartChallenge}>
-                🔥 Solve today's challenge
+                ðŸ”¥ Solve today's challenge
               </button>
             )}
             <p className="streak-popup__note">Streak increases when you submit a correct answer</p>
@@ -172,7 +173,7 @@ function StreakBadge() {
   );
 }
 
-// ── Route wrapper for assignment pages ───────────────────────
+// â”€â”€ Route wrapper for assignment pages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function AssignmentRouteWrapper() {
   const { id: assignmentId } = useParams();
   return (
@@ -187,19 +188,59 @@ function AssignmentRouteWrapper() {
   );
 }
 
-// ── Top navigation bar ───────────────────────────────────────
-// ── Discuss Page ─────────────────────────────────────────────
+// â”€â”€ Discuss Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function DiscussPage() {
-  const [posts] = useState([
-    { id: 1, title: 'How to approach SQL JOIN problems?', author: 'SQLMaster', replies: 12, views: 346, tags: ['JOIN', 'Tips'], time: '2h ago', hot: true },
-    { id: 2, title: 'Understanding Window Functions - Complete Guide', author: 'DataExpert', replies: 28, views: 892, tags: ['Window Fn', 'Guide'], time: '5h ago', hot: true },
-    { id: 3, title: 'GROUP BY vs PARTITION BY - When to use what?', author: 'QueryNinja', replies: 15, views: 523, tags: ['Aggregate', 'Window Fn'], time: '1d ago', hot: false },
-    { id: 4, title: 'Common mistakes in SQL subqueries', author: 'DBWizard', replies: 9, views: 234, tags: ['Subqueries'], time: '1d ago', hot: false },
-    { id: 5, title: 'Is CTE better than subquery for performance?', author: 'PerfGeek', replies: 21, views: 678, tags: ['CTE', 'Performance'], time: '2d ago', hot: true },
-    { id: 6, title: 'Tips for Google SQL interviews', author: 'InterviewPro', replies: 34, views: 1205, tags: ['Interview', 'Google'], time: '3d ago', hot: true },
-    { id: 7, title: 'How to optimize complex JOIN queries?', author: 'OptimizeSQL', replies: 7, views: 189, tags: ['JOIN', 'Performance'], time: '3d ago', hot: false },
-    { id: 8, title: 'HAVING vs WHERE - A confusion solved', author: 'Beginner101', replies: 11, views: 412, tags: ['Basics', 'Aggregate'], time: '4d ago', hot: false },
-  ]);
+  const { isAuthenticated } = useAuth();
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [sort, setSort] = useState('latest');
+  const [showModal, setShowModal] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newBody, setNewBody] = useState('');
+  const [newTags, setNewTags] = useState('');
+  const [posting, setPosting] = useState(false);
+
+  const fetchPosts = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await getAllDiscussions(sort);
+      if (res.data?.success) setPosts(res.data.posts || []);
+    } catch (err) {
+      console.error('Fetch discuss error:', err);
+    } finally { setLoading(false); }
+  }, [sort]);
+
+  useEffect(() => { fetchPosts(); }, [fetchPosts]);
+
+  const handleCreatePost = async () => {
+    if (!newBody.trim()) return;
+    try {
+      setPosting(true);
+      const tags = newTags.split(',').map(t => t.trim()).filter(Boolean);
+      await apiCreatePost('global', { title: newTitle, body: newBody, tags });
+      setNewTitle(''); setNewBody(''); setNewTags(''); setShowModal(false);
+      fetchPosts();
+    } catch (err) {
+      console.error('Create post error:', err);
+    } finally { setPosting(false); }
+  };
+
+  const handleLike = async (postId) => {
+    try {
+      const res = await apiLikePost('global', postId);
+      if (res.data?.success) setPosts(prev => prev.map(p => p._id === postId ? { ...p, likes: res.data.likes } : p));
+    } catch (err) { console.error('Like err:', err); }
+  };
+
+  const timeAgo = (d) => {
+    if (!d) return '';
+    const diff = Date.now() - new Date(d).getTime();
+    const m = Math.floor(diff / 60000);
+    if (m < 60) return `${m}m ago`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}h ago`;
+    return `${Math.floor(h / 24)}d ago`;
+  };
 
   return (
     <div className="discuss-page">
@@ -209,71 +250,91 @@ function DiscussPage() {
       </div>
       <div className="discuss-page__toolbar">
         <div className="discuss-page__tabs">
-          <button className="discuss-page__tab discuss-page__tab--active">Trending</button>
-          <button className="discuss-page__tab">Latest</button>
-          <button className="discuss-page__tab">Most Voted</button>
-          <button className="discuss-page__tab">My Posts</button>
+          {['latest', 'trending', 'top'].map(s => (
+            <button key={s} className={`discuss-page__tab ${sort === s ? 'discuss-page__tab--active' : ''}`}
+              onClick={() => setSort(s)}>{s.charAt(0).toUpperCase() + s.slice(1)}</button>
+          ))}
         </div>
-        <button className="discuss-page__new-btn">+ New Post</button>
+        {isAuthenticated && <button className="discuss-page__new-btn" onClick={() => setShowModal(true)}>+ New Post</button>}
       </div>
-      <div className="discuss-page__list">
-        {posts.map(p => (
-          <div key={p.id} className="discuss-post">
-            <div className="discuss-post__votes">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3l5 6H3l5-6z" fill="currentColor" /></svg>
-              <span>{p.replies}</span>
-            </div>
-            <div className="discuss-post__body">
-              <div className="discuss-post__title-row">
-                {p.hot && <span className="discuss-post__hot">🔥</span>}
-                <span className="discuss-post__title">{p.title}</span>
-              </div>
-              <div className="discuss-post__meta">
-                <span className="discuss-post__author">{p.author}</span>
-                <span className="discuss-post__dot">·</span>
-                <span className="discuss-post__time">{p.time}</span>
-                <span className="discuss-post__dot">·</span>
-                <span className="discuss-post__views">{p.views} views</span>
-                {p.tags.map(t => <span key={t} className="discuss-post__tag">{t}</span>)}
-              </div>
-            </div>
-            <div className="discuss-post__replies">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>
-              <span>{p.replies}</span>
+      {showModal && (
+        <>
+          <div className="discuss-modal-overlay" onClick={() => setShowModal(false)} />
+          <div className="discuss-modal">
+            <h3>Create New Post</h3>
+            <input className="discuss-modal__input" placeholder="Title" value={newTitle} onChange={e => setNewTitle(e.target.value)} />
+            <textarea className="discuss-modal__textarea" placeholder="Write your post..." rows={5} value={newBody} onChange={e => setNewBody(e.target.value)} />
+            <input className="discuss-modal__input" placeholder="Tags (comma separated)" value={newTags} onChange={e => setNewTags(e.target.value)} />
+            <div className="discuss-modal__actions">
+              <button className="discuss-modal__cancel" onClick={() => setShowModal(false)}>Cancel</button>
+              <button className="discuss-modal__submit" onClick={handleCreatePost} disabled={posting || !newBody.trim()}>{posting ? 'Posting...' : 'Post'}</button>
             </div>
           </div>
-        ))}
+        </>
+      )}
+      <div className="discuss-page__list">
+        {loading ? <div className="discuss-page__loading"><div className="discuss-page__spinner" />Loading...</div>
+          : posts.length === 0 ? <div className="discuss-page__empty">No posts yet. Be the first to start a discussion!</div>
+            : posts.map(p => (
+              <div key={p._id} className="discuss-post">
+                <div className="discuss-post__votes" onClick={() => handleLike(p._id)} style={{ cursor: 'pointer' }}>
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3l5 6H3l5-6z" fill="currentColor" /></svg>
+                  <span>{p.likes || 0}</span>
+                </div>
+                <div className="discuss-post__body">
+                  <div className="discuss-post__title-row">
+                    {(p.likes || 0) >= 3 && <span className="discuss-post__hot">ðŸ”¥</span>}
+                    <span className="discuss-post__title">{p.title || 'Untitled'}</span>
+                  </div>
+                  <div className="discuss-post__meta">
+                    <span className="discuss-post__author">{p.username}</span>
+                    <span className="discuss-post__dot">Â·</span>
+                    <span className="discuss-post__time">{timeAgo(p.createdAt)}</span>
+                    {(p.tags || []).map(t => <span key={t} className="discuss-post__tag">{t}</span>)}
+                  </div>
+                  <p className="discuss-post__preview">{(p.body || '').slice(0, 150)}{(p.body || '').length > 150 ? '...' : ''}</p>
+                </div>
+              </div>
+            ))}
       </div>
     </div>
   );
 }
 
-// ── Interview Page ───────────────────────────────────────────
+// â”€â”€ Interview Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function InterviewPage() {
   const navigate = useNavigate();
   const companies = [
-    { name: 'Google', icon: '🔍', count: 15, color: '#4285f4' },
-    { name: 'Amazon', icon: '📦', count: 12, color: '#ff9900' },
-    { name: 'Meta', icon: '💠', count: 10, color: '#0668e1' },
-    { name: 'Microsoft', icon: '🪟', count: 8, color: '#00a4ef' },
-    { name: 'Uber', icon: '🚗', count: 7, color: '#000' },
-    { name: 'Airbnb', icon: '🏠', count: 6, color: '#ff5a5f' },
-    { name: 'Netflix', icon: '🎬', count: 5, color: '#e50914' },
-    { name: 'Apple', icon: '🍎', count: 5, color: '#a2aaad' },
+    { name: 'Google', icon: 'ðŸ”', count: 15, topics: ['Window Functions', 'Aggregation', 'Joins'] },
+    { name: 'Amazon', icon: 'ðŸ“¦', count: 12, topics: ['Subqueries', 'CTEs', 'Window Functions'] },
+    { name: 'Meta', icon: 'ðŸ’ ', count: 10, topics: ['String Functions', 'Aggregation', 'Joins'] },
+    { name: 'Microsoft', icon: 'ðŸªŸ', count: 8, topics: ['Stored Procedures', 'Performance', 'Joins'] },
+    { name: 'Uber', icon: 'ðŸš—', count: 7, topics: ['Geospatial Queries', 'Window Functions'] },
+    { name: 'Airbnb', icon: 'ðŸ ', count: 6, topics: ['Date Functions', 'Aggregation'] },
+    { name: 'Netflix', icon: 'ðŸŽ¬', count: 5, topics: ['Ranking', 'Window Functions'] },
+    { name: 'Apple', icon: 'ðŸŽ', count: 5, topics: ['CTEs', 'Complex Joins'] },
   ];
-
+  const studyPlans = [
+    { icon: 'ðŸ“', title: 'SQL Fundamentals', desc: 'Master SELECT, WHERE, JOIN, GROUP BY, HAVING', level: 'Beginner', problems: 12 },
+    { icon: 'âš¡', title: 'Query Optimization', desc: 'Indexing strategies, execution plans, and query tuning', level: 'Advanced', problems: 8 },
+    { icon: 'ðŸ§©', title: 'Problem Patterns', desc: 'Running totals, gaps & islands, pivoting, recursive queries', level: 'Intermediate', problems: 15 },
+    { icon: 'ðŸŽ¯', title: 'Mock Interviews', desc: 'Timed SQL challenges simulating real interview conditions', level: 'All Levels', problems: 10 },
+    { icon: 'ðŸ—ï¸', title: 'Database Design', desc: 'Normalization, schema design, ER diagrams', level: 'Intermediate', problems: 6 },
+    { icon: 'ðŸ”', title: 'Security & Best Practices', desc: 'SQL injection prevention and parameterized queries', level: 'Advanced', problems: 4 },
+  ];
   const tips = [
-    { icon: '📝', title: 'SQL Fundamentals', desc: 'Master SELECT, WHERE, JOIN, GROUP BY', level: 'Beginner' },
-    { icon: '⚡', title: 'Query Optimization', desc: 'Learn indexing, execution plans, and query tuning', level: 'Advanced' },
-    { icon: '🧩', title: 'Problem Patterns', desc: 'Common SQL patterns: running totals, gaps & islands', level: 'Intermediate' },
-    { icon: '🎯', title: 'Mock Interviews', desc: 'Practice with timed SQL challenges', level: 'All Levels' },
+    { title: 'Always clarify requirements', desc: 'Ask about edge cases, NULL handling, and expected output format.' },
+    { title: 'Start with a simple approach', desc: 'Write a basic query first, then optimize. Show clear thinking.' },
+    { title: 'Explain your thought process', desc: 'Walk through your approach verbally as you write.' },
+    { title: 'Master window functions', desc: 'ROW_NUMBER, RANK, LAG, LEAD appear in 70%+ of SQL interviews.' },
+    { title: 'Know your JOINs deeply', desc: 'INNER, LEFT, RIGHT, FULL, CROSS, SELF â€” with edge case awareness.' },
   ];
 
   return (
     <div className="interview-page">
       <div className="interview-page__header">
         <h1 className="interview-page__title">Interview Prep</h1>
-        <p className="interview-page__subtitle">Practice SQL questions from top tech companies</p>
+        <p className="interview-page__subtitle">Practice SQL questions from top tech companies and ace your next interview</p>
       </div>
       <div className="interview-page__content">
         <div className="interview-page__companies">
@@ -282,8 +343,11 @@ function InterviewPage() {
             {companies.map(c => (
               <div key={c.name} className="interview-company-card" onClick={() => navigate('/')}>
                 <span className="interview-company-card__icon">{c.icon}</span>
-                <span className="interview-company-card__name">{c.name}</span>
-                <span className="interview-company-card__count">{c.count} questions</span>
+                <div className="interview-company-card__info">
+                  <span className="interview-company-card__name">{c.name}</span>
+                  <span className="interview-company-card__topics">{c.topics.join(' Â· ')}</span>
+                </div>
+                <span className="interview-company-card__count">{c.count}</span>
               </div>
             ))}
           </div>
@@ -291,14 +355,31 @@ function InterviewPage() {
         <div className="interview-page__tips">
           <h2 className="interview-page__section-title">Study Plans</h2>
           <div className="interview-page__tips-grid">
-            {tips.map(t => (
-              <div key={t.title} className="interview-tip-card">
+            {studyPlans.map(t => (
+              <div key={t.title} className="interview-tip-card" onClick={() => navigate('/')}>
                 <span className="interview-tip-card__icon">{t.icon}</span>
                 <div className="interview-tip-card__body">
                   <span className="interview-tip-card__title">{t.title}</span>
                   <span className="interview-tip-card__desc">{t.desc}</span>
                 </div>
-                <span className="interview-tip-card__level">{t.level}</span>
+                <div className="interview-tip-card__right">
+                  <span className="interview-tip-card__problems">{t.problems} problems</span>
+                  <span className="interview-tip-card__level">{t.level}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="interview-page__quick-tips">
+          <h2 className="interview-page__section-title">ðŸ’¡ Quick Tips</h2>
+          <div className="interview-page__tips-list">
+            {tips.map((tip, i) => (
+              <div key={i} className="interview-quick-tip">
+                <span className="interview-quick-tip__num">{i + 1}</span>
+                <div>
+                  <span className="interview-quick-tip__title">{tip.title}</span>
+                  <span className="interview-quick-tip__desc">{tip.desc}</span>
+                </div>
               </div>
             ))}
           </div>
@@ -307,6 +388,7 @@ function InterviewPage() {
     </div>
   );
 }
+
 
 function TopNavBar() {
   const location = useLocation();
@@ -320,13 +402,14 @@ function TopNavBar() {
   const isHomePage = location.pathname === '/';
   const isDiscussPage = location.pathname === '/discuss';
   const isInterviewPage = location.pathname === '/interview';
+  const isProfilePage = location.pathname === '/profile';
 
   const { execute, submit } = useQuery();
   const { assignments, currentIndex, setCurrentAssignmentIndex,
     getNextAssignmentId, getPreviousAssignmentId, hasNext, hasPrevious } = useNavigation();
   const { user, logout, isAuthenticated } = useAuth();
 
-  // Timer — reset when navigating to a new assignment
+  // Timer â€” reset when navigating to a new assignment
   useEffect(() => {
     if (!isAssignmentPage) { setTimer(0); return; }
     const iv = setInterval(() => setTimer(t => t + 1), 1000);
@@ -377,7 +460,7 @@ function TopNavBar() {
   return (
     <header className={`app__header ${isAssignmentPage ? 'app__header--problem' : ''}`}>
 
-      {/* ── Left side ─────────────────────────────── */}
+      {/* â”€â”€ Left side â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="app__header-left">
         {/* Brand */}
         <div className="app__brand" onClick={() => navigate('/')}>
@@ -508,7 +591,7 @@ function TopNavBar() {
         )}
       </div>
 
-      {/* ── Center: Run / Submit (assignment page only) ─── */}
+      {/* â”€â”€ Center: Run / Submit (assignment page only) â”€â”€â”€ */}
       {isAssignmentPage && (
         <div className="app__header-center">
           <button
@@ -534,7 +617,7 @@ function TopNavBar() {
         </div>
       )}
 
-      {/* ── Right ─────────────────────────────────────── */}
+      {/* â”€â”€ Right â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="app__header-right">
         {isAssignmentPage && (
           <div className="app__timer">
@@ -550,7 +633,7 @@ function TopNavBar() {
         {!isAuthPage && (
           isAuthenticated ? (
             <div className="app__header-right-inner">
-              {/* 🔥 Streak badge */}
+              {/* ðŸ”¥ Streak badge */}
               <StreakBadge />
 
               <div className="app__user-menu">
@@ -570,6 +653,16 @@ function TopNavBar() {
                       <div className="app__user-email">{user?.email}</div>
                     </div>
                     <div className="app__user-menu-divider" />
+                    <button
+                      className="app__user-menu-item"
+                      onClick={() => { setUserMenuOpen(false); navigate('/profile'); }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="7" r="4" />
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      </svg>
+                      My Profile
+                    </button>
                     <button
                       className="app__user-menu-item"
                       onClick={() => { logout(); setUserMenuOpen(false); navigate('/'); }}
@@ -597,7 +690,7 @@ function TopNavBar() {
   );
 }
 
-// ── App root ─────────────────────────────────────────────────
+// â”€â”€ App root â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function App() {
   return (
     <AuthProvider>
@@ -637,6 +730,17 @@ function App() {
                       <TopNavBar />
                       <main className="app__main">
                         <InterviewPage />
+                      </main>
+                    </>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <>
+                      <TopNavBar />
+                      <main className="app__main">
+                        <Profile />
                       </main>
                     </>
                   }

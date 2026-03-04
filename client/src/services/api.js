@@ -120,7 +120,11 @@ export const getCurrentUser = (token) => {
 export const getUserActivity = () => api.get('/user/activity');
 export const getUserStats = () => api.get('/user/stats');
 
+// ── Profile ──────────────────────────────────────────────────
+export const getUserProfile = () => api.get('/profile');
+
 // ── Discussion & Solutions ───────────────────────────────────
+export const getAllDiscussions = (sort = 'latest') => api.get(`/discuss/all?sort=${sort}`);
 export const getDiscussions = (assignmentId) => api.get(`/discuss/${assignmentId}`);
 export const createPost = (assignmentId, data) => api.post(`/discuss/${assignmentId}`, data);
 export const likePost = (assignmentId, postId) => api.post(`/discuss/${assignmentId}/${postId}/like`);

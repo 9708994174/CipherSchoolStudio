@@ -1,0 +1,477 @@
+@import '../index.scss';
+
+.profile-page {
+    flex: 1;
+    overflow-y: auto;
+    background: $bg-base;
+
+    &--empty,
+    &--loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 14px;
+        color: $text-3;
+        font-size: 14px;
+    }
+
+    &__spinner {
+        width: 28px;
+        height: 28px;
+        border: 3px solid $border;
+        border-top-color: $yellow;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    &__login-prompt {
+        text-align: center;
+
+        span {
+            font-size: 40px;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        h2 {
+            color: $text-1;
+            font-size: 20px;
+            margin-bottom: 6px;
+        }
+
+        p {
+            color: $text-3;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+    }
+
+    &__login-btn {
+        padding: 8px 28px;
+        background: $yellow;
+        color: #1a1a1a;
+        border: none;
+        border-radius: $r-sm;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+
+        &:hover {
+            background: $yellow-dark;
+        }
+    }
+
+    &__layout {
+        display: flex;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 20px;
+        gap: 20px;
+    }
+}
+
+// ── LEFT SIDEBAR ────────────────────────────────────────────
+.profile-sidebar {
+    width: 260px;
+    min-width: 260px;
+    flex-shrink: 0;
+
+    &__avatar {
+        width: 90px;
+        height: 90px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #ffa116, #ff6b00);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 12px;
+        box-shadow: 0 4px 16px rgba(255, 161, 22, .3);
+    }
+
+    &__name {
+        font-size: 20px;
+        font-weight: 800;
+        color: $text-1;
+        margin-bottom: 2px;
+    }
+
+    &__email {
+        font-size: 12px;
+        color: $text-3;
+        margin-bottom: 4px;
+    }
+
+    &__joined {
+        font-size: 11px;
+        color: $text-3;
+    }
+
+    &__divider {
+        height: 1px;
+        background: $border;
+        margin: 16px 0;
+    }
+
+    &__community {
+        h3 {
+            font-size: 13px;
+            font-weight: 700;
+            color: $text-1;
+            margin-bottom: 10px;
+        }
+    }
+
+    &__stat-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 0;
+        font-size: 13px;
+        color: $text-3;
+
+        span {
+            flex: 1;
+        }
+
+        strong {
+            color: $text-1;
+            font-weight: 700;
+        }
+    }
+
+    &__lang {
+        h3 {
+            font-size: 13px;
+            font-weight: 700;
+            color: $text-1;
+            margin-bottom: 10px;
+        }
+    }
+
+    &__lang-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: $text-3;
+    }
+
+    &__lang-badge {
+        padding: 2px 10px;
+        border-radius: 4px;
+        background: rgba(44, 187, 93, .12);
+        color: #2cbb5d;
+        font-size: 11px;
+        font-weight: 700;
+    }
+}
+
+// ── MAIN CONTENT ────────────────────────────────────────────
+.profile-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+// ── Stats Row ───────────────────────────────────────────────
+.profile-stats-row {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.profile-donut-card {
+    background: $bg-panel;
+    border: 1px solid $border;
+    border-radius: $r-md;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 140px;
+}
+
+.profile-donut {
+    width: 120px;
+    height: 120px;
+}
+
+.profile-diff-bars {
+    flex: 1;
+    background: $bg-panel;
+    border: 1px solid $border;
+    border-radius: $r-md;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+}
+
+.profile-diff-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.profile-diff-label {
+    font-size: 12px;
+    font-weight: 700;
+    width: 34px;
+    flex-shrink: 0;
+}
+
+.profile-diff-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, .07);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.profile-diff-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width .8s ease;
+}
+
+.profile-diff-count {
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 50px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+
+    span {
+        font-weight: 400;
+        color: $text-3;
+    }
+}
+
+.profile-badges-card {
+    background: $bg-panel;
+    border: 1px solid $border;
+    border-radius: $r-md;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 120px;
+}
+
+.profile-badge-icon {
+    font-size: 24px;
+}
+
+.profile-badge-info {
+    text-align: center;
+}
+
+.profile-badge-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: $text-1;
+    display: block;
+}
+
+.profile-badge-label {
+    font-size: 10px;
+    color: $text-3;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+}
+
+// ── Heatmap ─────────────────────────────────────────────────
+.profile-heatmap-card {
+    background: $bg-panel;
+    border: 1px solid $border;
+    border-radius: $r-md;
+    padding: 16px;
+}
+
+.profile-heatmap-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.profile-heatmap-title {
+    font-size: 14px;
+    color: $text-2;
+
+    strong {
+        color: $text-1;
+        font-size: 16px;
+    }
+}
+
+.profile-heatmap-meta {
+    font-size: 12px;
+    color: $text-3;
+}
+
+.profile-heatmap {
+    display: flex;
+    gap: 3px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #333 transparent;
+}
+
+.profile-heatmap-month {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.profile-heatmap-cells {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    width: 56px;
+}
+
+.profile-heatmap-cell {
+    width: 8px;
+    height: 8px;
+    background: rgba(255, 255, 255, .05);
+    border-radius: 2px;
+    transition: background .2s;
+
+    &--active {
+        background: rgba(44, 187, 93, .4);
+    }
+
+    &:hover {
+        outline: 1px solid rgba(255, 255, 255, .2);
+    }
+}
+
+.profile-heatmap-label {
+    font-size: 10px;
+    color: $text-3;
+    font-weight: 500;
+}
+
+// ── Tabs ────────────────────────────────────────────────────
+.profile-tabs-card {
+    background: $bg-panel;
+    border: 1px solid $border;
+    border-radius: $r-md;
+    overflow: hidden;
+}
+
+.profile-tabs {
+    display: flex;
+    border-bottom: 1px solid $border;
+}
+
+.profile-tab {
+    padding: 10px 18px;
+    background: transparent;
+    border: none;
+    color: $text-3;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all .12s;
+
+    &:hover {
+        color: $text-2;
+    }
+
+    &--active {
+        color: $text-1;
+        border-bottom-color: $yellow;
+        font-weight: 600;
+    }
+}
+
+.profile-tab-content {
+    max-height: 320px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #333 transparent;
+}
+
+.profile-tab-empty {
+    padding: 40px;
+    text-align: center;
+    color: $text-3;
+    font-size: 13px;
+}
+
+.profile-submission-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba($border, .5);
+    transition: background .1s;
+
+    &:hover {
+        background: rgba(255, 255, 255, .03);
+    }
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.profile-submission-status {
+    width: 20px;
+    text-align: center;
+    font-size: 13px;
+    color: $text-3;
+
+    &--ac {
+        color: #2cbb5d;
+        font-weight: 700;
+    }
+}
+
+.profile-submission-title {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 500;
+    color: $text-2;
+
+    .profile-submission-row:hover & {
+        color: $yellow;
+    }
+}
+
+.profile-submission-time {
+    font-size: 12px;
+    color: $text-3;
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .profile-page__layout {
+        flex-direction: column;
+    }
+
+    .profile-sidebar {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .profile-stats-row {
+        flex-direction: column;
+    }
+}

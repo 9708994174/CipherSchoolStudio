@@ -9,7 +9,7 @@ const jwt = require('jsonwebtoken');
         await pool.query(`
       CREATE TABLE IF NOT EXISTS discussions (
         id SERIAL PRIMARY KEY,
-        assignment_id VARCHAR(255) NOT NULL,
+        assignment_id VARCHAR(255) NOT NULL DEFAULT 'global',
         user_id VARCHAR(255) NOT NULL DEFAULT 'anonymous',
         username VARCHAR(100) NOT NULL DEFAULT 'Anonymous',
         title VARCHAR(500) DEFAULT '',
@@ -23,7 +23,6 @@ const jwt = require('jsonwebtoken');
         updated_at TIMESTAMP DEFAULT NOW()
       )
     `);
-        // Create index for faster lookups
         await pool.query(`CREATE INDEX IF NOT EXISTS idx_discussions_assignment ON discussions(assignment_id)`);
         console.log('✅ Discussions table ready (PostgreSQL)');
     } catch (err) {
@@ -42,6 +41,50 @@ function getUser(req) {
     } catch { }
     return { id: 'anonymous', username: 'Anonymous' };
 }
+
+// ──────────────────────────────────────────────────────────────
+// GET /api/discuss/all — list ALL posts globally (for Discuss page)
+// ──────────────────────────────────────────────────────────────
+router.get('/all', async (req, res) => {
+    try {
+        const sort = req.query.sort || 'latest'; // latest | trending | top
+        let orderBy = 'created_at DESC';
+        if (sort === 'trending') orderBy = 'likes DESC, created_at DESC';
+        if (sort === 'top') orderBy = 'likes DESC';
+
+        const { rows } = await pool.query(
+            `SELECT id as _id, assignment_id, user_id as "userId", username, title, body, 
+              likes, liked_by, type, language, tags, created_at as "createdAt", updated_at as "updatedAt"
+       FROM discussions 
+       ORDER BY ${orderBy}
+       LIMIT 50`
+        );
+        res.json({ success: true, posts: rows });
+    } catch (err) {
+        console.error('GET all discussions error:', err.message);
+        res.json({ success: true, posts: [] });
+    }
+});
+
+// GET /api/discuss/global/stats/:assignmentId — engagement stats
+router.get('/global/stats/:assignmentId', async (req, res) => {
+    try {
+        const { rows } = await pool.query(
+            `SELECT COUNT(*) as count, COALESCE(SUM(likes), 0) as total_likes 
+       FROM discussions 
+       WHERE assignment_id = $1`,
+            [req.params.assignmentId]
+        );
+        res.json({
+            success: true,
+            discussions: parseInt(rows[0].count) || 0,
+            likes: parseInt(rows[0].total_likes) || 0,
+        });
+    } catch (err) {
+        console.error('GET stats error:', err.message);
+        res.json({ success: true, discussions: 0, likes: 0 });
+    }
+});
 
 // GET /api/discuss/:assignmentId — list all posts for a problem
 router.get('/:assignmentId', async (req, res) => {
@@ -91,10 +134,8 @@ router.post('/:assignmentId/:postId/like', async (req, res) => {
         const postId = parseInt(req.params.postId, 10);
         if (isNaN(postId)) return res.status(400).json({ error: 'Invalid post ID.' });
 
-        // Check if user already liked
         const { rows: existing } = await pool.query(
-            `SELECT likes, liked_by FROM discussions WHERE id = $1`,
-            [postId]
+            `SELECT likes, liked_by FROM discussions WHERE id = $1`, [postId]
         );
         if (existing.length === 0) return res.status(404).json({ error: 'Post not found.' });
 
@@ -102,14 +143,12 @@ router.post('/:assignmentId/:postId/like', async (req, res) => {
         const alreadyLiked = likedBy.includes(userId);
 
         if (alreadyLiked) {
-            // Unlike
             await pool.query(
                 `UPDATE discussions SET likes = likes - 1, liked_by = array_remove(liked_by, $1), updated_at = NOW() WHERE id = $2`,
                 [userId, postId]
             );
             res.json({ success: true, likes: existing[0].likes - 1, liked: false });
         } else {
-            // Like
             await pool.query(
                 `UPDATE discussions SET likes = likes + 1, liked_by = array_append(liked_by, $1), updated_at = NOW() WHERE id = $2`,
                 [userId, postId]
@@ -119,26 +158,6 @@ router.post('/:assignmentId/:postId/like', async (req, res) => {
     } catch (err) {
         console.error('LIKE discussion error:', err.message);
         res.status(500).json({ error: 'Failed to like post.' });
-    }
-});
-
-// GET /api/discuss/global/stats/:assignmentId — engagement stats
-router.get('/global/stats/:assignmentId', async (req, res) => {
-    try {
-        const { rows } = await pool.query(
-            `SELECT COUNT(*) as count, COALESCE(SUM(likes), 0) as total_likes 
-       FROM discussions 
-       WHERE assignment_id = $1`,
-            [req.params.assignmentId]
-        );
-        res.json({
-            success: true,
-            discussions: parseInt(rows[0].count) || 0,
-            likes: parseInt(rows[0].total_likes) || 0,
-        });
-    } catch (err) {
-        console.error('GET stats error:', err.message);
-        res.json({ success: true, discussions: 0, likes: 0 });
     }
 });
 

@@ -1147,4 +1147,227 @@
     white-space: nowrap;
     flex-shrink: 0;
   }
+
+  &__right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  &__problems {
+    font-size: 11px;
+    color: $text-3;
+    font-weight: 500;
+  }
+}
+
+// Company card extra info
+.interview-company-card__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.interview-company-card__topics {
+  font-size: 11px;
+  color: $text-3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Quick Tips
+.interview-page__quick-tips {
+  margin-top: 4px;
+}
+
+.interview-page__tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.interview-quick-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background: $bg-panel;
+  border: 1px solid $border;
+  border-radius: $r-md;
+  transition: all .12s;
+
+  &:hover {
+    background: $bg-card;
+    border-color: $border-2;
+  }
+
+  &__num {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba($yellow, .12);
+    color: $yellow;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-size: 14px;
+    font-weight: 600;
+    color: $text-2;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  &__desc {
+    font-size: 12px;
+    color: $text-3;
+    display: block;
+  }
+}
+
+// ═══ DISCUSS MODAL ══════════════════════════════════════════════
+.discuss-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, .5);
+  z-index: 1000;
+}
+
+.discuss-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: $bg-panel;
+  border: 1px solid $border;
+  border-radius: $r-md;
+  padding: 24px;
+  width: 500px;
+  max-width: 90vw;
+  z-index: 1001;
+
+  h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: $text-1;
+    margin-bottom: 16px;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid $border;
+    border-radius: $r-sm;
+    background: $bg-base;
+    color: $text-2;
+    font-size: 13px;
+    margin-bottom: 10px;
+    outline: none;
+
+    &:focus {
+      border-color: $yellow;
+    }
+  }
+
+  &__textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid $border;
+    border-radius: $r-sm;
+    background: $bg-base;
+    color: $text-2;
+    font-size: 13px;
+    margin-bottom: 10px;
+    resize: vertical;
+    font-family: inherit;
+    outline: none;
+
+    &:focus {
+      border-color: $yellow;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  &__cancel {
+    padding: 8px 18px;
+    background: transparent;
+    border: 1px solid $border;
+    border-radius: $r-sm;
+    color: $text-3;
+    font-size: 13px;
+    cursor: pointer;
+
+    &:hover {
+      border-color: $border-2;
+      color: $text-2;
+    }
+  }
+
+  &__submit {
+    padding: 8px 24px;
+    background: $yellow;
+    border: none;
+    border-radius: $r-sm;
+    color: #1a1a1a;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:hover {
+      background: $yellow-dark;
+    }
+
+    &:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Discuss loading and empty
+.discuss-page__loading,
+.discuss-page__empty {
+  padding: 40px;
+  text-align: center;
+  color: $text-3;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.discuss-page__spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid $border;
+  border-top-color: $yellow;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+.discuss-post__preview {
+  font-size: 12px;
+  color: $text-3;
+  margin-top: 6px;
+  line-height: 1.4;
 }
