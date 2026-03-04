@@ -8,7 +8,7 @@ function getUser(req) {
     try {
         const token = req.headers.authorization?.replace('Bearer ', '');
         if (token) {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'cipher_secret');
+            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key-change-in-production');
             return String(decoded.userId || decoded.id || decoded._id);
         }
     } catch { }

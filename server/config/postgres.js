@@ -3,17 +3,36 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
+// Determine if we should use SSL (required for Render, Railway, etc.)
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Build pool config — prefer DATABASE_URL for simplicity (Render sets it automatically)
+let poolConfig;
+
+if (process.env.DATABASE_URL) {
+  poolConfig = {
+    connectionString: process.env.DATABASE_URL,
+    ssl: isProduction ? { rejectUnauthorized: false } : false,
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 15000,
+  };
+} else {
+  poolConfig = {
+    host: process.env.PG_HOST || 'localhost',
+    port: parseInt(process.env.PG_PORT, 10) || 5432,
+    user: process.env.PG_USER || 'postgres',
+    password: process.env.PG_PASSWORD,
+    database: process.env.PG_DATABASE || 'ciphersqlstudio_app',
+    ssl: isProduction ? { rejectUnauthorized: false } : false,
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 15000,
+  };
+}
+
 // PostgreSQL connection pool
-const pool = new Pool({
-  host: process.env.PG_HOST || 'localhost',
-  port: process.env.PG_PORT || 5432,
-  user: process.env.PG_USER || 'postgres',
-  password: process.env.PG_PASSWORD,
-  database: process.env.PG_DATABASE || 'ciphersqlstudio_app',
-  max: 20, // Maximum number of clients in the pool
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000, // Increased timeout to 10 seconds
-});
+const pool = new Pool(poolConfig);
 
 // Test connection on startup
 pool.connect()
@@ -24,9 +43,11 @@ pool.connect()
   .catch((err) => {
     console.error('❌ Failed to connect to PostgreSQL:', err.message);
     console.error('   Please check your PostgreSQL connection settings in .env file');
-    console.error('   PG_HOST:', process.env.PG_HOST || 'localhost');
-    console.error('   PG_PORT:', process.env.PG_PORT || 5432);
-    console.error('   PG_DATABASE:', process.env.PG_DATABASE || 'ciphersqlstudio_app');
+    if (!process.env.DATABASE_URL) {
+      console.error('   PG_HOST:', process.env.PG_HOST || 'localhost');
+      console.error('   PG_PORT:', process.env.PG_PORT || 5432);
+      console.error('   PG_DATABASE:', process.env.PG_DATABASE || 'ciphersqlstudio_app');
+    }
     // Don't exit - allow server to start but queries will fail gracefully
   });
 
@@ -41,7 +62,7 @@ pool.on('error', (err) => {
 async function createSchema(schemaName) {
   const client = await pool.connect();
   try {
-    await client.query(`CREATE SCHEMA IF NOT EXISTS ${schemaName}`);
+    await client.query(`CREATE SCHEMA IF NOT EXISTS "${schemaName}"`);
     console.log(`✅ Schema ${schemaName} created/verified`);
   } catch (error) {
     console.error(`❌ Error creating schema ${schemaName}:`, error);
@@ -57,7 +78,7 @@ async function createSchema(schemaName) {
 async function setSearchPath(schemaName) {
   const client = await pool.connect();
   try {
-    await client.query(`SET search_path TO ${schemaName}`);
+    await client.query(`SET search_path TO "${schemaName}"`);
   } catch (error) {
     console.error(`❌ Error setting search path:`, error);
     throw error;
@@ -79,7 +100,7 @@ async function executeQuery(schemaName, query) {
     client = await Promise.race([
       pool.connect(),
       new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('PostgreSQL connection timeout')), 10000)
+        setTimeout(() => reject(new Error('PostgreSQL connection timeout')), 15000)
       )
     ]);
 
@@ -124,7 +145,7 @@ async function executeQuery(schemaName, query) {
       success: false,
       error: errorMessage,
       code: error.code,
-      originalError: process.env.NODE_ENV === 'development' ? error.message : undefined
+      originalError: !isProduction ? error.message : undefined
     };
   } finally {
     if (client) {
@@ -214,8 +235,6 @@ function mapDataTypeToPostgreSQL(dataType) {
 async function getTableSchemas(schemaName) {
   const client = await pool.connect();
   try {
-    await client.query(`SET search_path TO ${schemaName}`);
-
     const result = await client.query(`
       SELECT 
         table_name,
@@ -244,7 +263,3 @@ module.exports = {
   initializeAssignmentTables,
   getTableSchemas
 };
-
-
-
-

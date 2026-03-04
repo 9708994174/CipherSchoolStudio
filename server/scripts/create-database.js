@@ -21,14 +21,14 @@ const pool = new Pool({
 async function createDatabase() {
   const client = await pool.connect();
   const dbName = process.env.PG_DATABASE || 'ciphersqlstudio_app';
-  
+
   try {
     // Check if database exists
     const result = await client.query(
       `SELECT 1 FROM pg_database WHERE datname = $1`,
       [dbName]
     );
-    
+
     if (result.rows.length > 0) {
       console.log(`✅ Database "${dbName}" already exists`);
     } else {
@@ -36,7 +36,7 @@ async function createDatabase() {
       await client.query(`CREATE DATABASE ${dbName}`);
       console.log(`✅ Database "${dbName}" created successfully`);
     }
-    
+
     process.exit(0);
   } catch (error) {
     console.error(`❌ Error creating database:`, error.message);
