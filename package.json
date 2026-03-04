@@ -12,9 +12,9 @@
     "server": "npm run dev --workspace=server",
     "client": "npm run start --workspace=client",
     "install-all": "npm install",
-    "build": "CI=false npm run build --workspace=client",
+    "build": "npm run build -w client",
     "vercel-build": "npm run build",
-    "start": "npm run start --workspace=server"
+    "start": "node server/index.js"
   },
   "keywords": [
     "sql",
