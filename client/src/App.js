@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { QueryProvider, useQuery } from './contexts/QueryContext';
 import { NavigationProvider, useNavigation } from './contexts/NavigationContext';
@@ -9,7 +9,7 @@ import Login from './components/Login';
 import Signup from './components/Signup';
 import Profile from './components/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
-import { getAssignments, getAllDiscussions, createPost as apiCreatePost, likePost as apiLikePost } from './services/api';
+import { getAssignments, getAllDiscussions, createPost as apiCreatePost, likePost as apiLikePost, getComments, postComment } from './services/api';
 import './App.scss';
 
 // =============================================================================
@@ -193,6 +193,10 @@ function DiscussPage() {
   const [newBody, setNewBody] = useState('');
   const [newTags, setNewTags] = useState('');
   const [posting, setPosting] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [commentLoading, setCommentLoading] = useState(false);
+  const [newComment, setNewComment] = useState('');
+  const [commenting, setCommenting] = useState(false);
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -231,6 +235,34 @@ function DiscussPage() {
       }
     } catch (err) { console.error('Like err:', err); }
   };
+
+  const fetchComments = useCallback(async (postId) => {
+    try {
+      setCommentLoading(true);
+      const res = await getComments(postId);
+      if (res.data?.success) setComments(res.data.comments || []);
+    } catch (err) {
+      console.error('Fetch comments error:', err);
+    } finally { setCommentLoading(false); }
+  }, []);
+
+  const handlePostComment = async () => {
+    if (!newComment.trim() || !selectedPost) return;
+    try {
+      setCommenting(true);
+      const res = await postComment(selectedPost._id, newComment);
+      if (res.data?.success) {
+        setNewComment('');
+        fetchComments(selectedPost._id);
+      }
+    } catch (err) {
+      console.error('Post comment error:', err);
+    } finally { setCommenting(false); }
+  };
+
+  useEffect(() => {
+    if (selectedPost) fetchComments(selectedPost._id);
+  }, [selectedPost, fetchComments]);
 
   const timeAgo = (d) => {
     if (!d) return '';
@@ -273,9 +305,52 @@ function DiscussPage() {
         </div>
 
         <div className="discuss-comments">
-          <h3 className="discuss-comments__title">Comments</h3>
-          <div className="discuss-comments__empty">
-            No comments yet. Start the conversation!
+          <h3 className="discuss-comments__title">Comments ({comments.length})</h3>
+
+          {isAuthenticated ? (
+            <div className="discuss-comments__input-wrap">
+              <textarea
+                className="discuss-comments__input"
+                placeholder="Write a comment..."
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handlePostComment(); } }}
+              />
+              <button
+                className={`discuss-comments__post-btn ${commenting ? 'discuss-comments__post-btn--loading' : ''}`}
+                onClick={handlePostComment}
+                disabled={commenting || !newComment.trim()}
+              >
+                {commenting ? 'Post...' : 'Post'}
+              </button>
+            </div>
+          ) : (
+            <div className="discuss-comments__login-prompt">
+              Please <a href="/login">login</a> to join the conversation.
+            </div>
+          )}
+
+          <div className="discuss-comments__list">
+            {commentLoading ? (
+              <div className="discuss-comments__loading">Loading comments...</div>
+            ) : comments.length === 0 ? (
+              <div className="discuss-comments__empty">
+                No comments yet. Start the conversation!
+              </div>
+            ) : (
+              comments.map(c => (
+                <div key={c._id} className="discuss-comment">
+                  <div className="discuss-comment__avatar">{(c.username || 'U').slice(0, 1).toUpperCase()}</div>
+                  <div className="discuss-comment__body">
+                    <div className="discuss-comment__header">
+                      <span className="discuss-comment__author">{c.username}</span>
+                      <span className="discuss-comment__time">{timeAgo(c.createdAt)}</span>
+                    </div>
+                    <p className="discuss-comment__text">{c.body}</p>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

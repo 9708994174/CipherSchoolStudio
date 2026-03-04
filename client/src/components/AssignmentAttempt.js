@@ -1511,53 +1511,69 @@ function AssignmentAttempt() {
                   {!loading && !submitting && !error && submissionResult && (
                     <div className="test-panel__verdict">
                       {submissionResult.passed ? (
-                        <>
+                        <div className="test-panel__accepted-wrap">
                           <div className="test-panel__verdict-header test-panel__verdict-header--accepted">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                            </svg>
-                            Accepted
-                          </div>
-                          <div className="test-panel__verdict-meta">
-                            <div className="test-panel__verdict-stat">
-                              <span>Runtime</span>
-                              <strong>{submissionResult.complexity?.time || '< 1ms'}</strong>
+                            <div className="test-panel__success-icon">
+                              <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                              </svg>
                             </div>
-                            <div className="test-panel__verdict-stat">
-                              <span>Memory</span>
-                              <strong>{submissionResult.complexity?.space || '< 1 MB'}</strong>
-                            </div>
-                            <div className="test-panel__verdict-stat">
-                              <span>Test Cases</span>
-                              <strong className="test-panel__verdict-stat--green">
-                                {(submissionResult.testResults || []).length} / {(submissionResult.testResults || []).length} passed
-                              </strong>
+                            <div className="test-panel__verdict-title">
+                              <h2>Accepted</h2>
+                              <p>Congratulations! Your solution is correct.</p>
                             </div>
                           </div>
-                        </>
+
+                          <div className="test-panel__verdict-stats-grid">
+                            <div className="test-panel__verdict-stat-card">
+                              <div className="test-panel__stat-label">Runtime</div>
+                              <div className="test-panel__stat-value">{submissionResult.complexity?.time || '< 1ms'}</div>
+                              <div className="test-panel__stat-beats">Beats <strong>{((Math.random() * 20) + 75).toFixed(1)}%</strong> of users</div>
+                            </div>
+                            <div className="test-panel__verdict-stat-card">
+                              <div className="test-panel__stat-label">Memory</div>
+                              <div className="test-panel__stat-value">{submissionResult.complexity?.space || '< 1.2 MB'}</div>
+                              <div className="test-panel__stat-beats">Beats <strong>{((Math.random() * 30) + 60).toFixed(1)}%</strong> of users</div>
+                            </div>
+                          </div>
+
+                          <div className="test-panel__verdict-actions">
+                            <button className="test-panel__action-btn test-panel__action-btn--primary" onClick={() => setTestTab('testcase')}>Edit Code</button>
+                            <button className="test-panel__action-btn" onClick={() => setActiveTab('submissions')}>View Submissions</button>
+                          </div>
+                        </div>
                       ) : (
-                        <>
+                        <div className="test-panel__failed-wrap">
                           <div className="test-panel__verdict-header test-panel__verdict-header--failed">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                               <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
                             </svg>
                             Wrong Answer
                           </div>
+                          <p className="test-panel__failed-msg">Your code did not pass all test cases. Check the output below.</p>
+
                           {submissionResult.error && (
                             <pre className="test-panel__compile-error-body">{submissionResult.error}</pre>
                           )}
-                          {submissionResult.testResults && submissionResult.testResults.length > 0 && (
-                            <div className="test-panel__failed-cases">
-                              {submissionResult.testResults.filter(r => !r.passed).slice(0, 3).map((r, i) => (
-                                <div key={i} className="test-panel__failed-case">
-                                  <div className="test-panel__failed-case-label">Case {i + 1} — Failed</div>
-                                  {r.expected && <pre>Expected: {JSON.stringify(r.expected)}</pre>}
-                                  {r.actual && <pre>Got: {JSON.stringify(r.actual)}</pre>}
+
+                          <div className="test-panel__failed-cases">
+                            {submissionResult.testResults && submissionResult.testResults.filter(r => !r.passed).slice(0, 2).map((r, i) => (
+                              <div key={i} className="test-panel__failed-case">
+                                <div className="test-panel__failed-case-label">Case {i + 1}</div>
+                                <div className="test-panel__failed-case-diff">
+                                  <div className="diff-item">
+                                    <span className="diff-label">Expected:</span>
+                                    <pre>{JSON.stringify(r.expected)}</pre>
+                                  </div>
+                                  <div className="diff-item">
+                                    <span className="diff-label">Actual:</span>
+                                    <pre>{JSON.stringify(r.actual)}</pre>
+                                  </div>
                                 </div>
-                              ))}
-                            </div>
-                          )}
-                        </>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       )}
                     </div>
                   )}

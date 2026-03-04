@@ -23,8 +23,19 @@ const jwt = require('jsonwebtoken');
         updated_at TIMESTAMP DEFAULT NOW()
       )
     `);
+        await pool.query(`
+      CREATE TABLE IF NOT EXISTS discussion_comments (
+        id SERIAL PRIMARY KEY,
+        post_id INTEGER NOT NULL REFERENCES discussions(id) ON DELETE CASCADE,
+        user_id VARCHAR(255) NOT NULL DEFAULT 'anonymous',
+        username VARCHAR(100) NOT NULL DEFAULT 'Anonymous',
+        body TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
         await pool.query(`CREATE INDEX IF NOT EXISTS idx_discussions_assignment ON discussions(assignment_id)`);
-        console.log('✅ Discussions table ready (PostgreSQL)');
+        await pool.query(`CREATE INDEX IF NOT EXISTS idx_comments_post ON discussion_comments(post_id)`);
+        console.log('✅ Discussions & Comments tables ready (PostgreSQL)');
     } catch (err) {
         console.error('❌ Failed to create discussions table:', err.message);
     }
@@ -158,6 +169,47 @@ router.post('/:assignmentId/:postId/like', async (req, res) => {
     } catch (err) {
         console.error('LIKE discussion error:', err.message);
         res.status(500).json({ error: 'Failed to like post.' });
+    }
+});
+
+// ── COMMENTS ──────────────────────────────────────────────────
+
+// GET /api/discuss/post/:postId/comments — list comments
+router.get('/post/:postId/comments', async (req, res) => {
+    try {
+        const postId = parseInt(req.params.postId, 10);
+        const { rows } = await pool.query(
+            `SELECT id as _id, post_id, user_id as "userId", username, body, created_at as "createdAt"
+       FROM discussion_comments 
+       WHERE post_id = $1 
+       ORDER BY created_at ASC`,
+            [postId]
+        );
+        res.json({ success: true, comments: rows });
+    } catch (err) {
+        console.error('GET comments error:', err.message);
+        res.json({ success: true, comments: [] });
+    }
+});
+
+// POST /api/discuss/post/:postId/comments — post comment
+router.post('/post/:postId/comments', async (req, res) => {
+    try {
+        const { id: userId, username } = getUser(req);
+        const postId = parseInt(req.params.postId, 10);
+        const { body } = req.body;
+        if (!body || !body.trim()) return res.status(400).json({ error: 'Comment body is required.' });
+
+        const { rows } = await pool.query(
+            `INSERT INTO discussion_comments (post_id, user_id, username, body)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id as _id, post_id, user_id as "userId", username, body, created_at as "createdAt"`,
+            [postId, userId, username, body.trim()]
+        );
+        res.json({ success: true, comment: rows[0] });
+    } catch (err) {
+        console.error('POST comment error:', err.message);
+        res.status(500).json({ error: 'Failed to post comment.' });
     }
 });
 

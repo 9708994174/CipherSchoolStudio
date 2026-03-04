@@ -128,6 +128,8 @@ export const getAllDiscussions = (sort = 'latest') => api.get(`/discuss/all?sort
 export const getDiscussions = (assignmentId) => api.get(`/discuss/${assignmentId}`);
 export const createPost = (assignmentId, data) => api.post(`/discuss/${assignmentId}`, data);
 export const likePost = (assignmentId, postId) => api.post(`/discuss/${assignmentId}/${postId}/like`);
+export const getComments = (postId) => api.get(`/discuss/post/${postId}/comments`);
+export const postComment = (postId, body) => api.post(`/discuss/post/${postId}/comments`, { body });
 export const getEngagementStats = (assignmentId) => api.get(`/discuss/global/stats/${assignmentId}`);
 
 export default api;
