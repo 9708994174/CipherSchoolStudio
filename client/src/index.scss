@@ -144,6 +144,8 @@ $bp-xl: 1280px;
 
 html {
   scroll-behavior: smooth;
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -151,7 +153,8 @@ body {
   background: $bg-base;
   color: $text-2;
   line-height: 1.6;
-  min-height: 100vh;
+  height: 100%;
+  overflow: hidden;
   -webkit-font-smoothing: antialiased;
 }
 

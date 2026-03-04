@@ -188,6 +188,127 @@ function AssignmentRouteWrapper() {
 }
 
 // ── Top navigation bar ───────────────────────────────────────
+// ── Discuss Page ─────────────────────────────────────────────
+function DiscussPage() {
+  const navigate = useNavigate();
+  const [posts] = useState([
+    { id: 1, title: 'How to approach SQL JOIN problems?', author: 'SQLMaster', replies: 12, views: 346, tags: ['JOIN', 'Tips'], time: '2h ago', hot: true },
+    { id: 2, title: 'Understanding Window Functions - Complete Guide', author: 'DataExpert', replies: 28, views: 892, tags: ['Window Fn', 'Guide'], time: '5h ago', hot: true },
+    { id: 3, title: 'GROUP BY vs PARTITION BY - When to use what?', author: 'QueryNinja', replies: 15, views: 523, tags: ['Aggregate', 'Window Fn'], time: '1d ago', hot: false },
+    { id: 4, title: 'Common mistakes in SQL subqueries', author: 'DBWizard', replies: 9, views: 234, tags: ['Subqueries'], time: '1d ago', hot: false },
+    { id: 5, title: 'Is CTE better than subquery for performance?', author: 'PerfGeek', replies: 21, views: 678, tags: ['CTE', 'Performance'], time: '2d ago', hot: true },
+    { id: 6, title: 'Tips for Google SQL interviews', author: 'InterviewPro', replies: 34, views: 1205, tags: ['Interview', 'Google'], time: '3d ago', hot: true },
+    { id: 7, title: 'How to optimize complex JOIN queries?', author: 'OptimizeSQL', replies: 7, views: 189, tags: ['JOIN', 'Performance'], time: '3d ago', hot: false },
+    { id: 8, title: 'HAVING vs WHERE - A confusion solved', author: 'Beginner101', replies: 11, views: 412, tags: ['Basics', 'Aggregate'], time: '4d ago', hot: false },
+  ]);
+
+  return (
+    <div className="discuss-page">
+      <div className="discuss-page__header">
+        <h1 className="discuss-page__title">Discuss</h1>
+        <p className="discuss-page__subtitle">Share solutions, ask questions, and learn from the community</p>
+      </div>
+      <div className="discuss-page__toolbar">
+        <div className="discuss-page__tabs">
+          <button className="discuss-page__tab discuss-page__tab--active">Trending</button>
+          <button className="discuss-page__tab">Latest</button>
+          <button className="discuss-page__tab">Most Voted</button>
+          <button className="discuss-page__tab">My Posts</button>
+        </div>
+        <button className="discuss-page__new-btn">+ New Post</button>
+      </div>
+      <div className="discuss-page__list">
+        {posts.map(p => (
+          <div key={p.id} className="discuss-post">
+            <div className="discuss-post__votes">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3l5 6H3l5-6z" fill="currentColor" /></svg>
+              <span>{p.replies}</span>
+            </div>
+            <div className="discuss-post__body">
+              <div className="discuss-post__title-row">
+                {p.hot && <span className="discuss-post__hot">🔥</span>}
+                <span className="discuss-post__title">{p.title}</span>
+              </div>
+              <div className="discuss-post__meta">
+                <span className="discuss-post__author">{p.author}</span>
+                <span className="discuss-post__dot">·</span>
+                <span className="discuss-post__time">{p.time}</span>
+                <span className="discuss-post__dot">·</span>
+                <span className="discuss-post__views">{p.views} views</span>
+                {p.tags.map(t => <span key={t} className="discuss-post__tag">{t}</span>)}
+              </div>
+            </div>
+            <div className="discuss-post__replies">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>
+              <span>{p.replies}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Interview Page ───────────────────────────────────────────
+function InterviewPage() {
+  const navigate = useNavigate();
+  const companies = [
+    { name: 'Google', icon: '🔍', count: 15, color: '#4285f4' },
+    { name: 'Amazon', icon: '📦', count: 12, color: '#ff9900' },
+    { name: 'Meta', icon: '💠', count: 10, color: '#0668e1' },
+    { name: 'Microsoft', icon: '🪟', count: 8, color: '#00a4ef' },
+    { name: 'Uber', icon: '🚗', count: 7, color: '#000' },
+    { name: 'Airbnb', icon: '🏠', count: 6, color: '#ff5a5f' },
+    { name: 'Netflix', icon: '🎬', count: 5, color: '#e50914' },
+    { name: 'Apple', icon: '🍎', count: 5, color: '#a2aaad' },
+  ];
+
+  const tips = [
+    { icon: '📝', title: 'SQL Fundamentals', desc: 'Master SELECT, WHERE, JOIN, GROUP BY', level: 'Beginner' },
+    { icon: '⚡', title: 'Query Optimization', desc: 'Learn indexing, execution plans, and query tuning', level: 'Advanced' },
+    { icon: '🧩', title: 'Problem Patterns', desc: 'Common SQL patterns: running totals, gaps & islands', level: 'Intermediate' },
+    { icon: '🎯', title: 'Mock Interviews', desc: 'Practice with timed SQL challenges', level: 'All Levels' },
+  ];
+
+  return (
+    <div className="interview-page">
+      <div className="interview-page__header">
+        <h1 className="interview-page__title">Interview Prep</h1>
+        <p className="interview-page__subtitle">Practice SQL questions from top tech companies</p>
+      </div>
+      <div className="interview-page__content">
+        <div className="interview-page__companies">
+          <h2 className="interview-page__section-title">Top Companies</h2>
+          <div className="interview-page__company-grid">
+            {companies.map(c => (
+              <div key={c.name} className="interview-company-card" onClick={() => navigate('/')}>
+                <span className="interview-company-card__icon">{c.icon}</span>
+                <span className="interview-company-card__name">{c.name}</span>
+                <span className="interview-company-card__count">{c.count} questions</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="interview-page__tips">
+          <h2 className="interview-page__section-title">Study Plans</h2>
+          <div className="interview-page__tips-grid">
+            {tips.map(t => (
+              <div key={t.title} className="interview-tip-card">
+                <span className="interview-tip-card__icon">{t.icon}</span>
+                <div className="interview-tip-card__body">
+                  <span className="interview-tip-card__title">{t.title}</span>
+                  <span className="interview-tip-card__desc">{t.desc}</span>
+                </div>
+                <span className="interview-tip-card__level">{t.level}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TopNavBar() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -198,6 +319,8 @@ function TopNavBar() {
   const isAssignmentPage = location.pathname.includes('/assignment/');
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
   const isHomePage = location.pathname === '/';
+  const isDiscussPage = location.pathname === '/discuss';
+  const isInterviewPage = location.pathname === '/interview';
 
   const { execute, submit } = useQuery();
   const { assignments, currentIndex, setCurrentAssignmentIndex,
@@ -271,10 +394,16 @@ function TopNavBar() {
             >
               Problems
             </button>
-            <button className="app__nav-link" onClick={() => navigate('/')}>
+            <button
+              className={`app__nav-link ${isDiscussPage ? 'app__nav-link--active' : ''}`}
+              onClick={() => navigate('/discuss')}
+            >
               Discuss
             </button>
-            <button className="app__nav-link" onClick={() => navigate('/')}>
+            <button
+              className={`app__nav-link ${isInterviewPage ? 'app__nav-link--active' : ''}`}
+              onClick={() => navigate('/interview')}
+            >
               Interview
             </button>
           </nav>
@@ -327,9 +456,8 @@ function TopNavBar() {
                             e.preventDefault();
                             e.stopPropagation();
                             setQPaletteOpen(false);
-                            // Clear stale cache to force refresh if needed
-                            localStorage.removeItem('assignments');
-                            window.location.assign(`/assignment/${a._id}`);
+                            setCurrentAssignmentIndex(idx);
+                            navigate(`/assignment/${a._id}`);
                           }}
                         >
                           <span className="app__question-palette-number">{idx + 1}</span>
@@ -353,7 +481,7 @@ function TopNavBar() {
                 className="app__nav-btn" title="Previous Problem"
                 onClick={() => {
                   const id = getPreviousAssignmentId();
-                  if (id) { localStorage.removeItem('assignments'); window.location.assign(`/assignment/${id}`); }
+                  if (id) navigate(`/assignment/${id}`);
                 }}
                 disabled={!hasPrevious()}
               >
@@ -368,7 +496,7 @@ function TopNavBar() {
                 className="app__nav-btn" title="Next Problem"
                 onClick={() => {
                   const id = getNextAssignmentId();
-                  if (id) { localStorage.removeItem('assignments'); window.location.assign(`/assignment/${id}`); }
+                  if (id) navigate(`/assignment/${id}`);
                 }}
                 disabled={!hasNext()}
               >
@@ -488,6 +616,28 @@ function App() {
                       <TopNavBar />
                       <main className="app__main">
                         <AssignmentList />
+                      </main>
+                    </>
+                  }
+                />
+                <Route
+                  path="/discuss"
+                  element={
+                    <>
+                      <TopNavBar />
+                      <main className="app__main">
+                        <DiscussPage />
+                      </main>
+                    </>
+                  }
+                />
+                <Route
+                  path="/interview"
+                  element={
+                    <>
+                      <TopNavBar />
+                      <main className="app__main">
+                        <InterviewPage />
                       </main>
                     </>
                   }
