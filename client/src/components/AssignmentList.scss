@@ -556,6 +556,14 @@
     font-size: 13px;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+  }
+
+  &__solved-icon {
+    color: #2cbb5d;
+    font-size: 16px;
+    font-weight: 700;
   }
 
   &__title {

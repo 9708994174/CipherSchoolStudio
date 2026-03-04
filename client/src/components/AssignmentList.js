@@ -352,19 +352,29 @@ function AssignmentList() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((a, idx) => (
-                  <tr key={a._id} className="prob-row" onClick={() => handleClick(a)}>
-                    <td className="prob-row__num">{idx + 1}</td>
-                    <td className="prob-row__title">
-                      <span className="prob-row__title-text">{a.title}</span>
-                    </td>
-                    <td className="prob-row__tags prob-row__tags--hide-sm">
-                      {getSqlTags(a).map(tag => <span key={tag} className="prob-tag">{tag}</span>)}
-                    </td>
-                    <td className="prob-row__acceptance">{((String(a._id).length % 40) + 40).toFixed(1)}%</td>
-                    <td className={`prob-row__diff prob-row__diff--${a.difficulty.toLowerCase()}`}>{a.difficulty}</td>
-                  </tr>
-                ))}
+                {filtered.map((a, idx) => {
+                  const solvedProblems = JSON.parse(localStorage.getItem('solvedProblems') || '{}');
+                  const isSolved = solvedProblems[a._id];
+                  return (
+                    <tr key={a._id} className="prob-row" onClick={() => handleClick(a)}>
+                      <td className="prob-row__num">
+                        {isSolved ? (
+                          <span className="prob-row__solved-icon" title="Solved">✓</span>
+                        ) : (
+                          idx + 1
+                        )}
+                      </td>
+                      <td className="prob-row__title">
+                        <span className="prob-row__title-text">{a.title}</span>
+                      </td>
+                      <td className="prob-row__tags prob-row__tags--hide-sm">
+                        {getSqlTags(a).map(tag => <span key={tag} className="prob-tag">{tag}</span>)}
+                      </td>
+                      <td className="prob-row__acceptance">{((String(a._id).length % 40) + 40).toFixed(1)}%</td>
+                      <td className={`prob-row__diff prob-row__diff--${a.difficulty.toLowerCase()}`}>{a.difficulty}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

@@ -676,6 +676,11 @@ function AssignmentAttempt() {
           const solvedDays = JSON.parse(localStorage.getItem('solvedDays') || '{}');
           solvedDays[today] = (solvedDays[today] || 0) + 1;
           localStorage.setItem('solvedDays', JSON.stringify(solvedDays));
+
+          // Also mark the specific problem as solved
+          const solvedProblems = JSON.parse(localStorage.getItem('solvedProblems') || '{}');
+          solvedProblems[id] = true;
+          localStorage.setItem('solvedProblems', JSON.stringify(solvedProblems));
         } catch { }
         // Dispatch event so streak badge and heatmap update instantly
         window.dispatchEvent(new CustomEvent('problem-solved', { detail: { id } }));

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { QueryProvider, useQuery } from './contexts/QueryContext';
 import { NavigationProvider, useNavigation } from './contexts/NavigationContext';
@@ -12,9 +12,9 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { getAssignments, getAllDiscussions, createPost as apiCreatePost, likePost as apiLikePost } from './services/api';
 import './App.scss';
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// =============================================================================
 //  STREAK BADGE  (header component)
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// =============================================================================
 function StreakBadge() {
   const [open, setOpen] = useState(false);
   const [checked, setChecked] = useState(false);
@@ -23,14 +23,12 @@ function StreakBadge() {
   const [dailyId, setDailyId] = useState(null);
   const navigate = useNavigate();
 
-  // Load streak from localStorage
   const loadStreak = useCallback(() => {
     try {
       const solved = JSON.parse(localStorage.getItem('solvedDays') || '{}');
       const today = new Date().toISOString().slice(0, 10);
       setChecked(!!solved[today]);
 
-      // Count current streak (consecutive days ending today)
       let s = 0;
       const d = new Date();
       while (true) {
@@ -41,7 +39,6 @@ function StreakBadge() {
       }
       setStreak(s);
 
-      // Longest streak
       const days = Object.keys(solved).filter(k => solved[k] > 0).sort();
       let best = 0, cur = 0, prev = null;
       days.forEach(day => {
@@ -58,13 +55,11 @@ function StreakBadge() {
 
   useEffect(() => {
     loadStreak();
-    // Update when a problem is solved
     const handler = () => setTimeout(loadStreak, 200);
     window.addEventListener('problem-solved', handler);
     return () => window.removeEventListener('problem-solved', handler);
   }, [loadStreak]);
 
-  // Close on outside click
   useEffect(() => {
     if (!open) return;
     const handler = e => { if (!e.target.closest('.streak-badge')) setOpen(false); };
@@ -72,7 +67,6 @@ function StreakBadge() {
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
 
-  // Pick today's daily challenge from cached assignments
   useEffect(() => {
     try {
       const cached = JSON.parse(localStorage.getItem('assignments') || '[]');
@@ -89,7 +83,6 @@ function StreakBadge() {
     navigate(dailyId ? `/assignment/${dailyId}` : '/');
   };
 
-  // Build last 7 days for the mini calendar strip
   const last7 = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date();
@@ -106,22 +99,20 @@ function StreakBadge() {
         onClick={() => setOpen(v => !v)}
         title={`${streak} day streak`}
       >
-        <span className="streak-badge__fire">ðŸ”¥</span>
+        <span className="streak-badge__fire">🔥</span>
         <span className="streak-badge__count">{streak}</span>
       </button>
 
       {open && (
         <div className="streak-popup">
-          {/* Header */}
           <div className="streak-popup__top">
-            <div className="streak-popup__flame">ðŸ”¥</div>
+            <div className="streak-popup__flame">🔥</div>
             <div>
               <div className="streak-popup__number">{streak}</div>
               <div className="streak-popup__label">Day Streak</div>
             </div>
           </div>
 
-          {/* 7-day strip */}
           <div className="streak-popup__week">
             {last7.map(({ key, day, filled }) => (
               <div key={key} className="streak-popup__day">
@@ -137,7 +128,6 @@ function StreakBadge() {
             ))}
           </div>
 
-          {/* Stats row */}
           <div className="streak-popup__stats">
             <div className="streak-popup__stat">
               <span className="streak-popup__stat-val">{streak}</span>
@@ -150,7 +140,6 @@ function StreakBadge() {
             </div>
           </div>
 
-          {/* Daily challenge button */}
           <div className="streak-popup__footer">
             {checked ? (
               <div className="streak-popup__checked">
@@ -158,11 +147,11 @@ function StreakBadge() {
                   <circle cx="8" cy="8" r="7" fill="#2cbb5d" />
                   <path d="M5 8l2.5 2.5L11 6" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                Solved today! Streak maintained ðŸŽ‰
+                Solved today! Streak maintained 🎉
               </div>
             ) : (
               <button className="streak-popup__checkin-btn" onClick={handleStartChallenge}>
-                ðŸ”¥ Solve today's challenge
+                🔥 Solve today's challenge
               </button>
             )}
             <p className="streak-popup__note">Streak increases when you submit a correct answer</p>
@@ -173,10 +162,11 @@ function StreakBadge() {
   );
 }
 
-// â”€â”€ Route wrapper for assignment pages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -----------------------------------------------------------------------------
+//  Assignment Route Wrapper
+// -----------------------------------------------------------------------------
 function AssignmentRouteWrapper() {
   const { id: assignmentId } = useParams();
-  console.log('[AssignmentRouteWrapper] Rendering with assignmentId:', assignmentId);
   return (
     <>
       <TopNavBar />
@@ -189,13 +179,16 @@ function AssignmentRouteWrapper() {
   );
 }
 
-// â”€â”€ Discuss Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -----------------------------------------------------------------------------
+//  Discuss Page
+// -----------------------------------------------------------------------------
 function DiscussPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState('latest');
   const [showModal, setShowModal] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
   const [newTitle, setNewTitle] = useState('');
   const [newBody, setNewBody] = useState('');
   const [newTags, setNewTags] = useState('');
@@ -226,10 +219,16 @@ function DiscussPage() {
     } finally { setPosting(false); }
   };
 
-  const handleLike = async (postId) => {
+  const handleLike = async (postId, e) => {
+    if (e) e.stopPropagation();
     try {
       const res = await apiLikePost('global', postId);
-      if (res.data?.success) setPosts(prev => prev.map(p => p._id === postId ? { ...p, likes: res.data.likes } : p));
+      if (res.data?.success) {
+        setPosts(prev => prev.map(p => p._id === postId ? { ...p, likes: res.data.likes } : p));
+        if (selectedPost && selectedPost._id === postId) {
+          setSelectedPost(prev => ({ ...prev, likes: res.data.likes }));
+        }
+      }
     } catch (err) { console.error('Like err:', err); }
   };
 
@@ -242,6 +241,46 @@ function DiscussPage() {
     if (h < 24) return `${h}h ago`;
     return `${Math.floor(h / 24)}d ago`;
   };
+
+  if (selectedPost) {
+    return (
+      <div className="discuss-page discuss-page--detail">
+        <div className="discuss-page__back" onClick={() => setSelectedPost(null)}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M10 4L6 8l4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Back to Discussions
+        </div>
+        <div className="discuss-post discuss-post--full">
+          <div className="discuss-post__votes" onClick={(e) => handleLike(selectedPost._id, e)}>
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M8 3l5 6H3l5-6z" fill="currentColor" /></svg>
+            <span>{selectedPost.likes || 0}</span>
+          </div>
+          <div className="discuss-post__body">
+            <h2 className="discuss-post__title-full">{selectedPost.title || 'Untitled'}</h2>
+            <div className="discuss-post__meta">
+              <span className="discuss-post__author">{selectedPost.username}</span>
+              <span className="discuss-post__dot">·</span>
+              <span className="discuss-post__time">{timeAgo(selectedPost.createdAt)}</span>
+              {(selectedPost.tags || []).map(t => <span key={t} className="discuss-post__tag">{t}</span>)}
+            </div>
+            <div className="discuss-post__content-full">
+              {selectedPost.body && selectedPost.body.split('\n').map((line, i) => (
+                <p key={i}>{line}</p>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="discuss-comments">
+          <h3 className="discuss-comments__title">Comments</h3>
+          <div className="discuss-comments__empty">
+            No comments yet. Start the conversation!
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="discuss-page">
@@ -277,19 +316,19 @@ function DiscussPage() {
         {loading ? <div className="discuss-page__loading"><div className="discuss-page__spinner" />Loading...</div>
           : posts.length === 0 ? <div className="discuss-page__empty">No posts yet. Be the first to start a discussion!</div>
             : posts.map(p => (
-              <div key={p._id} className="discuss-post">
-                <div className="discuss-post__votes" onClick={() => handleLike(p._id)} style={{ cursor: 'pointer' }}>
+              <div key={p._id} className="discuss-post" onClick={() => setSelectedPost(p)} style={{ cursor: 'pointer' }}>
+                <div className="discuss-post__votes" onClick={(e) => handleLike(p._id, e)}>
                   <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3l5 6H3l5-6z" fill="currentColor" /></svg>
                   <span>{p.likes || 0}</span>
                 </div>
                 <div className="discuss-post__body">
                   <div className="discuss-post__title-row">
-                    {(p.likes || 0) >= 3 && <span className="discuss-post__hot">ðŸ”¥</span>}
+                    {(p.likes || 0) >= 3 && <span className="discuss-post__hot">🔥</span>}
                     <span className="discuss-post__title">{p.title || 'Untitled'}</span>
                   </div>
                   <div className="discuss-post__meta">
                     <span className="discuss-post__author">{p.username}</span>
-                    <span className="discuss-post__dot">Â·</span>
+                    <span className="discuss-post__dot">·</span>
                     <span className="discuss-post__time">{timeAgo(p.createdAt)}</span>
                     {(p.tags || []).map(t => <span key={t} className="discuss-post__tag">{t}</span>)}
                   </div>
@@ -302,33 +341,35 @@ function DiscussPage() {
   );
 }
 
-// â”€â”€ Interview Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -----------------------------------------------------------------------------
+//  Interview Page
+// -----------------------------------------------------------------------------
 function InterviewPage() {
   const navigate = useNavigate();
   const companies = [
-    { name: 'Google', icon: 'ðŸ”', count: 15, topics: ['Window Functions', 'Aggregation', 'Joins'] },
-    { name: 'Amazon', icon: 'ðŸ“¦', count: 12, topics: ['Subqueries', 'CTEs', 'Window Functions'] },
-    { name: 'Meta', icon: 'ðŸ’ ', count: 10, topics: ['String Functions', 'Aggregation', 'Joins'] },
-    { name: 'Microsoft', icon: 'ðŸªŸ', count: 8, topics: ['Stored Procedures', 'Performance', 'Joins'] },
-    { name: 'Uber', icon: 'ðŸš—', count: 7, topics: ['Geospatial Queries', 'Window Functions'] },
-    { name: 'Airbnb', icon: 'ðŸ ', count: 6, topics: ['Date Functions', 'Aggregation'] },
-    { name: 'Netflix', icon: 'ðŸŽ¬', count: 5, topics: ['Ranking', 'Window Functions'] },
-    { name: 'Apple', icon: 'ðŸŽ', count: 5, topics: ['CTEs', 'Complex Joins'] },
+    { name: 'Google', icon: '🔍', count: 15, topics: ['Window Functions', 'Aggregation', 'Joins'] },
+    { name: 'Amazon', icon: '📦', count: 12, topics: ['Subqueries', 'CTEs', 'Window Functions'] },
+    { name: 'Meta', icon: '♾️', count: 10, topics: ['String Functions', 'Aggregation', 'Joins'] },
+    { name: 'Microsoft', icon: '🪟', count: 8, topics: ['Stored Procedures', 'Performance', 'Joins'] },
+    { name: 'Uber', icon: '🚗', count: 7, topics: ['Geospatial Queries', 'Window Functions'] },
+    { name: 'Airbnb', icon: '🏠', count: 6, topics: ['Date Functions', 'Aggregation'] },
+    { name: 'Netflix', icon: '🎬', count: 5, topics: ['Ranking', 'Window Functions'] },
+    { name: 'Apple', icon: '🍎', count: 5, topics: ['CTEs', 'Complex Joins'] },
   ];
   const studyPlans = [
-    { icon: 'ðŸ“', title: 'SQL Fundamentals', desc: 'Master SELECT, WHERE, JOIN, GROUP BY, HAVING', level: 'Beginner', problems: 12 },
-    { icon: 'âš¡', title: 'Query Optimization', desc: 'Indexing strategies, execution plans, and query tuning', level: 'Advanced', problems: 8 },
-    { icon: 'ðŸ§©', title: 'Problem Patterns', desc: 'Running totals, gaps & islands, pivoting, recursive queries', level: 'Intermediate', problems: 15 },
-    { icon: 'ðŸŽ¯', title: 'Mock Interviews', desc: 'Timed SQL challenges simulating real interview conditions', level: 'All Levels', problems: 10 },
-    { icon: 'ðŸ—ï¸', title: 'Database Design', desc: 'Normalization, schema design, ER diagrams', level: 'Intermediate', problems: 6 },
-    { icon: 'ðŸ”', title: 'Security & Best Practices', desc: 'SQL injection prevention and parameterized queries', level: 'Advanced', problems: 4 },
+    { icon: '📄', title: 'SQL Fundamentals', desc: 'Master SELECT, WHERE, JOIN, GROUP BY, HAVING', level: 'Beginner', problems: 12 },
+    { icon: '⚡', title: 'Query Optimization', desc: 'Indexing strategies, execution plans, and query tuning', level: 'Advanced', problems: 8 },
+    { icon: '🧩', title: 'Problem Patterns', desc: 'Running totals, gaps & islands, pivoting, recursive queries', level: 'Intermediate', problems: 15 },
+    { icon: '🎯', title: 'Mock Interviews', desc: 'Timed SQL challenges simulating real interview conditions', level: 'All Levels', problems: 10 },
+    { icon: '🏗️', title: 'Database Design', desc: 'Normalization, schema design, ER diagrams', level: 'Intermediate', problems: 6 },
+    { icon: '🛡️', title: 'Security & Best Practices', desc: 'SQL injection prevention and parameterized queries', level: 'Advanced', problems: 4 },
   ];
   const tips = [
     { title: 'Always clarify requirements', desc: 'Ask about edge cases, NULL handling, and expected output format.' },
     { title: 'Start with a simple approach', desc: 'Write a basic query first, then optimize. Show clear thinking.' },
     { title: 'Explain your thought process', desc: 'Walk through your approach verbally as you write.' },
     { title: 'Master window functions', desc: 'ROW_NUMBER, RANK, LAG, LEAD appear in 70%+ of SQL interviews.' },
-    { title: 'Know your JOINs deeply', desc: 'INNER, LEFT, RIGHT, FULL, CROSS, SELF â€” with edge case awareness.' },
+    { title: 'Know your JOINs deeply', desc: 'INNER, LEFT, RIGHT, FULL, CROSS, SELF — with edge case awareness.' },
   ];
 
   return (
@@ -346,7 +387,7 @@ function InterviewPage() {
                 <span className="interview-company-card__icon">{c.icon}</span>
                 <div className="interview-company-card__info">
                   <span className="interview-company-card__name">{c.name}</span>
-                  <span className="interview-company-card__topics">{c.topics.join(' Â· ')}</span>
+                  <span className="interview-company-card__topics">{c.topics.join(' · ')}</span>
                 </div>
                 <span className="interview-company-card__count">{c.count}</span>
               </div>
@@ -372,7 +413,7 @@ function InterviewPage() {
           </div>
         </div>
         <div className="interview-page__quick-tips">
-          <h2 className="interview-page__section-title">ðŸ’¡ Quick Tips</h2>
+          <h2 className="interview-page__section-title">💡 Quick Tips</h2>
           <div className="interview-page__tips-list">
             {tips.map((tip, i) => (
               <div key={i} className="interview-quick-tip">
@@ -390,7 +431,9 @@ function InterviewPage() {
   );
 }
 
-
+// -----------------------------------------------------------------------------
+//  Top Nav Bar
+// -----------------------------------------------------------------------------
 function TopNavBar() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -404,13 +447,11 @@ function TopNavBar() {
   const isDiscussPage = location.pathname === '/discuss';
   const isInterviewPage = location.pathname === '/interview';
 
-
   const { execute, submit } = useQuery();
   const { assignments, currentIndex, setCurrentAssignmentIndex,
-    getNextAssignmentId, getPreviousAssignmentId, hasNext, hasPrevious } = useNavigation();
+    getNextAssignmentId, getPreviousAssignmentId, hasNext, hasPrevious, setAssignmentsList } = useNavigation();
   const { user, logout, isAuthenticated } = useAuth();
 
-  // Timer â€” reset when navigating to a new assignment
   useEffect(() => {
     if (!isAssignmentPage) { setTimer(0); return; }
     const iv = setInterval(() => setTimer(t => t + 1), 1000);
@@ -419,7 +460,6 @@ function TopNavBar() {
 
   const fmt = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
-  // Close menus on outside click
   useEffect(() => {
     const handler = e => {
       if (qPaletteOpen && !e.target.closest('.app__question-palette')) setQPaletteOpen(false);
@@ -429,23 +469,18 @@ function TopNavBar() {
     return () => document.removeEventListener('mousedown', handler);
   }, [qPaletteOpen, userMenuOpen]);
 
-  // Lazy-load assignments for problem palette when empty
-  const { setAssignmentsList } = useNavigation();
   useEffect(() => {
     if (!isAssignmentPage || assignments.length > 0) return;
-    // Try localStorage cache first
     try {
       const cached = JSON.parse(localStorage.getItem('assignments') || '[]');
       if (cached.length > 0) {
         setAssignmentsList(cached);
-        // Set current index based on URL
         const curId = location.pathname.split('/assignment/')[1];
         const idx = cached.findIndex(a => String(a._id) === String(curId));
         if (idx !== -1) setCurrentAssignmentIndex(idx);
         return;
       }
     } catch { }
-    // Fallback: fetch from API
     getAssignments().then(res => {
       const list = res.data || [];
       if (list.length > 0) {
@@ -460,15 +495,11 @@ function TopNavBar() {
 
   return (
     <header className={`app__header ${isAssignmentPage ? 'app__header--problem' : ''}`}>
-
-      {/* â”€â”€ Left side â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="app__header-left">
-        {/* Brand */}
         <div className="app__brand" onClick={() => navigate('/')}>
           CipherSQL<span>Studio</span>
         </div>
 
-        {/* Home nav links */}
         {!isAssignmentPage && !isAuthPage && (
           <nav className="app__nav">
             <button
@@ -492,12 +523,9 @@ function TopNavBar() {
           </nav>
         )}
 
-        {/* Assignment page: list icon + prev/next */}
         {isAssignmentPage && (
           <>
             <div className="app__sep" />
-
-            {/* Question palette toggle */}
             <div className="app__question-palette">
               <button
                 className="app__question-palette-btn"
@@ -511,7 +539,6 @@ function TopNavBar() {
               </button>
             </div>
 
-            {/* Sidebar */}
             {qPaletteOpen && (
               <>
                 <div className="app__question-palette-overlay" onClick={() => setQPaletteOpen(false)} />
@@ -531,6 +558,10 @@ function TopNavBar() {
                       const curId = location.pathname.split('/assignment/')[1];
                       const active = String(a._id) === String(curId);
                       const diff = (a.difficulty || 'Easy').toLowerCase();
+
+                      const solvedProblems = JSON.parse(localStorage.getItem('solvedProblems') || '{}');
+                      const isSolved = solvedProblems[a._id];
+
                       return (
                         <button
                           key={a._id}
@@ -538,17 +569,21 @@ function TopNavBar() {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            console.log('[Palette Click] Assignment:', a.title, 'ID:', a._id);
-                            console.log('[Palette Click] Current URL:', window.location.pathname);
-                            console.log('[Palette Click] Navigating to:', `/assignment/${a._id}`);
-                            console.log('[Palette Click] Index:', idx, 'Total:', assignments.length);
                             setQPaletteOpen(false);
                             setCurrentAssignmentIndex(idx);
                             navigate(`/assignment/${a._id}`);
-                            console.log('[Palette Click] navigate() called. New URL should be:', `/assignment/${a._id}`);
                           }}
                         >
-                          <span className="app__question-palette-number">{idx + 1}</span>
+                          <div className="app__question-palette-status-col">
+                            {isSolved ? (
+                              <svg className="app__question-palette-solved-icon" width="14" height="14" viewBox="0 0 16 16" fill="none">
+                                <circle cx="8" cy="8" r="7" fill="#2cbb5d" />
+                                <path d="M5 8l2.5 2.5L11 6" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            ) : (
+                              <span className="app__question-palette-number">{idx + 1}</span>
+                            )}
+                          </div>
                           <div className="app__question-palette-content">
                             <span className="app__question-palette-title">{a.title}</span>
                             <span className={`app__question-palette-difficulty app__question-palette-difficulty--${diff}`}>
@@ -563,7 +598,6 @@ function TopNavBar() {
               </>
             )}
 
-            {/* Prev / Next arrows */}
             <div className="app__nav-arrows">
               <button
                 className="app__nav-btn" title="Previous Problem"
@@ -597,7 +631,6 @@ function TopNavBar() {
         )}
       </div>
 
-      {/* â”€â”€ Center: Run / Submit (assignment page only) â”€â”€â”€ */}
       {isAssignmentPage && (
         <div className="app__header-center">
           <button
@@ -623,7 +656,6 @@ function TopNavBar() {
         </div>
       )}
 
-      {/* â”€â”€ Right â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="app__header-right">
         {isAssignmentPage && (
           <div className="app__timer">
@@ -639,7 +671,6 @@ function TopNavBar() {
         {!isAuthPage && (
           isAuthenticated ? (
             <div className="app__header-right-inner">
-              {/* ðŸ”¥ Streak badge */}
               <StreakBadge />
 
               <div className="app__user-menu">
@@ -696,7 +727,6 @@ function TopNavBar() {
   );
 }
 
-// â”€â”€ App root â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function App() {
   return (
     <AuthProvider>
