@@ -87,26 +87,30 @@ app.get("/api/health", (req, res) => {
 })
 
 // Serve React in production
-if (process.env.NODE_ENV === "production") {
-  const __dirname = path.resolve()
-  const buildPath = path.join(__dirname, "../client/build")
+if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
+  // Use the built-in __dirname which points to the server/ directory
+  // Then go up one level to find the client directory
+  const buildPath = path.join(__dirname, "..", "client", "build")
 
   // Verify build directory exists
   if (!fs.existsSync(buildPath)) {
-    console.error(`❌ React build directory not found at: ${buildPath}`)
-    console.error("   Make sure the client was built during the Docker build process.")
+    console.warn(`⚠️  React build directory not found at: ${buildPath}`)
+    console.warn("   Checking alternative paths...")
+
+    // Attempt absolute check from CWD as fallback
+    const altPath = path.join(process.cwd(), "client", "build")
+    if (fs.existsSync(altPath)) {
+      console.log(`✅ Found build directory at: ${altPath}`)
+      app.use(express.static(altPath))
+      app.get("*", (req, res) => res.sendFile(path.join(altPath, "index.html")))
+    } else {
+      console.error("❌ Could not find build directory in any known location.")
+    }
   } else {
     console.log(`✅ Serving React app from: ${buildPath}`)
+    app.use(express.static(buildPath))
+    app.get("*", (req, res) => res.sendFile(path.join(buildPath, "index.html")))
   }
-
-  // Serve static files from React build
-  app.use(express.static(buildPath))
-
-  // Catch-all handler: send back React's index.html file for any non-API routes
-  // This allows React Router to handle client-side routing
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(buildPath, "index.html"))
-  })
 }
 
 app.use((err, req, res, next) => {
