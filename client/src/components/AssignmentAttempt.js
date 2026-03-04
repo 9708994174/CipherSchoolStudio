@@ -374,28 +374,7 @@ function AssignmentAttempt() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  useEffect(() => {
-    // Reset state when assignment changes
-    setAssignment(null);
-    setQuery('');
-    setResults(null);
-    setError(null);
-    setHint(null);
-    setSubmissionResult(null);
-    setActiveTab('description');
-    setTestTab('testcase');
 
-    // Check server health on mount
-    checkServerHealth().catch(err => {
-      console.warn('Server health check failed:', err);
-      // Don't show error to user, just log it
-    });
-
-    fetchAllAssignments();
-    fetchAssignment();
-    fetchProgress();
-    fetchSubmissions();
-  }, [id, fetchAllAssignments, fetchAssignment, fetchProgress, fetchSubmissions]);
 
   useEffect(() => {
     queryRef.current = query;
@@ -537,6 +516,29 @@ function AssignmentAttempt() {
       console.error('Error fetching progress:', err);
     }
   }, [id, userId]);
+
+  useEffect(() => {
+    // Reset state when assignment changes
+    setAssignment(null);
+    setQuery('');
+    setResults(null);
+    setError(null);
+    setHint(null);
+    setSubmissionResult(null);
+    setActiveTab('description');
+    setTestTab('testcase');
+
+    // Check server health on mount
+    checkServerHealth().catch(err => {
+      console.warn('Server health check failed:', err);
+      // Don't show error to user, just log it
+    });
+
+    fetchAllAssignments();
+    fetchAssignment();
+    fetchProgress();
+    fetchSubmissions();
+  }, [id, fetchAllAssignments, fetchAssignment, fetchProgress, fetchSubmissions]);
 
   const handleExecute = async () => {
     const currentQuery = queryRef.current;
