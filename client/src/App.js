@@ -190,7 +190,6 @@ function AssignmentRouteWrapper() {
 // ── Top navigation bar ───────────────────────────────────────
 // ── Discuss Page ─────────────────────────────────────────────
 function DiscussPage() {
-  const navigate = useNavigate();
   const [posts] = useState([
     { id: 1, title: 'How to approach SQL JOIN problems?', author: 'SQLMaster', replies: 12, views: 346, tags: ['JOIN', 'Tips'], time: '2h ago', hot: true },
     { id: 2, title: 'Understanding Window Functions - Complete Guide', author: 'DataExpert', replies: 28, views: 892, tags: ['Window Fn', 'Guide'], time: '5h ago', hot: true },
