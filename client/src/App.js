@@ -403,7 +403,7 @@ function TopNavBar() {
   const isHomePage = location.pathname === '/';
   const isDiscussPage = location.pathname === '/discuss';
   const isInterviewPage = location.pathname === '/interview';
-  const isProfilePage = location.pathname === '/profile';
+
 
   const { execute, submit } = useQuery();
   const { assignments, currentIndex, setCurrentAssignmentIndex,

@@ -6,7 +6,7 @@ import './Profile.scss';
 
 function Profile() {
     const navigate = useNavigate();
-    const { user, isAuthenticated } = useAuth();
+    const { isAuthenticated } = useAuth();
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('recent');
@@ -70,7 +70,6 @@ function Profile() {
         const d = new Date(today.getFullYear(), today.getMonth() - m, 1);
         const label = d.toLocaleString('en', { month: 'short' });
         const weeks = [];
-        const firstDay = new Date(d.getFullYear(), d.getMonth(), 1);
         const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0);
         for (let day = 1; day <= lastDay.getDate(); day++) {
             const dt = new Date(d.getFullYear(), d.getMonth(), day);
