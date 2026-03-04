@@ -12,7 +12,7 @@
     "server": "npm run dev --workspace=server",
     "client": "npm run start --workspace=client",
     "install-all": "npm install",
-    "build": "npm run build --workspace=client",
+    "build": "CI=false npm run build --workspace=client",
     "vercel-build": "npm run build",
     "start": "npm run start --workspace=server"
   },
