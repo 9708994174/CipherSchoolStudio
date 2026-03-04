@@ -14,55 +14,57 @@ export const NavigationProvider = ({ children }) => {
   const [assignments, setAssignments] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(-1);
 
-  const setAssignmentsList = (list) => {
+  const setAssignmentsList = React.useCallback((list) => {
     setAssignments(list);
-  };
+  }, []);
 
-  const setCurrentAssignmentIndex = (index) => {
+  const setCurrentAssignmentIndex = React.useCallback((index) => {
     setCurrentIndex(index);
-  };
+  }, []);
 
-  const getCurrentAssignmentId = () => {
+  const getCurrentAssignmentId = React.useCallback(() => {
     if (currentIndex >= 0 && currentIndex < assignments.length) {
       return assignments[currentIndex]._id;
     }
     return null;
-  };
+  }, [currentIndex, assignments]);
 
-  const getNextAssignmentId = () => {
+  const getNextAssignmentId = React.useCallback(() => {
     if (currentIndex >= 0 && currentIndex < assignments.length - 1) {
       return assignments[currentIndex + 1]._id;
     }
     return null;
-  };
+  }, [currentIndex, assignments]);
 
-  const getPreviousAssignmentId = () => {
+  const getPreviousAssignmentId = React.useCallback(() => {
     if (currentIndex > 0 && currentIndex < assignments.length) {
       return assignments[currentIndex - 1]._id;
     }
     return null;
-  };
+  }, [currentIndex, assignments]);
 
-  const hasNext = () => {
+  const hasNext = React.useCallback(() => {
     return currentIndex >= 0 && currentIndex < assignments.length - 1;
-  };
+  }, [currentIndex, assignments]);
 
-  const hasPrevious = () => {
+  const hasPrevious = React.useCallback(() => {
     return currentIndex > 0;
-  };
+  }, [currentIndex]);
+
+  const value = React.useMemo(() => ({
+    assignments,
+    setAssignmentsList,
+    currentIndex,
+    setCurrentAssignmentIndex,
+    getCurrentAssignmentId,
+    getNextAssignmentId,
+    getPreviousAssignmentId,
+    hasNext,
+    hasPrevious
+  }), [assignments, setAssignmentsList, currentIndex, setCurrentAssignmentIndex, getCurrentAssignmentId, getNextAssignmentId, getPreviousAssignmentId, hasNext, hasPrevious]);
 
   return (
-    <NavigationContext.Provider value={{
-      assignments,
-      setAssignmentsList,
-      currentIndex,
-      setCurrentAssignmentIndex,
-      getCurrentAssignmentId,
-      getNextAssignmentId,
-      getPreviousAssignmentId,
-      hasNext,
-      hasPrevious
-    }}>
+    <NavigationContext.Provider value={value}>
       {children}
     </NavigationContext.Provider>
   );

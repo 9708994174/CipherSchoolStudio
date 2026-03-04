@@ -53,7 +53,7 @@ api.interceptors.response.use(
         window.location.href = '/login';
       }
     }
-    
+
     // Handle network errors
     if (!error.response) {
       if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error')) {
@@ -66,9 +66,9 @@ api.interceptors.response.use(
       console.error('[API Network Error]', error);
     } else {
       // Handle HTTP errors
-      error.userMessage = error.response?.data?.error || 
-                         error.response?.data?.message || 
-                         `Server error: ${error.response.status} ${error.response.statusText}`;
+      error.userMessage = error.response?.data?.error ||
+        error.response?.data?.message ||
+        `Server error: ${error.response.status} ${error.response.statusText}`;
       console.error('[API HTTP Error]', error.response?.status, error.response?.data);
     }
     return Promise.reject(error);
@@ -78,32 +78,32 @@ api.interceptors.response.use(
 // Assignments API
 export const getAssignments = () => api.get('/assignments');
 export const getAssignment = (id) => api.get(`/assignments/${id}`);
-export const getAssignmentProgress = (id, userId = 'anonymous') => 
+export const getAssignmentProgress = (id, userId = 'anonymous') =>
   api.get(`/assignments/${id}/progress`, { params: { userId } });
-export const saveAssignmentProgress = (id, data, userId = 'anonymous') => 
+export const saveAssignmentProgress = (id, data, userId = 'anonymous') =>
   api.post(`/assignments/${id}/progress`, { ...data, userId });
 
 // Query API
-export const executeQuery = (assignmentId, query) => 
+export const executeQuery = (assignmentId, query) =>
   api.post('/query/execute', { assignmentId, query });
 
 // Hints API
-export const getHint = (assignmentId, query = '') => 
+export const getHint = (assignmentId, query = '') =>
   api.post('/hints', { assignmentId, query });
 
 // Submit API
-export const submitQuery = (assignmentId, query, userId = 'anonymous') => 
+export const submitQuery = (assignmentId, query, userId = 'anonymous') =>
   api.post('/submit', { assignmentId, query, userId });
 
 // Health check API
-export const checkServerHealth = () => 
+export const checkServerHealth = () =>
   api.get('/health');
 
 // Auth API
-export const signup = (username, email, password) => 
+export const signup = (username, email, password) =>
   api.post('/auth/signup', { username, email, password });
 
-export const login = (email, password) => 
+export const login = (email, password) =>
   api.post('/auth/login', { email, password });
 
 export const getCurrentUser = (token) => {
@@ -111,6 +111,17 @@ export const getCurrentUser = (token) => {
   return api.get('/auth/me', config);
 };
 
+// ── User Activity & Stats ────────────────────────────────────
+export const getUserActivity = () => api.get('/user/activity');
+export const getUserStats = () => api.get('/user/stats');
+
+// ── Discussion & Solutions ───────────────────────────────────
+export const getDiscussions = (assignmentId) => api.get(`/discuss/${assignmentId}`);
+export const createPost = (assignmentId, data) => api.post(`/discuss/${assignmentId}`, data);
+export const likePost = (assignmentId, postId) => api.post(`/discuss/${assignmentId}/${postId}/like`);
+export const getEngagementStats = (assignmentId) => api.get(`/discuss/global/stats/${assignmentId}`);
+
 export default api;
+
 
 

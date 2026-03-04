@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const bcrypt = require('bcryptjs');
+const { pool } = require('../config/postgres');
 
 // JWT Secret - should be in environment variable
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
@@ -12,6 +13,27 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 const generateToken = (userId) => {
   return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 };
+
+// Ensure users table exists in PostgreSQL
+async function ensureUsersTable() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(30) UNIQUE NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+  } catch (err) {
+    console.error('❌ Failed to create users table:', err.message);
+  }
+}
+
+// Create table on module load
+ensureUsersTable();
 
 // @route   POST /api/auth/signup
 // @desc    Register a new user
@@ -35,7 +57,7 @@ router.post('/signup', [
     // Check validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
         errors: errors.array().map(err => ({
           field: err.path || err.param,
@@ -43,59 +65,65 @@ router.post('/signup', [
         }))
       });
     }
-    
+
     const { username, email, password } = req.body;
-    
+
     // Check if user already exists
-    const existingUser = await User.findOne({
-      $or: [{ email }, { username }]
-    });
-    
-    if (existingUser) {
+    const existingUser = await pool.query(
+      'SELECT id, email, username FROM users WHERE email = $1 OR username = $2',
+      [email.toLowerCase(), username]
+    );
+
+    if (existingUser.rows.length > 0) {
+      const found = existingUser.rows[0];
       return res.status(400).json({
         success: false,
-        error: existingUser.email === email 
-          ? 'Email is already registered' 
+        error: found.email === email.toLowerCase()
+          ? 'Email is already registered'
           : 'Username is already taken'
       });
     }
-    
-    // Create new user
-    const user = new User({
-      username,
-      email,
-      password // Will be hashed by pre-save hook
-    });
-    
-    await user.save();
-    
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Insert new user
+    const result = await pool.query(
+      `INSERT INTO users (username, email, password, created_at, updated_at)
+       VALUES ($1, $2, $3, NOW(), NOW())
+       RETURNING id, username, email, created_at`,
+      [username, email.toLowerCase(), hashedPassword]
+    );
+
+    const user = result.rows[0];
+
     // Generate JWT token
-    const token = generateToken(user._id);
-    
-    // Return user data (without password) and token
+    const token = generateToken(user.id);
+
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
       token,
       user: {
-        id: user._id,
+        id: user.id,
         username: user.username,
         email: user.email,
-        createdAt: user.createdAt
+        createdAt: user.created_at
       }
     });
   } catch (error) {
     console.error('Signup error:', error);
-    
-    // Handle duplicate key error
-    if (error.code === 11000) {
-      const field = Object.keys(error.keyPattern)[0];
+
+    // Handle duplicate key error from PostgreSQL
+    if (error.code === '23505') {
+      const detail = error.detail || '';
       return res.status(400).json({
         success: false,
-        error: `${field === 'email' ? 'Email' : 'Username'} is already registered`
+        error: detail.includes('email') ? 'Email is already registered' : 'Username is already taken'
       });
     }
-    
+
     res.status(500).json({
       success: false,
       error: 'Server error. Please try again later.'
@@ -119,7 +147,7 @@ router.post('/login', [
     // Check validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
         errors: errors.array().map(err => ({
           field: err.path || err.param,
@@ -127,42 +155,46 @@ router.post('/login', [
         }))
       });
     }
-    
+
     const { email, password } = req.body;
-    
+
     // Find user by email
-    const user = await User.findOne({ email: email.toLowerCase() });
-    
-    if (!user) {
+    const result = await pool.query(
+      'SELECT id, username, email, password, created_at FROM users WHERE email = $1',
+      [email.toLowerCase()]
+    );
+
+    if (result.rows.length === 0) {
       return res.status(401).json({
         success: false,
         error: 'Invalid email or password'
       });
     }
-    
+
+    const user = result.rows[0];
+
     // Check password
-    const isPasswordValid = await user.comparePassword(password);
-    
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
         error: 'Invalid email or password'
       });
     }
-    
+
     // Generate JWT token
-    const token = generateToken(user._id);
-    
-    // Return user data (without password) and token
+    const token = generateToken(user.id);
+
     res.json({
       success: true,
       message: 'Login successful',
       token,
       user: {
-        id: user._id,
+        id: user.id,
         username: user.username,
         email: user.email,
-        createdAt: user.createdAt
+        createdAt: user.created_at
       }
     });
   } catch (error) {
@@ -181,49 +213,54 @@ router.get('/me', async (req, res) => {
   try {
     // Get token from header
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ 
+      return res.status(401).json({
         success: false,
-        error: 'Authentication required' 
+        error: 'Authentication required'
       });
     }
-    
+
     const token = authHeader.substring(7);
-    
+
     try {
       // Verify token
       const decoded = jwt.verify(token, JWT_SECRET);
-      
-      // Find user
-      const user = await User.findById(decoded.userId).select('-password');
-      
-      if (!user) {
-        return res.status(401).json({ 
+
+      // Find user in PostgreSQL
+      const result = await pool.query(
+        'SELECT id, username, email, created_at FROM users WHERE id = $1',
+        [decoded.userId]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(401).json({
           success: false,
-          error: 'User not found' 
+          error: 'User not found'
         });
       }
-      
+
+      const user = result.rows[0];
+
       res.json({
         success: true,
         user: {
-          id: user._id,
+          id: user.id,
           username: user.username,
           email: user.email,
-          createdAt: user.createdAt
+          createdAt: user.created_at
         }
       });
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
-        return res.status(401).json({ 
+        return res.status(401).json({
           success: false,
-          error: 'Token has expired. Please login again.' 
+          error: 'Token has expired. Please login again.'
         });
       } else if (error.name === 'JsonWebTokenError') {
-        return res.status(401).json({ 
+        return res.status(401).json({
           success: false,
-          error: 'Invalid token. Please login again.' 
+          error: 'Invalid token. Please login again.'
         });
       }
       throw error;
@@ -238,5 +275,3 @@ router.get('/me', async (req, res) => {
 });
 
 module.exports = router;
-
-

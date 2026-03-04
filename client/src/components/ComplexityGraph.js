@@ -21,7 +21,7 @@ function ComplexityGraph({ complexity, testResults }) {
   return (
     <div className="complexity-graph">
       <h3 className="complexity-graph__title">Submission Analysis</h3>
-      
+
       <div className="complexity-graph__test-summary">
         <div className="complexity-graph__test-stat">
           <span className="complexity-graph__test-label">Tests Passed</span>
@@ -31,7 +31,7 @@ function ComplexityGraph({ complexity, testResults }) {
         </div>
         <div className="complexity-graph__pass-rate">
           <div className="complexity-graph__pass-rate-bar">
-            <div 
+            <div
               className="complexity-graph__pass-rate-fill"
               style={{ width: `${passRate}%` }}
             />
@@ -43,8 +43,8 @@ function ComplexityGraph({ complexity, testResults }) {
       <div className="complexity-graph__metrics">
         {metrics.map((metric, index) => {
           const percentage = Math.min((metric.value / metric.max) * 100, 100);
-          const displayValue = typeof metric.value === 'boolean' 
-            ? (metric.value ? 'Yes' : 'No') 
+          const displayValue = typeof metric.value === 'boolean'
+            ? (metric.value ? 'Yes' : 'No')
             : (typeof metric.value === 'number' ? metric.value : 0);
           return (
             <div key={index} className="complexity-graph__metric">
@@ -53,9 +53,9 @@ function ComplexityGraph({ complexity, testResults }) {
                 <span className="complexity-graph__metric-value">{displayValue}</span>
               </div>
               <div className="complexity-graph__metric-bar">
-                <div 
+                <div
                   className="complexity-graph__metric-fill"
-                  style={{ 
+                  style={{
                     width: `${percentage}%`,
                     backgroundColor: metric.color
                   }}
@@ -79,20 +79,20 @@ function ComplexityGraph({ complexity, testResults }) {
 
 function calculateComplexityScore(complexity) {
   let score = 0;
-  
+
   // Base score from query length
   if (complexity.queryLength < 100) score += 10;
   else if (complexity.queryLength < 300) score += 20;
   else score += 30;
-  
+
   // Add points for features
   if (complexity.hasJoins) score += 20;
   if (complexity.hasSubqueries) score += 25;
   if (complexity.hasAggregates) score += 15;
-  
+
   // Row count factor
   if (complexity.rowCount > 50) score += 10;
-  
+
   return Math.min(score, 100);
 }
 

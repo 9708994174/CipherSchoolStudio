@@ -14,28 +14,32 @@ export const QueryProvider = ({ children }) => {
   const [executeHandler, setExecuteHandler] = useState(null);
   const [submitHandler, setSubmitHandler] = useState(null);
 
-  const registerExecute = (handler) => {
+  const registerExecute = React.useCallback((handler) => {
     setExecuteHandler(() => handler);
-  };
+  }, []);
 
-  const registerSubmit = (handler) => {
+  const registerSubmit = React.useCallback((handler) => {
     setSubmitHandler(() => handler);
-  };
+  }, []);
 
-  const execute = () => {
+  const execute = React.useCallback(() => {
     if (executeHandler) {
       executeHandler();
     }
-  };
+  }, [executeHandler]);
 
-  const submit = () => {
+  const submit = React.useCallback(() => {
     if (submitHandler) {
       submitHandler();
     }
-  };
+  }, [submitHandler]);
+
+  const value = React.useMemo(() => ({
+    execute, submit, registerExecute, registerSubmit
+  }), [execute, submit, registerExecute, registerSubmit]);
 
   return (
-    <QueryContext.Provider value={{ execute, submit, registerExecute, registerSubmit }}>
+    <QueryContext.Provider value={value}>
       {children}
     </QueryContext.Provider>
   );

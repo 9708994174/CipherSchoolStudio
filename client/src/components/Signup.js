@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import './Signup.scss';
+import './Login.scss'; // reuse same white-card styles
 
 function Signup() {
   const [username, setUsername] = useState('');
@@ -9,193 +9,124 @@ function Signup() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  const [loading, setLoading] = useState(false);
+
   const { signupUser, isAuthenticated, error: authError } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      // Check if there's a redirect parameter
-      const urlParams = new URLSearchParams(window.location.search);
-      const redirect = urlParams.get('redirect');
+      const redirect = new URLSearchParams(window.location.search).get('redirect');
       navigate(redirect || '/');
     }
   }, [isAuthenticated, navigate]);
 
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!username.trim()) {
-      newErrors.username = 'Username is required';
-    } else if (username.length < 3) {
-      newErrors.username = 'Username must be at least 3 characters';
-    } else if (username.length > 30) {
-      newErrors.username = 'Username cannot exceed 30 characters';
-    } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      newErrors.username = 'Username can only contain letters, numbers, and underscores';
-    }
-    
-    if (!email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Email is invalid';
-    }
-    
-    if (!password) {
-      newErrors.password = 'Password is required';
-    } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
-    
-    if (!confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
-    } else if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const validate = () => {
+    const e = {};
+    if (!username.trim()) e.username = 'Username is required';
+    else if (username.length < 3) e.username = 'At least 3 characters';
+    else if (!/^[a-zA-Z0-9_]+$/.test(username)) e.username = 'Letters, numbers, underscores only';
+    if (!email.trim()) e.email = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(email)) e.email = 'Invalid email';
+    if (!password) e.password = 'Password is required';
+    else if (password.length < 6) e.password = 'At least 6 characters';
+    if (!confirmPassword) e.confirmPassword = 'Please confirm password';
+    else if (password !== confirmPassword) e.confirmPassword = 'Passwords do not match';
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-    
-    setIsSubmitting(true);
-    setErrors({});
-    
+    if (!validate()) return;
+    setLoading(true); setErrors({});
     const result = await signupUser(username, email, password);
-    
     if (result.success) {
-      // Check if there's a redirect parameter
-      const urlParams = new URLSearchParams(window.location.search);
-      const redirect = urlParams.get('redirect');
+      const redirect = new URLSearchParams(window.location.search).get('redirect');
       navigate(redirect || '/');
     } else {
-      // Handle field-specific errors
-      if (result.error) {
-        if (result.error.includes('email') || result.error.includes('Email')) {
-          setErrors({ email: result.error });
-        } else if (result.error.includes('username') || result.error.includes('Username')) {
-          setErrors({ username: result.error });
-        } else {
-          setErrors({ general: result.error });
-        }
-      } else {
-        setErrors({ general: 'Signup failed. Please try again.' });
-      }
+      const msg = result.error || 'Signup failed.';
+      if (msg.toLowerCase().includes('email')) setErrors({ email: msg });
+      else if (msg.toLowerCase().includes('user')) setErrors({ username: msg });
+      else setErrors({ general: msg });
     }
-    
-    setIsSubmitting(false);
+    setLoading(false);
   };
 
   return (
-    <div className="leetcode-auth">
-      <div className="leetcode-auth__container">
-        <div className="leetcode-auth__logo">
-          <h1 className="leetcode-auth__brand">CipherSQLStudio</h1>
-        </div>
-        
-        <form className="leetcode-auth__form" onSubmit={handleSubmit}>
-          {(errors.general || authError) && (
-            <div className="leetcode-auth__error">
-              {errors.general || authError}
-            </div>
-          )}
-          
-          <div className="leetcode-auth__field">
+    <div className="auth-page">
+      <div className="auth-card">
+        <h1 className="auth-card__brand" onClick={() => navigate('/')}>
+          CipherSQLStudio
+        </h1>
+        <p className="auth-card__tagline">Create your account</p>
+
+        {(errors.general || authError) && (
+          <div className="auth-card__error">{errors.general || authError}</div>
+        )}
+
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="auth-form__group">
             <input
+              className="auth-form__input"
               type="text"
-              id="username"
-              className={`leetcode-auth__input ${errors.username ? 'leetcode-auth__input--error' : ''}`}
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
               placeholder="Username"
-              disabled={isSubmitting}
-              autoComplete="username"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              autoFocus
             />
-            {errors.username && (
-              <div className="leetcode-auth__field-error">{errors.username}</div>
-            )}
+            {errors.username && <span className="auth-form__field-err">{errors.username}</span>}
           </div>
-          
-          <div className="leetcode-auth__field">
+
+          <div className="auth-form__group">
             <input
+              className="auth-form__input"
               type="email"
-              id="email"
-              className={`leetcode-auth__input ${errors.email ? 'leetcode-auth__input--error' : ''}`}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
-              disabled={isSubmitting}
-              autoComplete="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
             />
-            {errors.email && (
-              <div className="leetcode-auth__field-error">{errors.email}</div>
-            )}
+            {errors.email && <span className="auth-form__field-err">{errors.email}</span>}
           </div>
-          
-          <div className="leetcode-auth__field">
+
+          <div className="auth-form__group">
             <input
+              className="auth-form__input"
               type="password"
-              id="password"
-              className={`leetcode-auth__input ${errors.password ? 'leetcode-auth__input--error' : ''}`}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
-              disabled={isSubmitting}
-              autoComplete="new-password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
             />
-            {errors.password && (
-              <div className="leetcode-auth__field-error">{errors.password}</div>
-            )}
+            {errors.password && <span className="auth-form__field-err">{errors.password}</span>}
           </div>
-          
-          <div className="leetcode-auth__field">
+
+          <div className="auth-form__group">
             <input
+              className="auth-form__input"
               type="password"
-              id="confirmPassword"
-              className={`leetcode-auth__input ${errors.confirmPassword ? 'leetcode-auth__input--error' : ''}`}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm Password"
-              disabled={isSubmitting}
-              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
             />
-            {errors.confirmPassword && (
-              <div className="leetcode-auth__field-error">{errors.confirmPassword}</div>
-            )}
+            {errors.confirmPassword && <span className="auth-form__field-err">{errors.confirmPassword}</span>}
           </div>
-          
+
           <button
+            className="auth-form__submit"
             type="submit"
-            className="leetcode-auth__button"
-            disabled={isSubmitting}
+            disabled={loading}
           >
-            {isSubmitting ? 'Creating account...' : 'Sign Up'}
+            {loading ? 'Creating Account...' : 'Sign Up'}
           </button>
         </form>
-        
-        <div className="leetcode-auth__footer">
-          <span className="leetcode-auth__footer-text">
-            Already have an account?{' '}
-            <Link 
-              to={`/login${window.location.search}`} 
-              className="leetcode-auth__link"
-            >
-              Sign in
-            </Link>
-          </span>
-        </div>
+
+        <p className="auth-card__footer">
+          Already have an account?{' '}
+          <Link to={`/login${window.location.search}`} className="auth-card__link">Sign in</Link>
+        </p>
       </div>
     </div>
   );
 }
 
 export default Signup;
-

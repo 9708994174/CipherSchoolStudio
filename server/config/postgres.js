@@ -73,40 +73,42 @@ async function setSearchPath(schemaName) {
 async function executeQuery(schemaName, query) {
   let client;
   const executionStart = Date.now();
-  
+
   try {
     // Get client from pool with timeout handling
     client = await Promise.race([
       pool.connect(),
-      new Promise((_, reject) => 
+      new Promise((_, reject) =>
         setTimeout(() => reject(new Error('PostgreSQL connection timeout')), 10000)
       )
     ]);
-    
-    // Set search path to the schema
-    await client.query(`SET search_path TO ${schemaName}`);
-    
+
+    // Use a transaction so SET LOCAL search_path is scoped and reverts on release
+    await client.query('BEGIN');
+    await client.query(`SET LOCAL search_path TO "${schemaName}", public`);
+
     // Execute the user's query - REAL EXECUTION
     console.log(`[REAL EXECUTION] Executing query in schema: ${schemaName}`);
     console.log(`[REAL EXECUTION] Query: ${query.substring(0, 100)}...`);
-    
+
     const result = await client.query(query);
-    
+    await client.query('COMMIT');
+
     const executionTime = Date.now() - executionStart;
     console.log(`[REAL EXECUTION] Query executed in ${executionTime}ms, returned ${result.rows.length} rows`);
-    
+
     return {
       success: true,
-      rows: result.rows, // Real PostgreSQL result rows
-      rowCount: result.rowCount, // Real row count from PostgreSQL
+      rows: result.rows,
+      rowCount: result.rowCount,
       columns: result.fields ? result.fields.map(f => ({ name: f.name, type: f.dataTypeID })) : [],
-      executionTime: executionTime // Track execution time
+      executionTime: executionTime
     };
   } catch (error) {
     const executionTime = Date.now() - executionStart;
     console.error(`[REAL EXECUTION] Query failed after ${executionTime}ms:`, error.message);
-    
-    // Provide more helpful error messages
+    if (client) await client.query('ROLLBACK').catch(() => { });
+
     let errorMessage = error.message;
     if (error.code === 'ECONNREFUSED') {
       errorMessage = 'Cannot connect to PostgreSQL database. Please check your database connection settings.';
@@ -117,7 +119,7 @@ async function executeQuery(schemaName, query) {
     } else if (error.message.includes('timeout')) {
       errorMessage = 'Database connection timeout. Please check if PostgreSQL is running.';
     }
-    
+
     return {
       success: false,
       error: errorMessage,
@@ -137,50 +139,50 @@ async function executeQuery(schemaName, query) {
 async function initializeAssignmentTables(schemaName, sampleTables) {
   const client = await pool.connect();
   try {
-    // Create schema if it doesn't exist
-    await client.query(`CREATE SCHEMA IF NOT EXISTS ${schemaName}`);
-    
-    // Set search path
-    await client.query(`SET search_path TO ${schemaName}`);
-    
+    // Create schema if it doesn't exist (schema-qualified, no search_path change needed)
+    await client.query(`CREATE SCHEMA IF NOT EXISTS "${schemaName}"`);
+
+    // Use SET LOCAL so the search_path is scoped to this transaction only
+    // and resets automatically when the client is returned to the pool.
+    await client.query('BEGIN');
+    await client.query(`SET LOCAL search_path TO "${schemaName}", public`);
+
     // Drop existing tables in this schema (for re-initialization)
     for (const table of sampleTables) {
-      await client.query(`DROP TABLE IF EXISTS ${table.tableName} CASCADE`);
+      await client.query(`DROP TABLE IF EXISTS "${schemaName}"."${table.tableName}" CASCADE`);
     }
-    
-    // Create tables and insert data
+
+    // Create tables and insert data using schema-qualified names
     for (const table of sampleTables) {
-      // Build CREATE TABLE statement
       const columnDefinitions = table.columns.map(col => {
         const pgType = mapDataTypeToPostgreSQL(col.dataType);
-        return `${col.columnName} ${pgType}`;
+        return `"${col.columnName}" ${pgType}`;
       }).join(', ');
-      
-      await client.query(`CREATE TABLE ${table.tableName} (${columnDefinitions})`);
-      
-      // Insert sample data
+
+      await client.query(`CREATE TABLE "${schemaName}"."${table.tableName}" (${columnDefinitions})`);
+
       if (table.rows && table.rows.length > 0) {
         const columns = table.columns.map(col => col.columnName);
         const placeholders = table.rows.map((_, i) => {
           const rowPlaceholders = columns.map((_, j) => `$${i * columns.length + j + 1}`).join(', ');
           return `(${rowPlaceholders})`;
         }).join(', ');
-        
-        const values = table.rows.flatMap(row => 
-          columns.map(col => row[col])
-        );
-        
-        const insertQuery = `INSERT INTO ${table.tableName} (${columns.join(', ')}) VALUES ${placeholders}`;
+
+        const values = table.rows.flatMap(row => columns.map(col => row[col]));
+        const colList = columns.map(c => `"${c}"`).join(', ');
+        const insertQuery = `INSERT INTO "${schemaName}"."${table.tableName}" (${colList}) VALUES ${placeholders}`;
         await client.query(insertQuery, values);
       }
     }
-    
+
+    await client.query('COMMIT');
     console.log(`✅ Initialized tables for schema ${schemaName}`);
   } catch (error) {
+    await client.query('ROLLBACK').catch(() => { });
     console.error(`❌ Error initializing tables:`, error);
     throw error;
   } finally {
-    client.release();
+    client.release(); // search_path reverts to default because SET LOCAL was transaction-scoped
   }
 }
 
@@ -202,7 +204,7 @@ function mapDataTypeToPostgreSQL(dataType) {
     'DECIMAL': 'DECIMAL(10, 2)',
     'NUMERIC': 'NUMERIC'
   };
-  
+
   return typeMap[dataType.toUpperCase()] || 'TEXT';
 }
 
@@ -213,7 +215,7 @@ async function getTableSchemas(schemaName) {
   const client = await pool.connect();
   try {
     await client.query(`SET search_path TO ${schemaName}`);
-    
+
     const result = await client.query(`
       SELECT 
         table_name,
@@ -224,7 +226,7 @@ async function getTableSchemas(schemaName) {
       WHERE table_schema = $1
       ORDER BY table_name, ordinal_position
     `, [schemaName]);
-    
+
     return result.rows;
   } catch (error) {
     console.error(`❌ Error getting table schemas:`, error);

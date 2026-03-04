@@ -1,122 +1,108 @@
-// Variables - Modern Professional Color Palette
-$color-primary: #6366f1;
-$color-primary-dark: #4f46e5;
-$color-primary-light: #818cf8;
-$color-secondary: #64748b;
-$color-success: #10b981;
-$color-error: #ef4444;
-$color-warning: #f59e0b;
-$color-info: #3b82f6;
-$color-bg: #f8fafc;
-$color-bg-secondary: #f1f5f9;
-$color-bg-dark: #0f172a;
-$color-text: #0f172a;
-$color-text-secondary: #475569;
-$color-text-light: #64748b;
-$color-white: #ffffff;
-$color-border: #e2e8f0;
-$color-border-light: #f1f5f9;
+// ═══════════════════════════════════════════════════════════
+//  CipherSQL Studio — LeetCode-style Design System
+//  Dark theme • White text • #ffa116 yellow-orange accent
+// ═══════════════════════════════════════════════════════════
 
-// Gradients
-$gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-$gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-$gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-$gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+// ── Background ───────────────────────────────────────────────
+$bg-base: #1a1a1a; // main page bg  (LeetCode dark)
+$bg-panel: #282828; // panels / cards
+$bg-card: #333333; // hover state
+$bg-input: #222222; // input fields
 
-// Shadows
-$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-$shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-$shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-$shadow-colored: 0 10px 30px -5px rgba(99, 102, 241, 0.3);
+// ── Border ───────────────────────────────────────────────────
+$border: #3e3e3e;
+$border-2: #555555;
 
-// Border Radius
-$radius-sm: 6px;
-$radius-md: 8px;
-$radius-lg: 12px;
-$radius-xl: 16px;
-$radius-2xl: 20px;
-$radius-full: 9999px;
+// ── Text ─────────────────────────────────────────────────────
+$text-1: #ffffff; // primary — white
+$text-2: #eff1f6; // body text
+$text-3: #8c8c8c; // muted / placeholder
 
-// Breakpoints (Mobile-first approach)
-$breakpoint-xs: 320px;
-$breakpoint-sm: 640px;
-$breakpoint-md: 768px;
-$breakpoint-lg: 1024px;
-$breakpoint-xl: 1280px;
-$breakpoint-2xl: 1536px;
+// ── Accent (LeetCode yellow-orange) ──────────────────────────
+$yellow: #ffa116;
+$yellow-dark: #e89a00;
+$yellow-glow: rgba(255, 161, 22, 0.25);
 
-// Mixins
-@mixin xs {
-  @media (min-width: $breakpoint-xs) {
-    @content;
-  }
-}
+// ── Difficulty ───────────────────────────────────────────────
+$easy: #00b8a3;
+$easy-bg: rgba(0, 184, 163, 0.12);
+$medium: #ffc01e;
+$medium-bg: rgba(255, 192, 30, 0.12);
+$hard: #ff375f;
+$hard-bg: rgba(255, 55, 95, 0.12);
+
+// ── State colors ─────────────────────────────────────────────
+$success: #00b8a3;
+$error-col: #ff375f;
+$warn: #ffc01e;
+
+// ── Radius ───────────────────────────────────────────────────
+$r-xs: 4px;
+$r-sm: 6px;
+$r-md: 8px;
+$r-lg: 12px;
+
+// ── Breakpoints ──────────────────────────────────────────────
+$bp-sm: 640px;
+$bp-md: 768px;
+$bp-lg: 1024px;
+$bp-xl: 1280px;
 
 @mixin sm {
-  @media (min-width: $breakpoint-sm) {
+  @media (min-width: $bp-sm) {
     @content;
   }
 }
 
 @mixin md {
-  @media (min-width: $breakpoint-md) {
+  @media (min-width: $bp-md) {
     @content;
   }
 }
 
 @mixin lg {
-  @media (min-width: $breakpoint-lg) {
+  @media (min-width: $bp-lg) {
     @content;
   }
 }
 
 @mixin xl {
-  @media (min-width: $breakpoint-xl) {
+  @media (min-width: $bp-xl) {
     @content;
   }
 }
 
 @mixin mobile {
-  @media (max-width: $breakpoint-md - 1px) {
+  @media (max-width: ($bp-md - 1px)) {
     @content;
   }
 }
 
 @mixin tablet {
-  @media (min-width: $breakpoint-md) and (max-width: $breakpoint-lg - 1px) {
+  @media (min-width: $bp-md) and (max-width: ($bp-lg - 1px)) {
     @content;
   }
 }
 
 @mixin desktop {
-  @media (min-width: $breakpoint-lg) {
+  @media (min-width: $bp-lg) {
     @content;
   }
 }
 
-// Animations
+// ── Keyframes ────────────────────────────────────────────────
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(6px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -126,87 +112,89 @@ $breakpoint-2xl: 1536px;
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-6px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-// Reset and base styles
-* {
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: .45;
+  }
+}
+
+// ── Base reset ───────────────────────────────────────────────
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: #ffffff;
-  background-attachment: fixed;
-  color: #1e293b;
+  font-family: -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  background: $bg-base;
+  color: $text-2;
   line-height: 1.6;
   min-height: 100vh;
-  margin: 0;
-  padding: 0;
+  -webkit-font-smoothing: antialiased;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+code,
+pre {
+  font-family: 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
 }
 
-// Button base styles
+// ── Scrollbar (thin LeetCode style) ──────────────────────────
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: $bg-panel;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $border-2;
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+// ── Button base ──────────────────────────────────────────────
 button {
   font-family: inherit;
   cursor: pointer;
   border: none;
-  border-radius: $radius-md;
-  padding: 12px 24px;
   font-size: 14px;
-  font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 500;
+  transition: all .15s ease;
   touch-action: manipulation;
-  position: relative;
-  overflow: hidden;
-  letter-spacing: 0.5px;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
-  }
-
-  &:hover::before {
-    width: 300px;
-    height: 300px;
-  }
 
   &:disabled {
-    opacity: 0.6;
+    opacity: .45;
     cursor: not-allowed;
-    transform: none;
   }
 
-  &:active {
-    transform: scale(0.96);
-  }
-
-  @include tablet {
-    padding: 14px 28px;
-    font-size: 15px;
+  &:active:not(:disabled) {
+    transform: scale(.97);
   }
 }
-

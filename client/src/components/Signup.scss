@@ -1,6 +1,2 @@
-@import '../index.scss';
-
-// Reuse LeetCode-style authentication styles from Login.scss
-// Import the same styles
+/* Signup uses Login.scss — see Login.scss for all auth styles */
 @import './Login.scss';
-

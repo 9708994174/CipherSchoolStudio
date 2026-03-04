@@ -1,140 +1,91 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import './Login.scss';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const { loginUser, isAuthenticated, error: authError } = useAuth();
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // AuthContext exposes `loginUser` (not `login`)
+  const { loginUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirect = new URLSearchParams(location.search).get('redirect') || '/';
 
-  // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      // Check if there's a redirect parameter
-      const urlParams = new URLSearchParams(window.location.search);
-      const redirect = urlParams.get('redirect');
-      navigate(redirect || '/');
-    }
-  }, [isAuthenticated, navigate]);
+    if (isAuthenticated) navigate(redirect, { replace: true });
+  }, [isAuthenticated, navigate, redirect]);
 
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Email is invalid';
-    }
-    
-    if (!password) {
-      newErrors.password = 'Password is required';
-    } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
+    if (!email || !password) { setError('Please fill in all fields.'); return; }
+    try {
+      setLoading(true);
+      setError('');
+      const result = await loginUser(email.trim(), password);
+      if (result.success) {
+        navigate(redirect, { replace: true });
+      } else {
+        setError(result.error || 'Login failed. Please try again.');
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || err.message || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    
-    setIsSubmitting(true);
-    setErrors({});
-    
-    const result = await loginUser(email, password);
-    
-    if (result.success) {
-      // Check if there's a redirect parameter
-      const urlParams = new URLSearchParams(window.location.search);
-      const redirect = urlParams.get('redirect');
-      navigate(redirect || '/');
-    } else {
-      setErrors({ general: result.error || 'Login failed. Please try again.' });
-    }
-    
-    setIsSubmitting(false);
   };
 
   return (
-    <div className="leetcode-auth">
-      <div className="leetcode-auth__container">
-        <div className="leetcode-auth__logo">
-          <h1 className="leetcode-auth__brand">CipherSQLStudio</h1>
-        </div>
-        
-        <form className="leetcode-auth__form" onSubmit={handleSubmit}>
-          {(errors.general || authError) && (
-            <div className="leetcode-auth__error">
-              {errors.general || authError}
-            </div>
-          )}
-          
-          <div className="leetcode-auth__field">
+    <div className="auth-page">
+      <div className="auth-card">
+        <h1 className="auth-card__brand" onClick={() => navigate('/')}>
+          CipherSQLStudio
+        </h1>
+        <p className="auth-card__tagline">Sign in to continue</p>
+
+        {error && <div className="auth-card__error">{error}</div>}
+
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="auth-form__group">
             <input
+              className="auth-form__input"
               type="email"
-              id="email"
-              className={`leetcode-auth__input ${errors.email ? 'leetcode-auth__input--error' : ''}`}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
-              disabled={isSubmitting}
+              value={email}
+              onChange={e => setEmail(e.target.value)}
               autoComplete="email"
+              autoFocus
             />
-            {errors.email && (
-              <div className="leetcode-auth__field-error">{errors.email}</div>
-            )}
           </div>
-          
-          <div className="leetcode-auth__field">
+          <div className="auth-form__group">
             <input
+              className="auth-form__input"
               type="password"
-              id="password"
-              className={`leetcode-auth__input ${errors.password ? 'leetcode-auth__input--error' : ''}`}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
-              disabled={isSubmitting}
+              value={password}
+              onChange={e => setPassword(e.target.value)}
               autoComplete="current-password"
             />
-            {errors.password && (
-              <div className="leetcode-auth__field-error">{errors.password}</div>
-            )}
           </div>
-          
           <button
+            className="auth-form__submit"
             type="submit"
-            className="leetcode-auth__button"
-            disabled={isSubmitting}
+            disabled={loading}
           >
-            {isSubmitting ? 'Signing in...' : 'Sign In'}
+            {loading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
-        
-        <div className="leetcode-auth__footer">
-          <span className="leetcode-auth__footer-text">
-            Don't have an account?{' '}
-            <Link 
-              to={`/signup${window.location.search}`} 
-              className="leetcode-auth__link"
-            >
-              Sign up
-            </Link>
-          </span>
-        </div>
+
+        <p className="auth-card__footer">
+          Don't have an account?{' '}
+          <Link to="/signup" className="auth-card__link">Sign up</Link>
+        </p>
       </div>
     </div>
   );
 }
 
 export default Login;
-

@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { signup, login, getCurrentUser } from '../services/api';
 
 const AuthContext = createContext();
@@ -17,29 +17,46 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const doLogout = useCallback(() => {
+    setToken(null);
+    setUser(null);
+    setError(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  }, []);
+
   // Load user from localStorage on mount
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-    
+
     if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-      
+      try {
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+      } catch (_) {
+        // corrupted localStorage
+        doLogout();
+        setLoading(false);
+        return;
+      }
+
       // Verify token is still valid
       getCurrentUser(storedToken)
         .then(response => {
-          if (response.success) {
-            setUser(response.user);
-            localStorage.setItem('user', JSON.stringify(response.user));
+          // axios wraps response in .data
+          const data = response.data || response;
+          if (data.success) {
+            setUser(data.user);
+            localStorage.setItem('user', JSON.stringify(data.user));
           } else {
             // Token is invalid, clear storage
-            logout();
+            doLogout();
           }
         })
         .catch(() => {
-          // Token is invalid, clear storage
-          logout();
+          // Network error or invalid token — keep user logged in optimistically
+          // only clear if it was a 401 (handled by axios interceptor)
         })
         .finally(() => {
           setLoading(false);
@@ -47,16 +64,16 @@ export const AuthProvider = ({ children }) => {
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [doLogout]);
 
-  const signupUser = async (username, email, password) => {
+  const signupUser = useCallback(async (username, email, password) => {
     try {
       setError(null);
       const response = await signup(username, email, password);
-      
+
       // Check if response.data exists (axios wraps response)
       const data = response.data || response;
-      
+
       if (data.success) {
         setToken(data.token);
         setUser(data.user);
@@ -69,23 +86,23 @@ export const AuthProvider = ({ children }) => {
         return { success: false, error: errorMsg };
       }
     } catch (err) {
-      const errorMessage = err.response?.data?.error || 
-                          err.response?.data?.message || 
-                          err.message || 
-                          'Signup failed. Please try again.';
+      const errorMessage = err.response?.data?.error ||
+        err.response?.data?.message ||
+        err.message ||
+        'Signup failed. Please try again.';
       setError(errorMessage);
       return { success: false, error: errorMessage };
     }
-  };
+  }, []);
 
-  const loginUser = async (email, password) => {
+  const loginUser = useCallback(async (email, password) => {
     try {
       setError(null);
       const response = await login(email, password);
-      
+
       // Check if response.data exists (axios wraps response)
       const data = response.data || response;
-      
+
       if (data.success) {
         setToken(data.token);
         setUser(data.user);
@@ -98,24 +115,18 @@ export const AuthProvider = ({ children }) => {
         return { success: false, error: errorMsg };
       }
     } catch (err) {
-      const errorMessage = err.response?.data?.error || 
-                          err.response?.data?.message || 
-                          err.message || 
-                          'Login failed. Please try again.';
+      const errorMessage = err.response?.data?.error ||
+        err.response?.data?.message ||
+        err.message ||
+        'Login failed. Please try again.';
       setError(errorMessage);
       return { success: false, error: errorMessage };
     }
-  };
+  }, []);
 
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    setError(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-  };
+  const logout = doLogout;
 
-  const value = {
+  const value = React.useMemo(() => ({
     user,
     token,
     loading,
@@ -124,7 +135,7 @@ export const AuthProvider = ({ children }) => {
     loginUser,
     logout,
     isAuthenticated: !!user && !!token
-  };
+  }), [user, token, loading, error, signupUser, loginUser, logout]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

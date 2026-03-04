@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
-const Assignment = require('../models/Assignment');
+const { pool } = require('../config/postgres');
 
 // Lazy initialization of OpenAI client - only require and create if API key is available
 let openai = null;
@@ -32,11 +32,11 @@ function getOpenAIClient() {
 function generateFallbackHint(assignment, userQuery) {
   const difficulty = assignment.difficulty.toLowerCase();
   const hasQuery = userQuery && userQuery.trim().length > 0;
-  
+
   let hint = '';
-  
+
   if (difficulty === 'easy') {
-    hint = hasQuery 
+    hint = hasQuery
       ? `For this easy problem, review your SELECT statement. Make sure you're selecting the correct columns and using the right table names. Check if you need to use WHERE clause to filter results.`
       : `Start by identifying which table(s) contain the data you need. Use SELECT to choose the columns, and consider if you need WHERE to filter rows.`;
   } else if (difficulty === 'medium') {
@@ -48,7 +48,7 @@ function generateFallbackHint(assignment, userQuery) {
       ? `For this hard problem, you may need complex JOINs, subqueries, or window functions. Review your query logic step by step. Consider breaking it down into smaller parts.`
       : `This is a challenging problem. Start by understanding the relationships between tables. You may need multiple JOINs, subqueries, or advanced SQL functions.`;
   }
-  
+
   // Add specific hints based on question content
   const questionLower = assignment.question.toLowerCase();
   if (questionLower.includes('count') || questionLower.includes('number')) {
@@ -69,7 +69,7 @@ function generateFallbackHint(assignment, userQuery) {
   if (questionLower.includes('order') || questionLower.includes('sort')) {
     hint += ' Use ORDER BY to sort your results.';
   }
-  
+
   return hint;
 }
 
@@ -92,9 +92,9 @@ Difficulty Level: ${assignment.difficulty}
 
 Sample Tables Available:
 ${assignment.sampleTables.map(table => {
-  return `Table: ${table.tableName}
+      return `Table: ${table.tableName}
 Columns: ${table.columns.map(col => `${col.columnName} (${col.dataType})`).join(', ')}`;
-}).join('\n\n')}
+    }).join('\n\n')}
 
 Student's Current Query:
 ${userQuery || '(No query submitted yet)'}
@@ -126,7 +126,7 @@ Provide your hint now:`;
         temperature: 0.7,
         max_tokens: 150
       });
-      
+
       const aiHint = completion.choices[0].message.content.trim();
       console.log('✅ OpenAI hint generated successfully');
       return aiHint;
@@ -137,7 +137,7 @@ Provide your hint now:`;
       return generateFallbackHint(assignment, userQuery);
     }
   }
-  
+
   // Use fallback hints if OpenAI is not configured
   console.log('📝 Using built-in fallback hints (OpenAI API key not configured)');
   return generateFallbackHint(assignment, userQuery);
@@ -153,22 +153,28 @@ router.post('/', [
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    
+
     const { assignmentId, query } = req.body;
-    
-    // Get assignment
-    const assignment = await Assignment.findById(assignmentId);
-    if (!assignment) {
+
+    // Get assignment from PostgreSQL
+    const aResult = await pool.query(
+      `SELECT title, description, difficulty, question,
+              sample_tables AS "sampleTables"
+       FROM assignments WHERE id = $1`,
+      [assignmentId]
+    );
+    if (aResult.rows.length === 0) {
       return res.status(404).json({ error: 'Assignment not found' });
     }
-    
+    const assignment = aResult.rows[0];
+
     // Generate hint (will use fallback if OpenAI is not configured)
     const hint = await generateHint(assignment, query || '');
-    
+
     // Include hint source in response for debugging
     const hintSource = getOpenAIClient() ? 'openai' : 'built-in';
-    
-    res.json({ 
+
+    res.json({
       hint,
       source: hintSource // Optional: helps frontend know which source was used
     });
