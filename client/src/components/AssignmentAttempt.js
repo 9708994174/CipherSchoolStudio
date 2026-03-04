@@ -250,6 +250,7 @@ function AssignmentAttempt() {
 
   const { id } = useParams();
   const navigate = useNavigate();
+  console.log('[AssignmentAttempt] Rendering with id from useParams:', id);
   const [assignment, setAssignment] = useState(null);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState(null);
@@ -519,6 +520,7 @@ function AssignmentAttempt() {
 
   useEffect(() => {
     // Reset state when assignment changes
+    console.log('[AssignmentAttempt] useEffect triggered with id:', id, 'URL:', window.location.pathname);
     setAssignment(null);
     setQuery('');
     setResults(null);

@@ -176,6 +176,7 @@ function StreakBadge() {
 // â”€â”€ Route wrapper for assignment pages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function AssignmentRouteWrapper() {
   const { id: assignmentId } = useParams();
+  console.log('[AssignmentRouteWrapper] Rendering with assignmentId:', assignmentId);
   return (
     <>
       <TopNavBar />
@@ -537,9 +538,14 @@ function TopNavBar() {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
+                            console.log('[Palette Click] Assignment:', a.title, 'ID:', a._id);
+                            console.log('[Palette Click] Current URL:', window.location.pathname);
+                            console.log('[Palette Click] Navigating to:', `/assignment/${a._id}`);
+                            console.log('[Palette Click] Index:', idx, 'Total:', assignments.length);
                             setQPaletteOpen(false);
                             setCurrentAssignmentIndex(idx);
                             navigate(`/assignment/${a._id}`);
+                            console.log('[Palette Click] navigate() called. New URL should be:', `/assignment/${a._id}`);
                           }}
                         >
                           <span className="app__question-palette-number">{idx + 1}</span>
