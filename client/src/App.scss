@@ -867,18 +867,18 @@
     }
 
     &--active {
-      background: rgba($yellow, .12);
-      border-color: rgba($yellow, .4);
-      color: $yellow;
-      font-weight: 600;
+      background: #ffa116;
+      border-color: #ffa116;
+      color: #262626;
+      font-weight: 700;
     }
   }
 
   &__new-btn {
     padding: 6px 18px;
     border-radius: $r-sm;
-    background: $yellow;
-    color: #1a1a1a;
+    background: #ffa116;
+    color: #262626;
     font-size: 13px;
     font-weight: 700;
     border: none;
@@ -886,7 +886,7 @@
     transition: all .15s;
 
     &:hover {
-      background: $yellow-dark;
+      background: #e5910e;
     }
   }
 
@@ -929,7 +929,7 @@
     }
 
     &:hover svg {
-      color: $yellow;
+      color: #ffa116;
     }
   }
 
@@ -956,7 +956,7 @@
     transition: color .12s;
 
     .discuss-post:hover & {
-      color: $yellow;
+      color: #ffa116;
     }
   }
 
@@ -1087,10 +1087,9 @@
   &__count {
     font-size: 11px;
     font-weight: 700;
-    color: #d4920a;
-    background: rgba(212, 146, 10, .12);
-    border: 1px solid rgba(212, 146, 10, .25);
-    padding: 3px 10px;
+    color: #262626;
+    background: #ffa116;
+    padding: 1px 11px;
     border-radius: 99px;
     white-space: nowrap;
   }
@@ -1138,12 +1137,11 @@
 
   &__level {
     font-size: 11px;
-    font-weight: 600;
-    padding: 3px 10px;
+    font-weight: 700;
+    padding: 1px 11px;
     border-radius: 99px;
-    background: rgba($yellow, .1);
-    border: 1px solid rgba($yellow, .25);
-    color: $yellow;
+    background: #ffa116;
+    color: #262626;
     white-space: nowrap;
     flex-shrink: 0;
   }
@@ -1213,10 +1211,10 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: rgba($yellow, .12);
-    color: $yellow;
-    font-size: 12px;
-    font-weight: 700;
+    background: #ffa116;
+    color: #262626;
+    font-size: 13px;
+    font-weight: 800;
     flex-shrink: 0;
   }
 
@@ -1278,7 +1276,7 @@
     outline: none;
 
     &:focus {
-      border-color: $yellow;
+      border-color: #ffa116;
     }
   }
 
@@ -1296,7 +1294,7 @@
     outline: none;
 
     &:focus {
-      border-color: $yellow;
+      border-color: #ffa116;
     }
   }
 
@@ -1324,16 +1322,16 @@
 
   &__submit {
     padding: 8px 24px;
-    background: $yellow;
+    background: #ffa116;
     border: none;
     border-radius: $r-sm;
-    color: #1a1a1a;
+    color: #262626;
     font-size: 13px;
     font-weight: 700;
     cursor: pointer;
 
     &:hover {
-      background: $yellow-dark;
+      background: #e5910e;
     }
 
     &:disabled {
@@ -1359,7 +1357,7 @@
   width: 20px;
   height: 20px;
   border: 2px solid $border;
-  border-top-color: $yellow;
+  border-top-color: #ffa116;
   border-radius: 50%;
   animation: spin .8s linear infinite;
 }
@@ -1402,8 +1400,8 @@
   align-items: center;
   gap: 8px;
   padding: 10px 28px;
-  background: $yellow;
-  color: #1a1a1a;
+  background: #ffa116;
+  color: #262626;
   font-size: 14px;
   font-weight: 700;
   border: none;
@@ -1466,8 +1464,8 @@
   gap: 10px;
 
   &:focus-within {
-    border-color: $yellow;
-    background: rgba($yellow, .04);
+    border-color: #ffa116;
+    background: rgba(255, 161, 22, .04);
   }
 }
 
@@ -1491,8 +1489,8 @@
 .discuss-comments__post-btn {
   align-self: flex-end;
   padding: 6px 20px;
-  background: $yellow;
-  color: #1a1a1a;
+  background: #ffa116;
+  color: #262626;
   border: none;
   border-radius: $r-sm;
   font-size: 13px;
@@ -2050,11 +2048,10 @@
 .trending-card__count {
   font-size: 11px;
   font-weight: 700;
-  color: #d4920a;
-  background: rgba(212, 146, 10, .12);
-  border: 1px solid rgba(212, 146, 10, .3);
-  padding: 1px 8px;
-  border-radius: 4px;
+  color: #262626;
+  background: #ffa116;
+  padding: 1px 11px;
+  border-radius: 99px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -2130,8 +2127,8 @@
   height: 28px;
   min-width: 28px;
   border-radius: 50%;
-  background: rgba($yellow, .12);
-  color: $yellow;
+  background: #ffa116;
+  color: #262626;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2232,8 +2229,9 @@
   text-transform: capitalize;
 
   &--upcoming {
-    color: $yellow;
-    background: rgba($yellow, .1);
+    color: #262626;
+    background: #ffa116;
+    font-weight: 700;
   }
 
   &--active {

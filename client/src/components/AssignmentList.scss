@@ -168,10 +168,9 @@
   }
 
   &--active {
-    background: rgba($yellow, .12);
-    border-color: rgba($yellow, .45);
-    color: $yellow;
-    font-weight: 600;
+    background: #ffa116;
+    color: #262626;
+    font-weight: 700;
   }
 }
 

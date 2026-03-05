@@ -174,7 +174,7 @@ function LeftSidebar({ assignments, stats, activityData, onTopicFilter }) {
 // ══════════════════════════════════════════════════════════════
 //  TRENDING SECTION (right sidebar)
 // ══════════════════════════════════════════════════════════════
-function TrendingSection({ assignments = [], onCompanyFilter }) {
+function TrendingSection({ assignments = [], onCompanyFilter, onTopicFilter }) {
   const [search, setSearch] = useState('');
 
   const clusters = useMemo(() => {
@@ -236,12 +236,12 @@ function TrendingSection({ assignments = [], onCompanyFilter }) {
         <div className="trending-card__header">
           <h3 className="trending-card__title">Popular Topics</h3>
         </div>
-        <div className="trending-card__list">
+        <div className="trending-card__pills">
           {filteredTops.map(t => (
-            <div key={t.name} className="trending-card__topic-row">
-              <span className="trending-card__name">{t.name}</span>
-              <span className="trending-card__count">{t.count}</span>
-            </div>
+            <button key={t.name} className="trending-pill" onClick={() => onTopicFilter(t.name)}>
+              <span className="trending-pill__name">{t.name}</span>
+              <span className="trending-pill__count">{t.count}</span>
+            </button>
           ))}
           {filteredTops.length === 0 && <div className="trending-card__empty">No topics found</div>}
         </div>
@@ -391,7 +391,7 @@ function AssignmentList() {
         )}
       </main>
 
-      <TrendingSection assignments={assignments} onCompanyFilter={setCompanyTopic} />
+      <TrendingSection assignments={assignments} onCompanyFilter={setCompanyTopic} onTopicFilter={setSideTopic} />
     </div>
   );
 }
