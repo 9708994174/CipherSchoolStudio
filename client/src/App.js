@@ -9,7 +9,7 @@ import Login from './components/Login';
 import Signup from './components/Signup';
 import Profile from './components/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
-import { getAssignments, getContests, getContestById, joinContest, submitContestAnswer, getContestLeaderboard, getContestHistory, getAllDiscussions, createPost as apiCreatePost, likePost as apiLikePost, getComments, postComment } from './services/api';
+import { getAssignments, getContests, getContestById, joinContest, getContestLeaderboard, getContestHistory, getAllDiscussions, createPost as apiCreatePost, likePost as apiLikePost, getComments, postComment } from './services/api';
 import './App.scss';
 
 // =============================================================================
@@ -537,6 +537,7 @@ function TopNavBar() {
   const isHomePage = location.pathname === '/';
   const isDiscussPage = location.pathname === '/discuss';
   const isInterviewPage = location.pathname === '/interview';
+  const isContestPage = location.pathname === '/contest';
 
   const { execute, submit } = useQuery();
   const { assignments, currentIndex, setCurrentAssignmentIndex,
@@ -610,6 +611,12 @@ function TopNavBar() {
               onClick={() => navigate('/interview')}
             >
               Interview
+            </button>
+            <button
+              className={`app__nav-link ${location.pathname === '/contest' ? 'app__nav-link--active' : ''}`}
+              onClick={() => navigate('/contest')}
+            >
+              Contest
             </button>
           </nav>
         )}
@@ -831,8 +838,7 @@ function TopNavBar() {
 //  Contest Page (Real API)
 // -----------------------------------------------------------------------------
 function ContestPage() {
-  const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [contests, setContests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('past');
@@ -1099,6 +1105,18 @@ function App() {
                       <TopNavBar />
                       <main className="app__main">
                         <DiscussPage />
+                      </main>
+                    </>
+                  }
+                />
+                <Route
+                <Route
+                  path="/contest"
+                  element={
+                    <>
+                      <TopNavBar />
+                      <main className="app__main">
+                        <ContestPage />
                       </main>
                     </>
                   }
