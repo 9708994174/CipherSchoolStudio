@@ -295,6 +295,10 @@ function AssignmentAttempt() {
     }
   }, [isAuthenticated, user, userId]);
   const [isResizing, setIsResizing] = useState(false);
+  const [leftPanelWidth, setLeftPanelWidth] = useState(() => {
+    const saved = localStorage.getItem('leftPanelWidth');
+    return saved ? parseFloat(saved) : 50; // Default 50%
+  });
   const [editorHeight, setEditorHeight] = useState(() => {
     const saved = localStorage.getItem('editorHeight');
     return saved ? parseFloat(saved) : 60; // Default 60%
@@ -842,6 +846,7 @@ function AssignmentAttempt() {
 
       // Constrain between 15% and 85% to allow more flexibility
       const constrainedWidth = Math.max(15, Math.min(85, newWidth));
+      setLeftPanelWidth(constrainedWidth);
       localStorage.setItem('leftPanelWidth', constrainedWidth.toString());
     };
 
@@ -1151,6 +1156,7 @@ function AssignmentAttempt() {
         {/* Left Panel - Problem Description */}
         <div
           className="assignment-attempt__left-panel"
+          style={!isMobile ? { width: `${leftPanelWidth}%` } : {}}
         >
           <div className="problem-panel">
             {/* Tabs */}
@@ -1170,13 +1176,7 @@ function AssignmentAttempt() {
                   <div className="problem-panel__description-scroll">
                     <div className="problem-panel__header">
                       <h2 className="problem-panel__title">{assignment.title}</h2>
-                      <div className="problem-panel__header-right">
-                        <span className="problem-panel__active-users" title="Students currently solving">
-                          <span className="problem-panel__active-dot" />
-                          {activeUsers} solving now
-                        </span>
-                        <span className={`problem-panel__difficulty problem-panel__difficulty--${assignment.difficulty.toLowerCase()}`}>{assignment.difficulty}</span>
-                      </div>
+                      <span className={`problem-panel__difficulty problem-panel__difficulty--${assignment.difficulty.toLowerCase()}`}>{assignment.difficulty}</span>
                     </div>
                     <div className="problem-panel__tags">
                       <button className="problem-panel__tag-btn">Topics</button>
@@ -1203,6 +1203,10 @@ function AssignmentAttempt() {
                   </div>
                   {/* Fixed bottom engagement bar */}
                   <div className="problem-panel__engagement">
+                    <div className="problem-panel__engagement-item problem-panel__engagement-item--active" title="Students currently solving">
+                      <span className="problem-panel__active-dot" />
+                      <span>{activeUsers} solving now</span>
+                    </div>
                     <div className="problem-panel__engagement-item" title="Likes">
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z" />

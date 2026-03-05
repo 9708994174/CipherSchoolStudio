@@ -10,8 +10,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-producti
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 // Generate JWT token
-const generateToken = (userId) => {
-  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+const generateToken = (userId, username) => {
+  return jwt.sign({ userId, username }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 };
 
 // Ensure users table exists in PostgreSQL
@@ -99,7 +99,7 @@ router.post('/signup', [
     const user = result.rows[0];
 
     // Generate JWT token
-    const token = generateToken(user.id);
+    const token = generateToken(user.id, user.username);
 
     res.status(201).json({
       success: true,
@@ -184,7 +184,7 @@ router.post('/login', [
     }
 
     // Generate JWT token
-    const token = generateToken(user.id);
+    const token = generateToken(user.id, user.username);
 
     res.json({
       success: true,

@@ -47,7 +47,7 @@ function getUser(req) {
         const token = req.headers.authorization?.replace('Bearer ', '');
         if (token) {
             const d = jwt.verify(token, process.env.JWT_SECRET || 'cipher_secret');
-            return { id: String(d.userId || d.id), username: d.username || 'User' };
+            return { id: String(d.userId || d.id), username: d.username || 'Anonymous' };
         }
     } catch { }
     return { id: 'anonymous', username: 'Anonymous' };

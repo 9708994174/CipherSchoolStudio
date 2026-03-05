@@ -436,22 +436,22 @@ function DiscussPage() {
 function InterviewPage() {
   const navigate = useNavigate();
   const companies = [
-    { name: 'Google', icon: 'G', count: 15, topics: ['Window Functions', 'Aggregation', 'Joins'] },
-    { name: 'Amazon', icon: 'A', count: 12, topics: ['Subqueries', 'CTEs', 'Window Functions'] },
-    { name: 'Meta', icon: 'M', count: 10, topics: ['String Functions', 'Aggregation', 'Joins'] },
-    { name: 'Microsoft', icon: 'MS', count: 8, topics: ['Stored Procedures', 'Performance', 'Joins'] },
-    { name: 'Uber', icon: 'U', count: 7, topics: ['Geospatial Queries', 'Window Functions'] },
-    { name: 'Airbnb', icon: 'AB', count: 6, topics: ['Date Functions', 'Aggregation'] },
-    { name: 'Netflix', icon: 'N', count: 5, topics: ['Ranking', 'Window Functions'] },
-    { name: 'Apple', icon: 'AP', count: 5, topics: ['CTEs', 'Complex Joins'] },
+    { name: 'Google', icon: 'google', count: 15, topics: ['Window Functions', 'Aggregation', 'Joins'] },
+    { name: 'Amazon', icon: 'amazon', count: 12, topics: ['Subqueries', 'CTEs', 'Window Functions'] },
+    { name: 'Meta', icon: 'meta', count: 10, topics: ['String Functions', 'Aggregation', 'Joins'] },
+    { name: 'Microsoft', icon: 'microsoft', count: 8, topics: ['Stored Procedures', 'Performance', 'Joins'] },
+    { name: 'Uber', icon: 'uber', count: 7, topics: ['Geospatial Queries', 'Window Functions'] },
+    { name: 'Airbnb', icon: 'airbnb', count: 6, topics: ['Date Functions', 'Aggregation'] },
+    { name: 'Netflix', icon: 'netflix', count: 5, topics: ['Ranking', 'Window Functions'] },
+    { name: 'Apple', icon: 'apple', count: 5, topics: ['CTEs', 'Complex Joins'] },
   ];
   const studyPlans = [
-    { icon: 'I', title: 'SQL Fundamentals', desc: 'Master SELECT, WHERE, JOIN, GROUP BY, HAVING', level: 'Beginner', problems: 12 },
-    { icon: 'II', title: 'Query Optimization', desc: 'Indexing strategies, execution plans, and query tuning', level: 'Advanced', problems: 8 },
-    { icon: 'III', title: 'Problem Patterns', desc: 'Running totals, gaps & islands, pivoting, recursive queries', level: 'Intermediate', problems: 15 },
-    { icon: 'IV', title: 'Mock Interviews', desc: 'Timed SQL challenges simulating real interview conditions', level: 'All Levels', problems: 10 },
-    { icon: 'V', title: 'Database Design', desc: 'Normalization, schema design, ER diagrams', level: 'Intermediate', problems: 6 },
-    { icon: 'VI', title: 'Security & Best Practices', desc: 'SQL injection prevention and parameterized queries', level: 'Advanced', problems: 4 },
+    { icon: '1', title: 'SQL Fundamentals', desc: 'Master SELECT, WHERE, JOIN, GROUP BY, HAVING', level: 'Beginner', problems: 12 },
+    { icon: '2', title: 'Query Optimization', desc: 'Indexing strategies, execution plans, and query tuning', level: 'Advanced', problems: 8 },
+    { icon: '3', title: 'Problem Patterns', desc: 'Running totals, gaps & islands, pivoting, recursive queries', level: 'Intermediate', problems: 15 },
+    { icon: '4', title: 'Mock Interviews', desc: 'Timed SQL challenges simulating real interview conditions', level: 'All Levels', problems: 10 },
+    { icon: '5', title: 'Database Design', desc: 'Normalization, schema design, ER diagrams', level: 'Intermediate', problems: 6 },
+    { icon: '6', title: 'Security & Best Practices', desc: 'SQL injection prevention and parameterized queries', level: 'Advanced', problems: 4 },
   ];
   const tips = [
     { title: 'Always clarify requirements', desc: 'Ask about edge cases, NULL handling, and expected output format.' },
@@ -473,7 +473,7 @@ function InterviewPage() {
           <div className="interview-page__company-grid">
             {companies.map(c => (
               <div key={c.name} className="interview-company-card" onClick={() => navigate('/')}>
-                <span className="interview-company-card__icon">{c.icon}</span>
+                <span className="interview-company-card__icon"><img src={`https://logo.clearbit.com/${c.icon}.com`} alt={c.name} width="28" height="28" style={{borderRadius: "6px"}} onError={(e) => { e.target.style.display="none"; e.target.parentNode.textContent = c.name.charAt(0); }} /></span>
                 <div className="interview-company-card__info">
                   <span className="interview-company-card__name">{c.name}</span>
                   <span className="interview-company-card__topics">{c.topics.join(' · ')}</span>

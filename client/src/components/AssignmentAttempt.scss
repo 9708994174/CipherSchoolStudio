@@ -69,14 +69,14 @@
   background: $bg-base;
   border-bottom: 1px solid $border;
   flex-shrink: 0;
-  width: 100% !important;
-  height: 50% !important;
+  width: 100%;
+  height: 50%;
   min-height: 280px;
   max-height: 60%;
 
   @include lg {
-    width: 50% !important;
-    height: 100% !important;
+    width: 50%;
+    height: 100%;
     min-height: unset;
     max-height: none;
     border-bottom: none;

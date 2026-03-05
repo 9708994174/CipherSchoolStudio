@@ -827,15 +827,15 @@ router.post('/', optionalAuth, [
     // Save user progress to PostgreSQL
     await pool.query(
       `INSERT INTO user_progress (user_id, assignment_id, sql_query, is_completed, attempt_count, last_attempt, last_submission, updated_at)
-       VALUES ($1, $2, $3, $4, 1, NOW(), $5, NOW())
+       VALUES ($1, $2, $3, $4, 1, NOW(), $5::jsonb, NOW())
        ON CONFLICT (user_id, assignment_id) DO UPDATE SET
          sql_query      = EXCLUDED.sql_query,
          is_completed   = EXCLUDED.is_completed,
          attempt_count  = user_progress.attempt_count + 1,
          last_attempt   = NOW(),
-         last_submission = EXCLUDED.last_submission,
+         last_submission = EXCLUDED.last_submission::jsonb,
          updated_at     = NOW()`,
-      [userId, assignmentId, sanitizedQuery, allPassed, JSON.stringify(submission)]
+      [userId, assignmentId, sanitizedQuery, allPassed, JSON.stringify({query: sanitizedQuery, passed: allPassed, testResults: testResults.map(t => ({name: t.name, passed: t.passed})), submittedAt: new Date().toISOString()})]
     );
 
     // Return real validation results with LeetCode-style stats
