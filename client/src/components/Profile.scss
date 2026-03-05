@@ -28,10 +28,9 @@
     &__login-prompt {
         text-align: center;
 
-        span {
-            font-size: 40px;
+        svg {
             display: block;
-            margin-bottom: 12px;
+            margin: 0 auto 12px;
         }
 
         h2 {
@@ -71,7 +70,7 @@
     }
 }
 
-// â”€â”€ LEFT SIDEBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- LEFT SIDEBAR
 .profile-sidebar {
     width: 260px;
     min-width: 260px;
@@ -170,7 +169,7 @@
     }
 }
 
-// â”€â”€ MAIN CONTENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- MAIN CONTENT
 .profile-main {
     flex: 1;
     min-width: 0;
@@ -179,7 +178,7 @@
     gap: 16px;
 }
 
-// â”€â”€ Stats Row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- Stats Row
 .profile-stats-row {
     display: flex;
     gap: 12px;
@@ -269,6 +268,9 @@
 
 .profile-badge-icon {
     font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .profile-badge-info {
@@ -289,7 +291,7 @@
     letter-spacing: .3px;
 }
 
-// â”€â”€ Heatmap â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- Heatmap (GitHub-style contribution grid)
 .profile-heatmap-card {
     background: $bg-panel;
     border: 1px solid $border;
@@ -321,51 +323,106 @@
     color: $text-3;
 }
 
-.profile-heatmap {
-    display: flex;
-    gap: 3px;
+.profile-heatmap-grid-wrap {
     overflow-x: auto;
     scrollbar-width: thin;
     scrollbar-color: #333 transparent;
 }
 
-.profile-heatmap-month {
+.profile-heatmap-month-row {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-}
-
-.profile-heatmap-cells {
-    display: flex;
-    flex-wrap: wrap;
     gap: 2px;
-    width: 56px;
+    margin-bottom: 4px;
+    padding-left: 32px;
 }
 
-.profile-heatmap-cell {
-    width: 8px;
-    height: 8px;
-    background: rgba(255, 255, 255, .05);
-    border-radius: 2px;
-    transition: background .2s;
-
-    &--active {
-        background: rgba(44, 187, 93, .4);
-    }
-
-    &:hover {
-        outline: 1px solid rgba(255, 255, 255, .2);
-    }
+.profile-heatmap-day-spacer {
+    width: 0;
+    flex-shrink: 0;
 }
 
-.profile-heatmap-label {
+.profile-heatmap-month-lbl {
     font-size: 10px;
     color: $text-3;
     font-weight: 500;
+    min-width: 10px;
 }
 
-// â”€â”€ Tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+.profile-heatmap-grid {
+    display: flex;
+    gap: 0;
+}
+
+.profile-heatmap-day-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-right: 4px;
+    flex-shrink: 0;
+
+    span {
+        height: 10px;
+        font-size: 9px;
+        color: $text-3;
+        line-height: 10px;
+        min-width: 28px;
+        text-align: right;
+    }
+}
+
+.profile-heatmap-columns {
+    display: flex;
+    gap: 2px;
+}
+
+.profile-heatmap-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.profile-heatmap-cell {
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 255, 255, .04);
+    border-radius: 2px;
+    transition: outline .15s;
+
+    &--active {
+        // Green intensity set via inline style
+    }
+
+    &--empty {
+        background: transparent;
+    }
+
+    &:hover {
+        outline: 1px solid rgba(255, 255, 255, .3);
+        outline-offset: -1px;
+    }
+}
+
+.profile-heatmap-legend {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    justify-content: flex-end;
+    margin-top: 8px;
+    font-size: 10px;
+    color: $text-3;
+
+    .profile-heatmap-cell {
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+
+        &:hover {
+            outline: none;
+        }
+    }
+}
+
+// -- Tabs
 .profile-tabs-card {
     background: $bg-panel;
     border: 1px solid $border;

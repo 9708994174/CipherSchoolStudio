@@ -64,11 +64,11 @@ router.get('/', async (req, res) => {
       LIMIT 15
     `, [user.id]);
 
-        // Get activity heatmap (last 1 year)
+        // Get activity heatmap (last 1 year) - only count solved days
         const { rows: activityRows } = await pool.query(`
       SELECT DATE(updated_at) as day, COUNT(*) as cnt
       FROM user_progress
-      WHERE user_id = $1 AND updated_at > NOW() - INTERVAL '1 year'
+      WHERE user_id = $1 AND updated_at > NOW() - INTERVAL '1 year' AND is_completed = true
       GROUP BY DATE(updated_at)
       ORDER BY day
     `, [user.id]);

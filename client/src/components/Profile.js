@@ -32,7 +32,7 @@ function Profile() {
         return (
             <div className="profile-page profile-page--empty">
                 <div className="profile-page__login-prompt">
-                    <span className="profile-page__login-icon">ðŸ”’</span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>
                     <h2>Sign in to view your profile</h2>
                     <p>Track your progress, streaks, and submissions</p>
                     <button className="profile-page__login-btn" onClick={() => navigate('/login')}>Sign In</button>
@@ -63,21 +63,45 @@ function Profile() {
     const circumference = 2 * Math.PI * 52;
     const offset = circumference - (pct / 100) * circumference;
 
-    // Build 12-month heatmap
-    const months = [];
-    const today = new Date();
-    for (let m = 11; m >= 0; m--) {
-        const d = new Date(today.getFullYear(), today.getMonth() - m, 1);
-        const label = d.toLocaleString('en', { month: 'short' });
-        const weeks = [];
-        const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0);
-        for (let day = 1; day <= lastDay.getDate(); day++) {
-            const dt = new Date(d.getFullYear(), d.getMonth(), day);
-            const key = dt.toISOString().slice(0, 10);
-            weeks.push({ key, count: activity[key] || 0 });
+    // Build GitHub-style 52-week heatmap grid (7 rows x ~52 cols)
+    const heatmapWeeks = [];
+    const heatmapToday = new Date();
+    heatmapToday.setHours(0, 0, 0, 0);
+    const startDate = new Date(heatmapToday);
+    startDate.setDate(startDate.getDate() - 364 - startDate.getDay());
+
+    let totalActiveDays = 0;
+    let currentWeek = [];
+    const monthLabels = [];
+    let lastMonth = -1;
+
+    for (let d = new Date(startDate); d <= heatmapToday; d.setDate(d.getDate() + 1)) {
+        const key = d.toISOString().slice(0, 10);
+        const count = activity[key] || 0;
+        if (count > 0) totalActiveDays++;
+        const dayOfWeek = d.getDay();
+
+        if (d.getMonth() !== lastMonth) {
+            monthLabels.push({ weekIdx: heatmapWeeks.length, label: d.toLocaleString('en', { month: 'short' }) });
+            lastMonth = d.getMonth();
         }
-        months.push({ label, weeks });
+
+        currentWeek.push({ key, count, dayOfWeek });
+
+        if (dayOfWeek === 6) {
+            heatmapWeeks.push(currentWeek);
+            currentWeek = [];
+        }
     }
+    if (currentWeek.length > 0) heatmapWeeks.push(currentWeek);
+
+    const getGreenLevel = (count) => {
+        if (count === 0) return 'rgba(255,255,255,0.04)';
+        if (count === 1) return '#0e4429';
+        if (count <= 3) return '#006d32';
+        if (count <= 6) return '#26a641';
+        return '#39d353';
+    };
 
     const timeAgo = (dateStr) => {
         if (!dateStr) return '';
@@ -94,7 +118,7 @@ function Profile() {
     return (
         <div className="profile-page">
             <div className="profile-page__layout">
-                {/* â”€â”€ LEFT SIDEBAR â”€â”€â”€ */}
+                {/* LEFT SIDEBAR */}
                 <aside className="profile-sidebar">
                     <div className="profile-sidebar__avatar">
                         {(p.username || 'U').charAt(0).toUpperCase()}
@@ -136,9 +160,9 @@ function Profile() {
                     </div>
                 </aside>
 
-                {/* â”€â”€ MAIN CONTENT â”€â”€â”€ */}
+                {/* MAIN CONTENT */}
                 <div className="profile-main">
-                    {/* Donut + Difficulty Bars */}
+                    {/* Donut + Difficulty Bars + Streak */}
                     <div className="profile-stats-row">
                         <div className="profile-donut-card">
                             <svg className="profile-donut" viewBox="0 0 120 120">
@@ -166,12 +190,12 @@ function Profile() {
                             ))}
                         </div>
                         <div className="profile-badges-card">
-                            <div className="profile-badge-icon">ðŸ”¥</div>
+                            <div className="profile-badge-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d4920a" strokeWidth="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg></div>
                             <div className="profile-badge-info">
                                 <span className="profile-badge-value">{streak.current || 0}</span>
                                 <span className="profile-badge-label">Current Streak</span>
                             </div>
-                            <div className="profile-badge-icon">ðŸ†</div>
+                            <div className="profile-badge-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d4920a" strokeWidth="2"><path d="M6 9H4.5a2.5 2.5 0 010-5C7 4 7 8 12 10c5-2 5-6 7.5-6a2.5 2.5 0 010 5H18l-6 13-6-13z" /></svg></div>
                             <div className="profile-badge-info">
                                 <span className="profile-badge-value">{streak.max || 0}</span>
                                 <span className="profile-badge-label">Max Streak</span>
@@ -179,28 +203,70 @@ function Profile() {
                         </div>
                     </div>
 
-                    {/* Activity Heatmap */}
+                    {/* Activity Heatmap - GitHub/LeetCode style */}
                     <div className="profile-heatmap-card">
                         <div className="profile-heatmap-header">
                             <span className="profile-heatmap-title">
-                                <strong>{stats.totalSubmissions || 0}</strong> submissions in the past year
+                                <strong>{totalActiveDays}</strong> active days in the past year
                             </span>
-                            <span className="profile-heatmap-meta">Total active days: {p.activeDays || 0} Â· Max streak: {streak.max || 0}</span>
+                            <span className="profile-heatmap-meta">Total solved: {totalSolved} | Max streak: {streak.max || 0}</span>
                         </div>
-                        <div className="profile-heatmap">
-                            {months.map(m => (
-                                <div key={m.label} className="profile-heatmap-month">
-                                    <div className="profile-heatmap-cells">
-                                        {m.weeks.map(w => (
-                                            <div key={w.key} className={`profile-heatmap-cell ${w.count > 0 ? 'profile-heatmap-cell--active' : ''}`}
-                                                style={w.count > 0 ? { background: `rgba(44,187,93,${Math.min(0.3 + w.count * 0.2, 1)})` } : {}}
-                                                title={`${w.key}: ${w.count} submissions`}
-                                            />
-                                        ))}
-                                    </div>
-                                    <span className="profile-heatmap-label">{m.label}</span>
+
+                        <div className="profile-heatmap-grid-wrap">
+                            {/* Month labels */}
+                            <div className="profile-heatmap-month-row">
+                                <div className="profile-heatmap-day-spacer" />
+                                {monthLabels.map((m, i) => (
+                                    <span key={i} className="profile-heatmap-month-lbl"
+                                        style={{ gridColumnStart: m.weekIdx + 1 }}>
+                                        {m.label}
+                                    </span>
+                                ))}
+                            </div>
+
+                            <div className="profile-heatmap-grid">
+                                {/* Day labels */}
+                                <div className="profile-heatmap-day-labels">
+                                    <span></span>
+                                    <span>Mon</span>
+                                    <span></span>
+                                    <span>Wed</span>
+                                    <span></span>
+                                    <span>Fri</span>
+                                    <span></span>
                                 </div>
-                            ))}
+
+                                {/* Week columns */}
+                                <div className="profile-heatmap-columns">
+                                    {heatmapWeeks.map((week, wi) => (
+                                        <div key={wi} className="profile-heatmap-col">
+                                            {Array.from({ length: 7 }, (_, di) => {
+                                                const cell = week.find(c => c.dayOfWeek === di);
+                                                if (!cell) return <div key={di} className="profile-heatmap-cell profile-heatmap-cell--empty" />;
+                                                return (
+                                                    <div
+                                                        key={di}
+                                                        className={`profile-heatmap-cell ${cell.count > 0 ? 'profile-heatmap-cell--active' : ''}`}
+                                                        style={{ background: getGreenLevel(cell.count) }}
+                                                        title={`${cell.key}: ${cell.count} problem${cell.count !== 1 ? 's' : ''} solved`}
+                                                    />
+                                                );
+                                            })}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Legend */}
+                        <div className="profile-heatmap-legend">
+                            <span>Less</span>
+                            <div className="profile-heatmap-cell" style={{ background: 'rgba(255,255,255,0.04)' }} />
+                            <div className="profile-heatmap-cell" style={{ background: '#0e4429' }} />
+                            <div className="profile-heatmap-cell" style={{ background: '#006d32' }} />
+                            <div className="profile-heatmap-cell" style={{ background: '#26a641' }} />
+                            <div className="profile-heatmap-cell" style={{ background: '#39d353' }} />
+                            <span>More</span>
                         </div>
                     </div>
 
@@ -208,10 +274,10 @@ function Profile() {
                     <div className="profile-tabs-card">
                         <div className="profile-tabs">
                             <button className={`profile-tab ${activeTab === 'recent' ? 'profile-tab--active' : ''}`} onClick={() => setActiveTab('recent')}>
-                                ðŸ“‹ Recent AC
+                                Recent AC
                             </button>
                             <button className={`profile-tab ${activeTab === 'list' ? 'profile-tab--active' : ''}`} onClick={() => setActiveTab('list')}>
-                                ðŸ“ƒ All Solved
+                                All Solved
                             </button>
                         </div>
                         <div className="profile-tab-content">
@@ -221,7 +287,7 @@ function Profile() {
                                 recent.filter(r => activeTab === 'recent' || r.isCompleted).map((r, i) => (
                                     <div key={i} className="profile-submission-row" onClick={() => navigate(`/assignment/${r.assignmentId}`)}>
                                         <span className={`profile-submission-status ${r.isCompleted ? 'profile-submission-status--ac' : ''}`}>
-                                            {r.isCompleted ? 'âœ“' : 'â—‹'}
+                                            {r.isCompleted ? '\u2713' : '\u25CB'}
                                         </span>
                                         <span className="profile-submission-title">{r.title}</span>
                                         <span className="profile-submission-time">{timeAgo(r.time)}</span>

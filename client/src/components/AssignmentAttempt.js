@@ -124,9 +124,6 @@ function ChatPanel({ posts = [], loading, onPost, postBody, setPostBody, posting
         )}
         {!loading && posts.length === 0 && (
           <div className="chat-panel__empty">
-            <div className="chat-panel__empty-icon">
-              {type === 'solution' ? 'ðŸ“' : 'ðŸ’¬'}
-            </div>
             <p>{type === 'solution'
               ? 'No solutions yet. Be the first to share yours!'
               : 'No discussions yet. Start the conversation!'}</p>
@@ -223,7 +220,7 @@ function ChatPanel({ posts = [], loading, onPost, postBody, setPostBody, posting
             rows={1}
           />
           {type === 'solution' && postBody.trim() && !postBody.includes('\n') && (
-            <div className="chat-panel__composer-hint">ðŸ’¡ Include your SQL query above</div>
+            <div className="chat-panel__composer-hint">Include your SQL query above</div>
           )}
         </div>
         <button
@@ -923,7 +920,7 @@ function AssignmentAttempt() {
   return (
     <div className="assignment-attempt">
 
-      {/* â•â•â• LEETCODE-STYLE SUBMISSION RESULT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* â•â•â• LEETCODE-STYLE SUBMISSION RESULT â•â•â•â•â•â•”â•—â•â•â•â•â•â•â•â•â•â•â•â• */}
       {showSubmissionDialog && submissionResult && (() => {
         const rt = submissionResult.runtime || { ms: 0, beats: 0, distribution: [] };
         const mem = submissionResult.memory || { mb: 0, beats: 0, distribution: [] };
@@ -991,7 +988,7 @@ function AssignmentAttempt() {
                   return (
                     <g>
                       <circle cx={x} cy={chartH - ((data[userIdx].percentage / maxPct) * (chartH - 10)) - 12} r="10" fill="#2a2a2a" stroke="#d4920a" strokeWidth="1.5" />
-                      <text x={x} y={chartH - ((data[userIdx].percentage / maxPct) * (chartH - 10)) - 8} fill="#fff" fontSize="7" textAnchor="middle" fontWeight="700">ðŸ‘¤</text>
+                      <text x={x} y={chartH - ((data[userIdx].percentage / maxPct) * (chartH - 10)) - 8} fill="#fff" fontSize="7" textAnchor="middle" fontWeight="700">You</text>
                     </g>
                   );
                 }
@@ -1040,36 +1037,36 @@ function AssignmentAttempt() {
                     {/* Runtime card */}
                     <div className="lc-submission__metric-card">
                       <div className="lc-submission__metric-header">
-                        <span className="lc-submission__metric-icon">â±</span>
+                        <span className="lc-submission__metric-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg></span>
                         <span className="lc-submission__metric-label">Runtime</span>
-                        <span className="lc-submission__metric-info" title="Compared to other solutions">â“˜</span>
+                        <span className="lc-submission__metric-info" title="Compared to other solutions">i</span>
                       </div>
                       <div className="lc-submission__metric-value-row">
-                        <span className="lc-submission__metric-value">{rt.ms || submissionResult.complexity?.executionTime || 2}</span>
+                        <span className="lc-submission__metric-value">{rt.ms || submissionResult.complexity?.executionTime || '--'}</span>
                         <span className="lc-submission__metric-unit">ms</span>
                         <span className="lc-submission__metric-separator">|</span>
                         <span className="lc-submission__metric-label2">Beats</span>
-                        <span className="lc-submission__metric-beats">{rt.beats || 99}%</span>
-                        <span className="lc-submission__metric-fire">ðŸ”¥</span>
+                        <span className="lc-submission__metric-beats">{rt.beats || "--"}%</span>
+
                       </div>
                       <div className="lc-submission__metric-sub">
-                        <span className="lc-submission__analyze-link">âœ¨ Analyze Complexity</span>
+                        <span className="lc-submission__analyze-link"> Analyze Complexity</span>
                       </div>
                     </div>
 
                     {/* Memory card */}
                     <div className="lc-submission__metric-card">
                       <div className="lc-submission__metric-header">
-                        <span className="lc-submission__metric-icon">ðŸ’¾</span>
+                        <span className="lc-submission__metric-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="4" width="16" height="16" rx="2" /><path d="M9 9h6M9 12h6M9 15h6" /></svg></span>
                         <span className="lc-submission__metric-label">Memory</span>
                       </div>
                       <div className="lc-submission__metric-value-row">
-                        <span className="lc-submission__metric-value">{mem.mb || submissionResult.complexity?.memoryUsage || 47}</span>
+                        <span className="lc-submission__metric-value">{mem.mb || submissionResult.complexity?.memoryUsage || '--'}</span>
                         <span className="lc-submission__metric-unit">MB</span>
                         <span className="lc-submission__metric-separator">|</span>
                         <span className="lc-submission__metric-label2">Beats</span>
-                        <span className="lc-submission__metric-beats">{mem.beats || 84}%</span>
-                        <span className="lc-submission__metric-fire">ðŸ”¥</span>
+                        <span className="lc-submission__metric-beats">{mem.beats || "--"}%</span>
+                        <span className="lc-submission__metric-fire"></span>
                       </div>
                     </div>
                   </div>
@@ -1103,7 +1100,7 @@ function AssignmentAttempt() {
                       <div className="lc-submission__cases-grid">
                         {submissionResult.testResults.map((r, i) => (
                           <div key={i} className={`lc-submission__case ${r.passed ? 'lc-submission__case--pass' : 'lc-submission__case--fail'}`}>
-                            <span>{r.passed ? 'âœ“' : 'âœ—'}</span>
+                            <span>{r.passed ? '✓' : '✗'}</span>
                             <span>Case {i + 1}</span>
                           </div>
                         ))}
@@ -1116,11 +1113,11 @@ function AssignmentAttempt() {
               {/* â”€â”€ Bottom bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
               <div className="lc-submission__footer">
                 <button className="lc-submission__footer-btn" onClick={() => setShowSubmissionDialog(false)}>
-                  â† Back to Problem
+                  ← Back to Problem
                 </button>
                 {submissionResult.passed && (
                   <button className="lc-submission__footer-btn lc-submission__footer-btn--next" onClick={() => { setShowSubmissionDialog(false); navigate('/'); }}>
-                    Next Problem â†’
+                    Next Problem →
                   </button>
                 )}
                 {!submissionResult.passed && (
@@ -1203,17 +1200,17 @@ function AssignmentAttempt() {
                   <h3>Editorial</h3>
                   <div className="editorial-content">
                     <div className="editorial-section">
-                      <h4>ðŸ“Œ Approach</h4>
+                      <h4>Approach</h4>
                       <p>{assignment.editorialApproach || `This problem requires you to write a SQL query to ${(assignment.question || '').toLowerCase().replace(/write a sql query to /i, '').slice(0, 120) || 'retrieve data from the database'}.`}</p>
                     </div>
                     <div className="editorial-section">
-                      <h4>ðŸ’¡ Key Concepts</h4>
+                      <h4>Key Concepts</h4>
                       <ul>
                         {getEditorialTips(assignment).map((tip, i) => <li key={i}>{tip}</li>)}
                       </ul>
                     </div>
                     <div className="editorial-section">
-                      <h4>âš¡ Algorithm</h4>
+                      <h4> Algorithm</h4>
                       <ol>
                         <li>Identify all required tables from the schema</li>
                         <li>Determine the columns you need to SELECT</li>
@@ -1223,7 +1220,7 @@ function AssignmentAttempt() {
                       </ol>
                     </div>
                     <div className="editorial-section editorial-section--complexity">
-                      <h4>â± Complexity</h4>
+                      <h4>Complexity</h4>
                       <div className="complexity-badges">
                         <span className="complexity-badge complexity-badge--time">Time: O(n)</span>
                         <span className="complexity-badge complexity-badge--space">Space: O(n)</span>
@@ -1528,12 +1525,12 @@ function AssignmentAttempt() {
                             <div className="test-panel__verdict-stat-card">
                               <div className="test-panel__stat-label">Runtime</div>
                               <div className="test-panel__stat-value">{submissionResult.complexity?.time || '< 1ms'}</div>
-                              <div className="test-panel__stat-beats">Beats <strong>{((Math.random() * 20) + 75).toFixed(1)}%</strong> of users</div>
+                              <div className="test-panel__stat-beats">Beats <strong>{submissionResult.complexity?.beatsRuntime || "--"}%</strong> of users</div>
                             </div>
                             <div className="test-panel__verdict-stat-card">
                               <div className="test-panel__stat-label">Memory</div>
                               <div className="test-panel__stat-value">{submissionResult.complexity?.space || '< 1.2 MB'}</div>
-                              <div className="test-panel__stat-beats">Beats <strong>{((Math.random() * 30) + 60).toFixed(1)}%</strong> of users</div>
+                              <div className="test-panel__stat-beats">Beats <strong>{submissionResult.complexity?.beatsRuntime || "--"}%</strong> of users</div>
                             </div>
                           </div>
 
@@ -1599,7 +1596,7 @@ function AssignmentAttempt() {
             <div className="hint-card__glow" />
             <div className="hint-card__header">
               <div className="hint-card__icon-wrap">
-                <span className="hint-card__icon">ðŸ’¡</span>
+                <span className="hint-card__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
               </div>
               <div>
                 <h3 className="hint-card__title">Hint</h3>
@@ -1616,7 +1613,7 @@ function AssignmentAttempt() {
             </div>
             <div className="hint-card__footer">
               <button className="hint-card__btn" onClick={() => setShowHintModal(false)}>
-                Got it, thanks! ðŸ‘
+                Got it, thanks!
               </button>
             </div>
           </div>

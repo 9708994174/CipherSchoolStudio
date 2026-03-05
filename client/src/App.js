@@ -151,7 +151,7 @@ function StreakBadge() {
               </div>
             ) : (
               <button className="streak-popup__checkin-btn" onClick={handleStartChallenge}>
-                🔥 Solve today's challenge
+                Solve today's challenge
               </button>
             )}
             <p className="streak-popup__note">Streak increases when you submit a correct answer</p>
@@ -391,7 +391,7 @@ function DiscussPage() {
         {loading ? <div className="discuss-page__loading"><div className="discuss-page__spinner" />Loading...</div>
           : posts.length === 0 ? (
             <div className="discuss-page__empty-state">
-              <div className="discuss-page__empty-icon">💬</div>
+              <div className="discuss-page__empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
               <h3 className="discuss-page__empty-heading">No discussions yet</h3>
               <p className="discuss-page__empty-desc">Be the first to start a conversation! Ask a question, share your approach, or discuss SQL concepts.</p>
               {isAuthenticated ? (
@@ -436,22 +436,22 @@ function DiscussPage() {
 function InterviewPage() {
   const navigate = useNavigate();
   const companies = [
-    { name: 'Google', icon: '🔍', count: 15, topics: ['Window Functions', 'Aggregation', 'Joins'] },
-    { name: 'Amazon', icon: '📦', count: 12, topics: ['Subqueries', 'CTEs', 'Window Functions'] },
-    { name: 'Meta', icon: '♾️', count: 10, topics: ['String Functions', 'Aggregation', 'Joins'] },
-    { name: 'Microsoft', icon: '🪟', count: 8, topics: ['Stored Procedures', 'Performance', 'Joins'] },
-    { name: 'Uber', icon: '🚗', count: 7, topics: ['Geospatial Queries', 'Window Functions'] },
-    { name: 'Airbnb', icon: '🏠', count: 6, topics: ['Date Functions', 'Aggregation'] },
-    { name: 'Netflix', icon: '🎬', count: 5, topics: ['Ranking', 'Window Functions'] },
-    { name: 'Apple', icon: '🍎', count: 5, topics: ['CTEs', 'Complex Joins'] },
+    { name: 'Google', icon: 'G', count: 15, topics: ['Window Functions', 'Aggregation', 'Joins'] },
+    { name: 'Amazon', icon: 'A', count: 12, topics: ['Subqueries', 'CTEs', 'Window Functions'] },
+    { name: 'Meta', icon: 'M', count: 10, topics: ['String Functions', 'Aggregation', 'Joins'] },
+    { name: 'Microsoft', icon: 'MS', count: 8, topics: ['Stored Procedures', 'Performance', 'Joins'] },
+    { name: 'Uber', icon: 'U', count: 7, topics: ['Geospatial Queries', 'Window Functions'] },
+    { name: 'Airbnb', icon: 'AB', count: 6, topics: ['Date Functions', 'Aggregation'] },
+    { name: 'Netflix', icon: 'N', count: 5, topics: ['Ranking', 'Window Functions'] },
+    { name: 'Apple', icon: 'AP', count: 5, topics: ['CTEs', 'Complex Joins'] },
   ];
   const studyPlans = [
-    { icon: '📄', title: 'SQL Fundamentals', desc: 'Master SELECT, WHERE, JOIN, GROUP BY, HAVING', level: 'Beginner', problems: 12 },
-    { icon: '⚡', title: 'Query Optimization', desc: 'Indexing strategies, execution plans, and query tuning', level: 'Advanced', problems: 8 },
-    { icon: '🧩', title: 'Problem Patterns', desc: 'Running totals, gaps & islands, pivoting, recursive queries', level: 'Intermediate', problems: 15 },
-    { icon: '🎯', title: 'Mock Interviews', desc: 'Timed SQL challenges simulating real interview conditions', level: 'All Levels', problems: 10 },
-    { icon: '🏗️', title: 'Database Design', desc: 'Normalization, schema design, ER diagrams', level: 'Intermediate', problems: 6 },
-    { icon: '🛡️', title: 'Security & Best Practices', desc: 'SQL injection prevention and parameterized queries', level: 'Advanced', problems: 4 },
+    { icon: 'I', title: 'SQL Fundamentals', desc: 'Master SELECT, WHERE, JOIN, GROUP BY, HAVING', level: 'Beginner', problems: 12 },
+    { icon: 'II', title: 'Query Optimization', desc: 'Indexing strategies, execution plans, and query tuning', level: 'Advanced', problems: 8 },
+    { icon: 'III', title: 'Problem Patterns', desc: 'Running totals, gaps & islands, pivoting, recursive queries', level: 'Intermediate', problems: 15 },
+    { icon: 'IV', title: 'Mock Interviews', desc: 'Timed SQL challenges simulating real interview conditions', level: 'All Levels', problems: 10 },
+    { icon: 'V', title: 'Database Design', desc: 'Normalization, schema design, ER diagrams', level: 'Intermediate', problems: 6 },
+    { icon: 'VI', title: 'Security & Best Practices', desc: 'SQL injection prevention and parameterized queries', level: 'Advanced', problems: 4 },
   ];
   const tips = [
     { title: 'Always clarify requirements', desc: 'Ask about edge cases, NULL handling, and expected output format.' },
@@ -502,7 +502,7 @@ function InterviewPage() {
           </div>
         </div>
         <div className="interview-page__quick-tips">
-          <h2 className="interview-page__section-title">💡 Quick Tips</h2>
+          <h2 className="interview-page__section-title">Quick Tips</h2>
           <div className="interview-page__tips-list">
             {tips.map((tip, i) => (
               <div key={i} className="interview-quick-tip">
