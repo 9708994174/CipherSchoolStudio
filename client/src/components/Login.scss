@@ -1,4 +1,4 @@
-/* Login.scss — simple classic white card (original style) */
+/* Login.scss â€” simple classic white card (original style) */
 @import '../index.scss';
 
 .auth-page {
@@ -79,8 +79,8 @@
   }
 
   &:focus {
-    border-color: #ffa116;
-    box-shadow: 0 0 0 2px rgba(255, 161, 22, 0.08);
+    border-color: #d4920a;
+    box-shadow: 0 0 0 2px rgba(212, 146, 10, 0.08);
   }
 }
 
@@ -94,7 +94,7 @@
 .auth-form__submit {
   width: 100%;
   padding: 11px;
-  background: #ffa116;
+  background: #d4920a;
   color: #ffffff;
   border: none;
   border-radius: 6px;

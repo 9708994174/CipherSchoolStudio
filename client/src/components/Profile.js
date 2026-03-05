@@ -32,7 +32,7 @@ function Profile() {
         return (
             <div className="profile-page profile-page--empty">
                 <div className="profile-page__login-prompt">
-                    <span className="profile-page__login-icon">🔒</span>
+                    <span className="profile-page__login-icon">ðŸ”’</span>
                     <h2>Sign in to view your profile</h2>
                     <p>Track your progress, streaks, and submissions</p>
                     <button className="profile-page__login-btn" onClick={() => navigate('/login')}>Sign In</button>
@@ -94,7 +94,7 @@ function Profile() {
     return (
         <div className="profile-page">
             <div className="profile-page__layout">
-                {/* ── LEFT SIDEBAR ─── */}
+                {/* â”€â”€ LEFT SIDEBAR â”€â”€â”€ */}
                 <aside className="profile-sidebar">
                     <div className="profile-sidebar__avatar">
                         {(p.username || 'U').charAt(0).toUpperCase()}
@@ -115,7 +115,7 @@ function Profile() {
                             <strong>{totalSolved}</strong>
                         </div>
                         <div className="profile-sidebar__stat-item">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffa116" strokeWidth="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d4920a" strokeWidth="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>
                             <span>Discuss</span>
                             <strong>{p.discussions || 0}</strong>
                         </div>
@@ -136,14 +136,14 @@ function Profile() {
                     </div>
                 </aside>
 
-                {/* ── MAIN CONTENT ─── */}
+                {/* â”€â”€ MAIN CONTENT â”€â”€â”€ */}
                 <div className="profile-main">
                     {/* Donut + Difficulty Bars */}
                     <div className="profile-stats-row">
                         <div className="profile-donut-card">
                             <svg className="profile-donut" viewBox="0 0 120 120">
                                 <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,.07)" strokeWidth="8" />
-                                <circle cx="60" cy="60" r="52" fill="none" stroke="#ffa116" strokeWidth="8"
+                                <circle cx="60" cy="60" r="52" fill="none" stroke="#d4920a" strokeWidth="8"
                                     strokeDasharray={circumference} strokeDashoffset={offset}
                                     strokeLinecap="round" transform="rotate(-90 60 60)" style={{ transition: 'stroke-dashoffset 1s ease' }} />
                                 <text x="60" y="54" textAnchor="middle" fill="#fff" fontSize="22" fontWeight="800">{totalSolved}</text>
@@ -166,12 +166,12 @@ function Profile() {
                             ))}
                         </div>
                         <div className="profile-badges-card">
-                            <div className="profile-badge-icon">🔥</div>
+                            <div className="profile-badge-icon">ðŸ”¥</div>
                             <div className="profile-badge-info">
                                 <span className="profile-badge-value">{streak.current || 0}</span>
                                 <span className="profile-badge-label">Current Streak</span>
                             </div>
-                            <div className="profile-badge-icon">🏆</div>
+                            <div className="profile-badge-icon">ðŸ†</div>
                             <div className="profile-badge-info">
                                 <span className="profile-badge-value">{streak.max || 0}</span>
                                 <span className="profile-badge-label">Max Streak</span>
@@ -185,7 +185,7 @@ function Profile() {
                             <span className="profile-heatmap-title">
                                 <strong>{stats.totalSubmissions || 0}</strong> submissions in the past year
                             </span>
-                            <span className="profile-heatmap-meta">Total active days: {p.activeDays || 0} · Max streak: {streak.max || 0}</span>
+                            <span className="profile-heatmap-meta">Total active days: {p.activeDays || 0} Â· Max streak: {streak.max || 0}</span>
                         </div>
                         <div className="profile-heatmap">
                             {months.map(m => (
@@ -208,10 +208,10 @@ function Profile() {
                     <div className="profile-tabs-card">
                         <div className="profile-tabs">
                             <button className={`profile-tab ${activeTab === 'recent' ? 'profile-tab--active' : ''}`} onClick={() => setActiveTab('recent')}>
-                                📋 Recent AC
+                                ðŸ“‹ Recent AC
                             </button>
                             <button className={`profile-tab ${activeTab === 'list' ? 'profile-tab--active' : ''}`} onClick={() => setActiveTab('list')}>
-                                📃 All Solved
+                                ðŸ“ƒ All Solved
                             </button>
                         </div>
                         <div className="profile-tab-content">
@@ -221,7 +221,7 @@ function Profile() {
                                 recent.filter(r => activeTab === 'recent' || r.isCompleted).map((r, i) => (
                                     <div key={i} className="profile-submission-row" onClick={() => navigate(`/assignment/${r.assignmentId}`)}>
                                         <span className={`profile-submission-status ${r.isCompleted ? 'profile-submission-status--ac' : ''}`}>
-                                            {r.isCompleted ? '✓' : '○'}
+                                            {r.isCompleted ? 'âœ“' : 'â—‹'}
                                         </span>
                                         <span className="profile-submission-title">{r.title}</span>
                                         <span className="profile-submission-time">{timeAgo(r.time)}</span>

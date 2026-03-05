@@ -1,6 +1,6 @@
 @import '../index.scss';
 
-// ═══ ATTEMPT SHELL ═══════════════════════════════════════════
+// â•â•â• ATTEMPT SHELL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 .assignment-attempt {
   width: 100%;
   height: calc(100vh - 44px);
@@ -49,7 +49,7 @@
   }
 }
 
-// ── Split container ──────────────────────────────────────────
+// â”€â”€ Split container â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .assignment-attempt__container {
   display: flex;
   flex-direction: column;
@@ -61,7 +61,7 @@
   }
 }
 
-// Left panel — problem description
+// Left panel â€” problem description
 .assignment-attempt__left-panel {
   display: flex;
   flex-direction: column;
@@ -140,7 +140,7 @@
   }
 }
 
-// Right panel — editor
+// Right panel â€” editor
 .assignment-attempt__right-panel {
   flex: 1;
   display: flex;
@@ -207,7 +207,7 @@
   }
 }
 
-// ═══ PROBLEM PANEL ═══════════════════════════════════════════
+// â•â•â• PROBLEM PANEL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 .problem-panel {
   display: flex;
   flex-direction: column;
@@ -696,7 +696,7 @@
   }
 }
 
-// ═══ EDITOR PANEL ════════════════════════════════════════════
+// â•â•â• EDITOR PANEL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 .editor-panel {
   display: flex !important;
   flex-direction: column;
@@ -889,14 +889,14 @@
   }
 }
 
-// ── The actual Monaco wrapper div that needs flex:1 ───────────
+// â”€â”€ The actual Monaco wrapper div that needs flex:1 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .editor-panel__editor {
   flex: 1;
   overflow: hidden;
   min-height: 0;
   position: relative;
 
-  // Monaco sets height=100% internally — this makes it fill the flex parent
+  // Monaco sets height=100% internally â€” this makes it fill the flex parent
   >section,
   >div {
     height: 100% !important;
@@ -910,7 +910,7 @@
   background: #1e1e1e;
 }
 
-// ── Status bar ───────────────────────────────────────────────
+// â”€â”€ Status bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .editor-panel__status {
   display: flex;
   justify-content: space-between;
@@ -929,7 +929,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-// ═══ TEST / RESULTS PANEL ════════════════════════════════════
+// â•â•â• TEST / RESULTS PANEL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 .test-panel {
   display: flex;
   flex-direction: column;
@@ -1010,7 +1010,7 @@
   gap: 6px;
 
   &::before {
-    content: '◈';
+    content: 'â—ˆ';
     font-size: 10px;
   }
 }
@@ -1177,7 +1177,7 @@
   font-size: 13px;
 }
 
-// ═══ TESTCASE VIEWER (LeetCode style) ══════════════════════
+// â•â•â• TESTCASE VIEWER (LeetCode style) â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 .tc-viewer {
   height: 100%;
   display: flex;
@@ -1264,7 +1264,7 @@
   line-height: 1.5;
 }
 
-// ═══ VERDICT DISPLAY ════════════════════════════════════════
+// â•â•â• VERDICT DISPLAY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 .test-panel__running {
   display: flex;
   align-items: center;
@@ -1540,7 +1540,7 @@ pre {
   width: 18px;
   height: 18px;
   border: 2px solid #3e3e3e;
-  border-top-color: #ffa116;
+  border-top-color: #d4920a;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 
@@ -1563,8 +1563,8 @@ pre {
     flex-direction: row-reverse;
 
     .chat-msg__bubble {
-      background: rgba(255, 161, 22, .12);
-      border-color: rgba(255, 161, 22, .25);
+      background: rgba(212, 146, 10, .12);
+      border-color: rgba(212, 146, 10, .25);
     }
   }
 }
@@ -1601,7 +1601,7 @@ pre {
 .chat-msg__author {
   font-size: 11px;
   font-weight: 700;
-  color: #ffa116;
+  color: #d4920a;
 }
 
 .chat-msg__time {
@@ -1678,10 +1678,10 @@ pre {
 }
 
 .chat-msg__like--active {
-  color: #ffa116 !important;
+  color: #d4920a !important;
 
   svg {
-    stroke: #ffa116;
+    stroke: #d4920a;
   }
 }
 
@@ -1701,7 +1701,7 @@ pre {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ffa116, #ff6200);
+  background: linear-gradient(135deg, #d4920a, #b87d08);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1739,7 +1739,7 @@ pre {
   }
 
   &:focus {
-    border-color: rgba(255, 161, 22, .5);
+    border-color: rgba(212, 146, 10, .5);
   }
 
   scrollbar-width: thin;
@@ -1757,7 +1757,7 @@ pre {
   height: 34px;
   border-radius: 50%;
   border: none;
-  background: #ffa116;
+  background: #d4920a;
   color: #fff;
   display: flex;
   align-items: center;
@@ -1768,7 +1768,7 @@ pre {
   margin-bottom: 1px;
 
   &:hover:not(:disabled) {
-    background: #ff8c00;
+    background: #b87d08;
     transform: scale(1.05);
   }
 
@@ -1814,10 +1814,10 @@ pre {
   width: 420px;
   max-width: 92vw;
   background: #1e1e1e;
-  border: 1px solid rgba(255, 193, 7, .3);
+  border: 1px solid rgba(212, 146, 10, .3);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, .8), 0 0 0 1px rgba(255, 193, 7, .08), 0 0 60px rgba(255, 193, 7, .06);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .8), 0 0 0 1px rgba(212, 146, 10, .08), 0 0 60px rgba(212, 146, 10, .06);
   animation: hintSlideIn .22s ease;
 }
 
@@ -1839,7 +1839,7 @@ pre {
   right: -60px;
   width: 160px;
   height: 160px;
-  background: radial-gradient(circle, rgba(255, 193, 7, .18) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(212, 146, 10, .18) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -1855,8 +1855,8 @@ pre {
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: rgba(255, 193, 7, .12);
-  border: 1px solid rgba(255, 193, 7, .25);
+  background: rgba(212, 146, 10, .12);
+  border: 1px solid rgba(212, 146, 10, .25);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1884,7 +1884,7 @@ pre {
 .hint-card__title {
   font-size: 16px;
   font-weight: 700;
-  color: #ffc107;
+  color: #d4920a;
   margin: 0 0 2px 0;
 }
 
@@ -1919,8 +1919,8 @@ pre {
     line-height: 1.65;
     color: #ccc;
     margin: 0;
-    background: rgba(255, 193, 7, .04);
-    border-left: 3px solid rgba(255, 193, 7, .4);
+    background: rgba(212, 146, 10, .04);
+    border-left: 3px solid rgba(212, 146, 10, .4);
     padding: 12px 14px;
     border-radius: 0 8px 8px 0;
   }
@@ -1933,7 +1933,7 @@ pre {
 }
 
 .hint-card__btn {
-  background: linear-gradient(135deg, #ffa116, #ff8c00);
+  background: linear-gradient(135deg, #d4920a, #b87d08);
   border: none;
   border-radius: 8px;
   color: #fff;
@@ -1942,10 +1942,10 @@ pre {
   padding: 9px 22px;
   cursor: pointer;
   transition: all .15s;
-  box-shadow: 0 4px 16px rgba(255, 161, 22, .3);
+  box-shadow: 0 4px 16px rgba(212, 146, 10, .3);
 
   &:hover {
-    background: linear-gradient(135deg, #ff8c00, #e67700);
+    background: linear-gradient(135deg, #b87d08, #e67700);
     transform: translateY(-1px);
   }
 
@@ -1979,9 +1979,9 @@ pre {
   line-height: 1.4;
 }
 
-// ────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 //  LEETCODE-STYLE SUBMISSION ANALYSIS
-// ────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .submission-overlay {
   position: fixed;
   inset: 0;
@@ -2008,8 +2008,8 @@ pre {
 
 .lc-submission {
   width: 100%;
-  max-width: 820px;
-  max-height: 85vh;
+  max-width: 720px;
+  max-height: 80vh;
   background: #1a1a1a;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -2034,7 +2034,7 @@ pre {
   }
 }
 
-// ── Header: verdict + user info + action btns ──────────────
+// â”€â”€ Header: verdict + user info + action btns â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .lc-submission__header {
   padding: 18px 24px 14px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
@@ -2103,14 +2103,14 @@ pre {
 .lc-submission__action-btns {
   display: flex;
   gap: 10px;
-  margin-top: 16px;
+  margin-top: 10px;
 }
 
 .lc-submission__action-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 18px;
+  padding: 6px 16px;
   border-radius: 20px;
   font-size: 13px;
   font-weight: 600;
@@ -2148,7 +2148,7 @@ pre {
   }
 }
 
-// ── Runtime + Memory metric cards ──────────────────────────
+// â”€â”€ Runtime + Memory metric cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .lc-submission__metrics {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2164,7 +2164,7 @@ pre {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 12px;
-  padding: 16px 20px;
+  padding: 12px 16px;
 }
 
 .lc-submission__metric-header {
@@ -2247,7 +2247,7 @@ pre {
   }
 }
 
-// ── Distribution charts ────────────────────────────────────
+// â”€â”€ Distribution charts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .lc-submission__charts {
   padding: 20px 32px 8px;
   display: flex;
@@ -2270,7 +2270,7 @@ pre {
 }
 
 .lc-chart__bar--user {
-  filter: drop-shadow(0 0 4px rgba(255, 161, 22, 0.4));
+  filter: drop-shadow(0 0 4px rgba(212, 146, 10, 0.4));
 }
 
 .lc-submission__chart-tooltip {
@@ -2284,7 +2284,7 @@ pre {
   display: inline-block;
 }
 
-// ── Failed submission details ──────────────────────────────
+// â”€â”€ Failed submission details â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .lc-submission__fail-details {
   padding: 24px 32px;
 }
@@ -2350,9 +2350,9 @@ pre {
   }
 }
 
-// ── Footer bar ─────────────────────────────────────────────
+// â”€â”€ Footer bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .lc-submission__footer {
-  padding: 16px 32px;
+  padding: 12px 24px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(0, 0, 0, 0.15);
   display: flex;
@@ -2383,12 +2383,12 @@ pre {
   }
 
   &--next {
-    background: #ffa116;
-    border-color: #ffa116;
+    background: #d4920a;
+    border-color: #d4920a;
     color: #fff;
 
     &:hover {
-      background: #ff8c00;
+      background: #b87d08;
     }
   }
 

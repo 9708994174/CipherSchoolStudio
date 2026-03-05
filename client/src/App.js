@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { QueryProvider, useQuery } from './contexts/QueryContext';
 import { NavigationProvider, useNavigation } from './contexts/NavigationContext';
@@ -389,7 +389,21 @@ function DiscussPage() {
       )}
       <div className="discuss-page__list">
         {loading ? <div className="discuss-page__loading"><div className="discuss-page__spinner" />Loading...</div>
-          : posts.length === 0 ? <div className="discuss-page__empty">No posts yet. Be the first to start a discussion!</div>
+          : posts.length === 0 ? (
+            <div className="discuss-page__empty-state">
+              <div className="discuss-page__empty-icon">💬</div>
+              <h3 className="discuss-page__empty-heading">No discussions yet</h3>
+              <p className="discuss-page__empty-desc">Be the first to start a conversation! Ask a question, share your approach, or discuss SQL concepts.</p>
+              {isAuthenticated ? (
+                <button className="discuss-page__start-btn" onClick={() => setShowModal(true)}>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+                  Start a Discussion
+                </button>
+              ) : (
+                <p className="discuss-page__login-hint">Please <a href="/login">login</a> to start a discussion.</p>
+              )}
+            </div>
+          )
             : posts.map(p => (
               <div key={p._id} className="discuss-post" onClick={() => setSelectedPost(p)} style={{ cursor: 'pointer' }}>
                 <div className="discuss-post__votes" onClick={(e) => handleLike(p._id, e)}>

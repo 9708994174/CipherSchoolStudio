@@ -22,7 +22,7 @@ import SchemaViewer from './SchemaViewer';
 import ResultsPanel from './ResultsPanel';
 import './AssignmentAttempt.scss';
 
-// ── LeetCode-style test case viewer ──────────────────────────
+// â”€â”€ LeetCode-style test case viewer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function TestCaseViewer({ testCases }) {
   const [activeCase, setActiveCase] = useState(0);
   const cases = testCases.slice(0, 3);
@@ -72,15 +72,15 @@ function TestCaseViewer({ testCases }) {
   );
 }
 
-// ── Editorial tips generator ─────────────────────────────────
+// â”€â”€ Editorial tips generator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getEditorialTips(assignment) {
   const q = ((assignment?.question || '') + ' ' + (assignment?.description || '')).toUpperCase();
   const tips = [];
   if (q.includes('JOIN')) tips.push('Use JOIN to combine rows from two or more tables based on a related column.');
   if (q.includes('GROUP BY')) tips.push('GROUP BY groups rows sharing a property so aggregate functions can be applied.');
-  if (q.includes('HAVING')) tips.push('HAVING filters groups after aggregation — use WHERE for row-level filters.');
+  if (q.includes('HAVING')) tips.push('HAVING filters groups after aggregation â€” use WHERE for row-level filters.');
   if (q.includes('ORDER')) tips.push('ORDER BY sorts results. Use DESC for descending, ASC (default) for ascending.');
-  if (q.includes('SUBQUERY') || q.includes('IN (')) tips.push('Subqueries let you nest a query inside another — useful for filtering with aggregates.');
+  if (q.includes('SUBQUERY') || q.includes('IN (')) tips.push('Subqueries let you nest a query inside another â€” useful for filtering with aggregates.');
   if (q.includes('WINDOW') || q.includes('OVER')) tips.push('Window functions (RANK, ROW_NUMBER, LEAD, LAG) operate over a set of rows without collapsing them.');
   if (q.includes('DISTINCT')) tips.push('DISTINCT removes duplicate rows from the result set.');
   if (q.includes('COUNT') || q.includes('SUM') || q.includes('AVG')) tips.push('Aggregate functions (COUNT, SUM, AVG, MIN, MAX) compute a value from a set of rows.');
@@ -125,7 +125,7 @@ function ChatPanel({ posts = [], loading, onPost, postBody, setPostBody, posting
         {!loading && posts.length === 0 && (
           <div className="chat-panel__empty">
             <div className="chat-panel__empty-icon">
-              {type === 'solution' ? '📝' : '💬'}
+              {type === 'solution' ? 'ðŸ“' : 'ðŸ’¬'}
             </div>
             <p>{type === 'solution'
               ? 'No solutions yet. Be the first to share yours!'
@@ -223,7 +223,7 @@ function ChatPanel({ posts = [], loading, onPost, postBody, setPostBody, posting
             rows={1}
           />
           {type === 'solution' && postBody.trim() && !postBody.includes('\n') && (
-            <div className="chat-panel__composer-hint">💡 Include your SQL query above</div>
+            <div className="chat-panel__composer-hint">ðŸ’¡ Include your SQL query above</div>
           )}
         </div>
         <button
@@ -305,7 +305,7 @@ function AssignmentAttempt() {
   const [isResizingVertical, setIsResizingVertical] = useState(false);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024);
 
-  // ── Discussion / Solutions state ────────────────────────────
+  // â”€â”€ Discussion / Solutions state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [discussions, setDiscussions] = useState([]);
   const [discussLoading, setDiscussLoading] = useState(false);
   const [postBody, setPostBody] = useState('');
@@ -670,7 +670,7 @@ function AssignmentAttempt() {
       setActiveTab('description');
 
       if (submissionData.passed) {
-        // Mark today as solved → updates streak badge + calendar in real-time
+        // Mark today as solved â†’ updates streak badge + calendar in real-time
         try {
           const today = new Date().toISOString().slice(0, 10);
           const solvedDays = JSON.parse(localStorage.getItem('solvedDays') || '{}');
@@ -923,7 +923,7 @@ function AssignmentAttempt() {
   return (
     <div className="assignment-attempt">
 
-      {/* ═══ LEETCODE-STYLE SUBMISSION RESULT ══════════════════ */}
+      {/* â•â•â• LEETCODE-STYLE SUBMISSION RESULT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {showSubmissionDialog && submissionResult && (() => {
         const rt = submissionResult.runtime || { ms: 0, beats: 0, distribution: [] };
         const mem = submissionResult.memory || { mb: 0, beats: 0, distribution: [] };
@@ -969,7 +969,7 @@ function AssignmentAttempt() {
                     width={barW * xScale}
                     height={barH}
                     rx={1}
-                    fill={isUser ? '#ffa116' : 'rgba(90,160,255,0.7)'}
+                    fill={isUser ? '#d4920a' : 'rgba(90,160,255,0.7)'}
                     className={isUser ? 'lc-chart__bar--user' : ''}
                   />
                 );
@@ -990,8 +990,8 @@ function AssignmentAttempt() {
                   const x = userIdx * (barW + gap) * xScale + (barW * xScale) / 2;
                   return (
                     <g>
-                      <circle cx={x} cy={chartH - ((data[userIdx].percentage / maxPct) * (chartH - 10)) - 12} r="10" fill="#2a2a2a" stroke="#ffa116" strokeWidth="1.5" />
-                      <text x={x} y={chartH - ((data[userIdx].percentage / maxPct) * (chartH - 10)) - 8} fill="#fff" fontSize="7" textAnchor="middle" fontWeight="700">👤</text>
+                      <circle cx={x} cy={chartH - ((data[userIdx].percentage / maxPct) * (chartH - 10)) - 12} r="10" fill="#2a2a2a" stroke="#d4920a" strokeWidth="1.5" />
+                      <text x={x} y={chartH - ((data[userIdx].percentage / maxPct) * (chartH - 10)) - 8} fill="#fff" fontSize="7" textAnchor="middle" fontWeight="700">ðŸ‘¤</text>
                     </g>
                   );
                 }
@@ -1005,7 +1005,7 @@ function AssignmentAttempt() {
           <div className="submission-overlay" onClick={() => setShowSubmissionDialog(false)}>
             <div className="lc-submission" onClick={e => e.stopPropagation()}>
 
-              {/* ── Top: Verdict + test info ─────────────────── */}
+              {/* â”€â”€ Top: Verdict + test info â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
               <div className="lc-submission__header">
                 <div className="lc-submission__verdict-row">
                   <h1 className={`lc-submission__verdict ${submissionResult.passed ? 'lc-submission__verdict--accepted' : 'lc-submission__verdict--failed'}`}>
@@ -1035,14 +1035,14 @@ function AssignmentAttempt() {
 
               {submissionResult.passed && (
                 <>
-                  {/* ── Runtime + Memory Cards ──────────────────── */}
+                  {/* â”€â”€ Runtime + Memory Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
                   <div className="lc-submission__metrics">
                     {/* Runtime card */}
                     <div className="lc-submission__metric-card">
                       <div className="lc-submission__metric-header">
-                        <span className="lc-submission__metric-icon">⏱</span>
+                        <span className="lc-submission__metric-icon">â±</span>
                         <span className="lc-submission__metric-label">Runtime</span>
-                        <span className="lc-submission__metric-info" title="Compared to other solutions">ⓘ</span>
+                        <span className="lc-submission__metric-info" title="Compared to other solutions">â“˜</span>
                       </div>
                       <div className="lc-submission__metric-value-row">
                         <span className="lc-submission__metric-value">{rt.ms || submissionResult.complexity?.executionTime || 2}</span>
@@ -1050,17 +1050,17 @@ function AssignmentAttempt() {
                         <span className="lc-submission__metric-separator">|</span>
                         <span className="lc-submission__metric-label2">Beats</span>
                         <span className="lc-submission__metric-beats">{rt.beats || 99}%</span>
-                        <span className="lc-submission__metric-fire">🔥</span>
+                        <span className="lc-submission__metric-fire">ðŸ”¥</span>
                       </div>
                       <div className="lc-submission__metric-sub">
-                        <span className="lc-submission__analyze-link">✨ Analyze Complexity</span>
+                        <span className="lc-submission__analyze-link">âœ¨ Analyze Complexity</span>
                       </div>
                     </div>
 
                     {/* Memory card */}
                     <div className="lc-submission__metric-card">
                       <div className="lc-submission__metric-header">
-                        <span className="lc-submission__metric-icon">💾</span>
+                        <span className="lc-submission__metric-icon">ðŸ’¾</span>
                         <span className="lc-submission__metric-label">Memory</span>
                       </div>
                       <div className="lc-submission__metric-value-row">
@@ -1069,12 +1069,12 @@ function AssignmentAttempt() {
                         <span className="lc-submission__metric-separator">|</span>
                         <span className="lc-submission__metric-label2">Beats</span>
                         <span className="lc-submission__metric-beats">{mem.beats || 84}%</span>
-                        <span className="lc-submission__metric-fire">🔥</span>
+                        <span className="lc-submission__metric-fire">ðŸ”¥</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* ── Distribution Charts ─────────────────────── */}
+                  {/* â”€â”€ Distribution Charts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
                   <div className="lc-submission__charts">
                     <div className="lc-submission__chart-section">
                       <DistributionChart data={rt.distribution} unit="ms" userValue={rt.ms} label="Runtime" />
@@ -1089,7 +1089,7 @@ function AssignmentAttempt() {
                 </>
               )}
 
-              {/* ── Failed: error + test details ────────────── */}
+              {/* â”€â”€ Failed: error + test details â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
               {!submissionResult.passed && (
                 <div className="lc-submission__fail-details">
                   {submissionResult.error && (
@@ -1103,7 +1103,7 @@ function AssignmentAttempt() {
                       <div className="lc-submission__cases-grid">
                         {submissionResult.testResults.map((r, i) => (
                           <div key={i} className={`lc-submission__case ${r.passed ? 'lc-submission__case--pass' : 'lc-submission__case--fail'}`}>
-                            <span>{r.passed ? '✓' : '✗'}</span>
+                            <span>{r.passed ? 'âœ“' : 'âœ—'}</span>
                             <span>Case {i + 1}</span>
                           </div>
                         ))}
@@ -1113,14 +1113,14 @@ function AssignmentAttempt() {
                 </div>
               )}
 
-              {/* ── Bottom bar ──────────────────────────────── */}
+              {/* â”€â”€ Bottom bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
               <div className="lc-submission__footer">
                 <button className="lc-submission__footer-btn" onClick={() => setShowSubmissionDialog(false)}>
-                  ← Back to Problem
+                  â† Back to Problem
                 </button>
                 {submissionResult.passed && (
                   <button className="lc-submission__footer-btn lc-submission__footer-btn--next" onClick={() => { setShowSubmissionDialog(false); navigate('/'); }}>
-                    Next Problem →
+                    Next Problem â†’
                   </button>
                 )}
                 {!submissionResult.passed && (
@@ -1203,17 +1203,17 @@ function AssignmentAttempt() {
                   <h3>Editorial</h3>
                   <div className="editorial-content">
                     <div className="editorial-section">
-                      <h4>📌 Approach</h4>
+                      <h4>ðŸ“Œ Approach</h4>
                       <p>{assignment.editorialApproach || `This problem requires you to write a SQL query to ${(assignment.question || '').toLowerCase().replace(/write a sql query to /i, '').slice(0, 120) || 'retrieve data from the database'}.`}</p>
                     </div>
                     <div className="editorial-section">
-                      <h4>💡 Key Concepts</h4>
+                      <h4>ðŸ’¡ Key Concepts</h4>
                       <ul>
                         {getEditorialTips(assignment).map((tip, i) => <li key={i}>{tip}</li>)}
                       </ul>
                     </div>
                     <div className="editorial-section">
-                      <h4>⚡ Algorithm</h4>
+                      <h4>âš¡ Algorithm</h4>
                       <ol>
                         <li>Identify all required tables from the schema</li>
                         <li>Determine the columns you need to SELECT</li>
@@ -1223,7 +1223,7 @@ function AssignmentAttempt() {
                       </ol>
                     </div>
                     <div className="editorial-section editorial-section--complexity">
-                      <h4>⏱ Complexity</h4>
+                      <h4>â± Complexity</h4>
                       <div className="complexity-badges">
                         <span className="complexity-badge complexity-badge--time">Time: O(n)</span>
                         <span className="complexity-badge complexity-badge--space">Space: O(n)</span>
@@ -1278,7 +1278,7 @@ function AssignmentAttempt() {
                           <div key={submission.id} className="problem-panel__submission-item">
                             <div className="problem-panel__submission-header">
                               <span className={`problem-panel__submission-status ${isPassed ? 'problem-panel__submission-status--success' : 'problem-panel__submission-status--error'}`}>
-                                {isPassed ? '✓ Accepted' : '✗ Wrong Answer'}
+                                {isPassed ? 'âœ“ Accepted' : 'âœ— Wrong Answer'}
                               </span>
                               <span className="problem-panel__submission-time">{new Date(submission.timestamp).toLocaleString()}</span>
                             </div>
@@ -1313,7 +1313,7 @@ function AssignmentAttempt() {
         <div
           className="assignment-attempt__right-panel"
         >
-          {/* Hint is rendered at top level via portal-style fixed overlay — see bottom of component */}
+          {/* Hint is rendered at top level via portal-style fixed overlay â€” see bottom of component */}
 
           <div
             className="editor-panel"
@@ -1434,7 +1434,7 @@ function AssignmentAttempt() {
             </div>
 
             <div className="editor-panel__status">
-              <span className="editor-panel__status-text">MySQL · Saved</span>
+              <span className="editor-panel__status-text">MySQL Â· Saved</span>
               <span className="editor-panel__cursor-info">{cursorInfo}</span>
             </div>
           </div>
@@ -1491,7 +1491,7 @@ function AssignmentAttempt() {
                   {(loading || submitting) && (
                     <div className="test-panel__running">
                       <div className="test-panel__running-spinner" />
-                      <span>{submitting ? 'Evaluating your solution…' : 'Running query…'}</span>
+                      <span>{submitting ? 'Evaluating your solutionâ€¦' : 'Running queryâ€¦'}</span>
                     </div>
                   )}
 
@@ -1592,14 +1592,14 @@ function AssignmentAttempt() {
         </div>
       </div>
 
-      {/* ═══ FULL-PAGE BLUR HINT MODAL ══════════════════════ */}
+      {/* â•â•â• FULL-PAGE BLUR HINT MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {showHintModal && hint && (
         <div className="hint-overlay" onClick={() => setShowHintModal(false)}>
           <div className="hint-card" onClick={e => e.stopPropagation()}>
             <div className="hint-card__glow" />
             <div className="hint-card__header">
               <div className="hint-card__icon-wrap">
-                <span className="hint-card__icon">💡</span>
+                <span className="hint-card__icon">ðŸ’¡</span>
               </div>
               <div>
                 <h3 className="hint-card__title">Hint</h3>
@@ -1616,7 +1616,7 @@ function AssignmentAttempt() {
             </div>
             <div className="hint-card__footer">
               <button className="hint-card__btn" onClick={() => setShowHintModal(false)}>
-                Got it, thanks! 👍
+                Got it, thanks! ðŸ‘
               </button>
             </div>
           </div>
