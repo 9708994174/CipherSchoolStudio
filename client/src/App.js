@@ -613,7 +613,7 @@ function TopNavBar() {
               Interview
             </button>
             <button
-              className={`app__nav-link ${location.pathname === '/contest' ? 'app__nav-link--active' : ''}`}
+              className={`app__nav-link ${isContestPage ? 'app__nav-link--active' : ''}`}
               onClick={() => navigate('/contest')}
             >
               Contest
@@ -1109,7 +1109,6 @@ function App() {
                     </>
                   }
                 />
-                <Route
                 <Route
                   path="/contest"
                   element={
