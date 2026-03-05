@@ -706,95 +706,120 @@
   background: $bg-panel;
   border: 1px solid $border;
   border-radius: $r-md;
-  padding: 16px;
+  padding: 14px;
 }
 
 .trending-card__header {
-  margin-bottom: 16px;
-}
-
-.trending-card__header-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
 }
 
 .trending-card__title {
   font-size: 15px;
   font-weight: 700;
-  color: $text-1;
+  color: #e5e5e5;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
-.trending-card__nav {
+.trending-card__nav-arrows {
   display: flex;
-  gap: 4px;
+  gap: 8px;
 }
 
-.trending-card__nav-btn {
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
-  border: 1px solid $border;
-  background: $bg-card;
-  color: $text-3;
-  cursor: pointer;
+.trending-card__arrow {
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 4px;
+  color: #8c8c8c;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all .12s;
-  &:hover:not(:disabled) { border-color: $text-3; color: $text-1; }
-  &:disabled { opacity: .3; cursor: default; }
-}
+  cursor: pointer;
+  padding: 0;
+  transition: all .1s;
 
-.trending-card__search-mini {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255,255,255,.04);
-  border: 1px solid $border;
-  border-radius: 8px;
-  padding: 8px 12px;
-
-  input {
-    width: 100%;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: $text-2;
-    font-size: 13px;
-    font-family: inherit;
-    &::placeholder { color: #555; }
+  &:hover {
+    background: rgba(255, 255, 255, .1);
+    color: #fff;
   }
 }
 
-.trending-card__grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 14px;
-  padding-top: 4px;
+.trending-card__search-wrap {
+  position: relative;
+  margin-bottom: 20px;
 }
 
-.trending-card__company-chip {
+.trending-card__search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #555;
+}
+
+.trending-card__search-input {
+  width: 100%;
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 6px;
+  padding: 8px 12px 8px 32px;
+  color: #c9c9c9;
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+
+  &::placeholder {
+    color: #555;
+  }
+
+  &:focus {
+    border-color: rgba($yellow, .3);
+    background: rgba(255, 255, 255, .06);
+  }
+}
+
+.trending-card__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.trending-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
-  color: $text-2;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 99px;
   cursor: pointer;
-  transition: color .12s;
-  &:hover { color: $yellow; }
-}
+  transition: all .12s;
+  color: #c0c0c0;
 
-.trending-card__chip-count {
-  font-size: 11px;
-  font-weight: 700;
-  color: #d4920a;
-  background: rgba(212,146,10,.15);
-  border: 1px solid rgba(212,146,10,.35);
-  padding: 1px 8px;
-  border-radius: 4px;
-  font-variant-numeric: tabular-nums;
+  &:hover {
+    background: rgba(255, 255, 255, .09);
+    border-color: rgba(255, 255, 255, .15);
+    transform: translateY(-1px);
+  }
+
+  &__name {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  &__count {
+    font-size: 11px;
+    font-weight: 700;
+    background: #ffa116;
+    color: #262626;
+    padding: 1px 11px;
+    border-radius: 99px;
+  }
 }
 
 .trending-card__empty {

@@ -9,7 +9,7 @@ import Login from './components/Login';
 import Signup from './components/Signup';
 import Profile from './components/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
-import { getAssignments, getContests, getContestById, joinContest, getContestLeaderboard, getContestHistory, getAllDiscussions, createPost as apiCreatePost, likePost as apiLikePost, getComments, postComment } from './services/api';
+import { getAssignments, getContests, getContestById, joinContest, getContestLeaderboard, getGlobalLeaderboard, getContestHistory, getAllDiscussions, createPost as apiCreatePost, likePost as apiLikePost, getComments, postComment } from './services/api';
 import './App.scss';
 
 // =============================================================================
@@ -393,7 +393,7 @@ function DiscussPage() {
         {loading ? <div className="discuss-page__loading"><div className="discuss-page__spinner" />Loading...</div>
           : posts.length === 0 ? (
             <div className="discuss-page__empty-state">
-              <div className="discuss-page__empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+              <div className="discuss-page__empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg></div>
               <h3 className="discuss-page__empty-heading">No discussions yet</h3>
               <p className="discuss-page__empty-desc">Be the first to start a conversation! Ask a question, share your approach, or discuss SQL concepts.</p>
               {isAuthenticated ? (
@@ -475,7 +475,7 @@ function InterviewPage() {
           <div className="interview-page__company-grid">
             {companies.map(c => (
               <div key={c.name} className="interview-company-card" onClick={() => navigate('/')}>
-                <span className="interview-company-card__icon"><img src={`https://logo.clearbit.com/${c.icon}.com`} alt={c.name} width="28" height="28" style={{borderRadius: "6px"}} onError={(e) => { e.target.style.display="none"; e.target.parentNode.textContent = c.name.charAt(0); }} /></span>
+                <span className="interview-company-card__icon"><img src={`https://logo.clearbit.com/${c.icon}.com`} alt={c.name} width="28" height="28" style={{ borderRadius: "6px" }} onError={(e) => { e.target.style.display = "none"; e.target.parentNode.textContent = c.name.charAt(0); }} /></span>
                 <div className="interview-company-card__info">
                   <span className="interview-company-card__name">{c.name}</span>
                   <span className="interview-company-card__topics">{c.topics.join(' · ')}</span>
@@ -845,6 +845,7 @@ function ContestPage() {
   const [selectedContest, setSelectedContest] = useState(null);
   const [contestDetail, setContestDetail] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [globalLeaderboard, setGlobalLeaderboard] = useState([]);
   const [myHistory, setMyHistory] = useState([]);
   const [joining, setJoining] = useState(false);
   const [countdown, setCountdown] = useState({});
@@ -866,7 +867,18 @@ function ContestPage() {
     } catch (err) { console.error('History:', err); }
   }, [isAuthenticated]);
 
-  useEffect(() => { fetchContests(); fetchHistory(); }, [fetchContests, fetchHistory]);
+  const fetchGlobalLB = useCallback(async () => {
+    try {
+      const res = await getGlobalLeaderboard();
+      if (res.data?.success) setGlobalLeaderboard(res.data.leaderboard || []);
+    } catch (err) { console.error('Global LB:', err); }
+  }, []);
+
+  useEffect(() => {
+    fetchContests();
+    fetchHistory();
+    fetchGlobalLB();
+  }, [fetchContests, fetchHistory, fetchGlobalLB]);
 
   // Real-time countdown timer
   useEffect(() => {
@@ -881,8 +893,8 @@ function ContestPage() {
           const m = Math.floor((diff % 3600000) / 60000);
           const s = Math.floor((diff % 60000) / 1000);
           cd[ct.id] = d > 0
-            ? d + 'd ' + String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0')
-            : String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+            ? d + 'd ' + String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0')
+            : String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
         } else {
           cd[ct.id] = 'Started';
         }
@@ -932,7 +944,7 @@ function ContestPage() {
       <div className="contest-page">
         <div className="contest-detail-header">
           <button className="contest-detail-back" onClick={() => { setSelectedContest(null); setContestDetail(null); }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
             Back to Contests
           </button>
           <h1>{contestDetail.title}</h1>
@@ -946,7 +958,7 @@ function ContestPage() {
 
         <div className="contest-page__content">
           <div className="contest-page__main">
-            <h3 style={{color: '#e8e8e8', marginBottom: 14, fontSize: 16, fontWeight: 700}}>
+            <h3 style={{ color: '#e8e8e8', marginBottom: 14, fontSize: 16, fontWeight: 700 }}>
               Problems ({contestDetail.questions?.length || 0})
             </h3>
             {contestDetail.questions?.map((q, i) => {
@@ -964,7 +976,7 @@ function ContestPage() {
                   style={{ cursor: 'pointer' }}>
                   <div className="contest-question-card__num">
                     {solved ? (
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#2cbb5d" strokeWidth="2"><path d="M13 4L6 11 3 8"/></svg>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#2cbb5d" strokeWidth="2"><path d="M13 4L6 11 3 8" /></svg>
                     ) : (i + 1)}
                   </div>
                   <div className="contest-question-card__body">
@@ -990,7 +1002,7 @@ function ContestPage() {
           </div>
 
           <div className="contest-page__leaderboard">
-            <h3 style={{color: '#e8e8e8', marginBottom: 14, fontSize: 16, fontWeight: 700}}>Leaderboard</h3>
+            <h3 style={{ color: '#e8e8e8', marginBottom: 14, fontSize: 16, fontWeight: 700 }}>Leaderboard</h3>
             {leaderboard.length === 0 ? (
               <div className="contest-page__empty">No participants yet</div>
             ) : (
@@ -1019,12 +1031,12 @@ function ContestPage() {
     <div className="contest-page">
       <div className="contest-page__hero">
         <svg className="contest-page__trophy" viewBox="0 0 64 80" width="80" height="100">
-          <path d="M16 8h32v4H16z" fill="#d4920a"/>
-          <path d="M12 12h40v24c0 12-8 20-20 20S12 48 12 36V12z" fill="#d4920a"/>
-          <path d="M20 12h24v20c0 8-5 14-12 14s-12-6-12-14V12z" fill="#b87d08"/>
-          <circle cx="32" cy="28" r="8" fill="rgba(255,255,255,.2)"/>
-          <rect x="24" y="56" width="16" height="4" rx="1" fill="#b87d08"/>
-          <rect x="20" y="60" width="24" height="6" rx="2" fill="#d4920a"/>
+          <path d="M16 8h32v4H16z" fill="#d4920a" />
+          <path d="M12 12h40v24c0 12-8 20-20 20S12 48 12 36V12z" fill="#d4920a" />
+          <path d="M20 12h24v20c0 8-5 14-12 14s-12-6-12-14V12z" fill="#b87d08" />
+          <circle cx="32" cy="28" r="8" fill="rgba(255,255,255,.2)" />
+          <rect x="24" y="56" width="16" height="4" rx="1" fill="#b87d08" />
+          <rect x="20" y="60" width="24" height="6" rx="2" fill="#d4920a" />
         </svg>
         <h1 className="contest-page__title">SQL Contest</h1>
         <p className="contest-page__subtitle">Compete every week. Solve SQL challenges and see your ranking!</p>
@@ -1035,7 +1047,7 @@ function ContestPage() {
           {upcoming.slice(0, 2).map(ct => (
             <div key={ct.id} className={'contest-card contest-card--' + ct.type} onClick={() => loadContestDetail(ct.id)}>
               <div className="contest-card__countdown">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
                 {countdown[ct.id] || '...'}
               </div>
               <div className="contest-card__info">
@@ -1043,7 +1055,7 @@ function ContestPage() {
                 <p>{formatDate(ct.start_time)}</p>
               </div>
               <button className="contest-card__register" onClick={(e) => { e.stopPropagation(); handleJoin(ct.id); }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 8v4l2 2" /></svg>
               </button>
             </div>
           ))}
@@ -1068,7 +1080,7 @@ function ContestPage() {
                 myHistory.map(h => (
                   <div key={h.contest_id} className="contest-row" onClick={() => loadContestDetail(h.contest_id)}>
                     <div className={'contest-row__icon contest-row__icon--' + h.type}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 8v4l2 2"/></svg>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3" /><path d="M12 8v4l2 2" /></svg>
                     </div>
                     <div className="contest-row__info">
                       <span className="contest-row__title">{h.title}</span>
@@ -1086,7 +1098,7 @@ function ContestPage() {
                 past.map(ct => (
                   <div key={ct.id} className="contest-row" onClick={() => loadContestDetail(ct.id)}>
                     <div className={'contest-row__icon contest-row__icon--' + ct.type}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 8v4l2 2"/></svg>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3" /><path d="M12 8v4l2 2" /></svg>
                     </div>
                     <div className="contest-row__info">
                       <span className="contest-row__title">{ct.title}</span>
@@ -1102,10 +1114,23 @@ function ContestPage() {
         </div>
 
         <div className="contest-page__leaderboard">
-          <h3 style={{color: '#e8e8e8', marginBottom: 14, fontSize: 16, fontWeight: 700}}>Global Ranking</h3>
-          <div className="contest-page__empty" style={{fontSize: 12}}>
-            Participate in contests to appear on the leaderboard
-          </div>
+          <h3 style={{ color: '#e8e8e8', marginBottom: 14, fontSize: 16, fontWeight: 700 }}>Global Ranking</h3>
+          {globalLeaderboard.length === 0 ? (
+            <div className="contest-page__empty" style={{ fontSize: 12 }}>No data yet</div>
+          ) : (
+            <div className="contest-page__lb-list">
+              {globalLeaderboard.map(u => (
+                <div key={u.rank} className="contest-lb-row">
+                  <span className="contest-lb-row__rank">{u.rank}</span>
+                  <div className="contest-lb-row__avatar">{(u.username || 'A').charAt(0).toUpperCase()}</div>
+                  <span className="contest-lb-row__name">{u.username}</span>
+                  <div className="contest-lb-row__stats">
+                    <span>Score: <strong>{u.score}</strong></span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

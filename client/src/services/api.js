@@ -141,5 +141,6 @@ export const getContestById = (id) => api.get(`/contest/${id}`);
 export const joinContest = (id) => api.post(`/contest/${id}/join`);
 export const submitContestAnswer = (id, data) => api.post(`/contest/${id}/submit`, data);
 export const getContestLeaderboard = (id) => api.get(`/contest/${id}/leaderboard`);
+export const getGlobalLeaderboard = () => api.get('/contest/global/leaderboard');
 export const getContestHistory = () => api.get('/contest/user/history');
 

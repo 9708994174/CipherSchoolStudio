@@ -157,53 +157,53 @@ async function seedContestQuestions() {
 
 // ── Generate contests ──────────────────────────────────────
 async function generateContests() {
-  const { rows: allQ } = await pool.query('SELECT id, difficulty FROM contest_questions ORDER BY id');
-  if (allQ.length < 2) return;
+    const { rows: allQ } = await pool.query('SELECT id, difficulty FROM contest_questions ORDER BY id');
+    if (allQ.length < 2) return;
 
-  const now = new Date();
-  const easyMed = allQ.filter(q => q.difficulty === 'Easy' || q.difficulty === 'Medium');
-  const medHard = allQ.filter(q => q.difficulty === 'Medium' || q.difficulty === 'Hard');
+    const now = new Date();
+    const easyMed = allQ.filter(q => q.difficulty === 'Easy' || q.difficulty === 'Medium');
+    const medHard = allQ.filter(q => q.difficulty === 'Medium' || q.difficulty === 'Hard');
 
-  // Generate only upcoming contests (next 4 weekly + 2 biweekly)
-  for (let i = 0; i < 4; i++) {
-    const startDate = new Date(now);
-    // Next Sunday + i weeks
-    startDate.setDate(startDate.getDate() + (7 - startDate.getDay()) + (i * 7));
-    startDate.setHours(8, 0, 0, 0);
+    // Generate only upcoming contests (next 4 weekly + 2 biweekly)
+    for (let i = 0; i < 4; i++) {
+        const startDate = new Date(now);
+        // Next Sunday + i weeks
+        startDate.setDate(startDate.getDate() + (7 - startDate.getDay()) + (i * 7));
+        startDate.setHours(8, 0, 0, 0);
 
-    const endDate = new Date(startDate);
-    endDate.setMinutes(endDate.getMinutes() + 90);
+        const endDate = new Date(startDate);
+        endDate.setMinutes(endDate.getMinutes() + 90);
 
-    const q1 = easyMed[(i * 2) % easyMed.length];
-    const q2 = medHard[(i * 2 + 1) % medHard.length];
+        const q1 = easyMed[(i * 2) % easyMed.length];
+        const q2 = medHard[(i * 2 + 1) % medHard.length];
 
-    await pool.query(
-      `INSERT INTO contests (title, type, start_time, end_time, duration_minutes, question_ids, status)
+        await pool.query(
+            `INSERT INTO contests (title, type, start_time, end_time, duration_minutes, question_ids, status)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [`Weekly Contest ${494 + i}`, 'weekly', startDate, endDate, 90, [q1.id, q2.id], 'upcoming']
-    );
-  }
+            [`Weekly Contest ${494 + i}`, 'weekly', startDate, endDate, 90, [q1.id, q2.id], 'upcoming']
+        );
+    }
 
-  for (let i = 0; i < 2; i++) {
-    const startDate = new Date(now);
-    // Next Saturday + i*2 weeks
-    startDate.setDate(startDate.getDate() + (6 - startDate.getDay()) + (i * 14));
-    startDate.setHours(20, 0, 0, 0);
+    for (let i = 0; i < 2; i++) {
+        const startDate = new Date(now);
+        // Next Saturday + i*2 weeks
+        startDate.setDate(startDate.getDate() + (6 - startDate.getDay()) + (i * 14));
+        startDate.setHours(20, 0, 0, 0);
 
-    const endDate = new Date(startDate);
-    endDate.setMinutes(endDate.getMinutes() + 90);
+        const endDate = new Date(startDate);
+        endDate.setMinutes(endDate.getMinutes() + 90);
 
-    const q1 = easyMed[(i * 3 + 10) % easyMed.length];
-    const q2 = medHard[(i * 3 + 11) % medHard.length];
+        const q1 = easyMed[(i * 3 + 10) % easyMed.length];
+        const q2 = medHard[(i * 3 + 11) % medHard.length];
 
-    await pool.query(
-      `INSERT INTO contests (title, type, start_time, end_time, duration_minutes, question_ids, status)
+        await pool.query(
+            `INSERT INTO contests (title, type, start_time, end_time, duration_minutes, question_ids, status)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [`Biweekly Contest ${179 + i}`, 'biweekly', startDate, endDate, 90, [q1.id, q2.id], 'upcoming']
-    );
-  }
+            [`Biweekly Contest ${179 + i}`, 'biweekly', startDate, endDate, 90, [q1.id, q2.id], 'upcoming']
+        );
+    }
 
-  console.log('Generated upcoming contests');
+    console.log('Generated upcoming contests');
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -431,6 +431,33 @@ router.get('/user/history', async (req, res) => {
     } catch (err) {
         console.error('User history error:', err.message);
         res.status(500).json({ error: 'Failed to fetch history' });
+    }
+});
+
+// GET /api/contest/global-leaderboard — get overall rankings across all contests
+router.get('/global/leaderboard', async (req, res) => {
+    try {
+        const { rows } = await pool.query(
+            `SELECT user_id, username, SUM(score) as total_score, SUM(problems_solved) as total_solved
+             FROM contest_participants
+             GROUP BY user_id, username
+             ORDER BY total_score DESC, total_solved DESC
+             LIMIT 50`
+        );
+
+        res.json({
+            success: true,
+            leaderboard: rows.map((r, i) => ({
+                rank: i + 1,
+                userId: r.user_id,
+                username: r.username,
+                score: parseInt(r.total_score),
+                problemsSolved: parseInt(r.total_solved)
+            }))
+        });
+    } catch (err) {
+        console.error('Global leaderboard error:', err.message);
+        res.status(500).json({ error: 'Failed to fetch global leaderboard' });
     }
 });
 

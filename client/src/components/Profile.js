@@ -151,6 +151,31 @@ function Profile() {
                     </div>
 
                     <div className="profile-sidebar__divider" />
+                    <div className="profile-sidebar__contest">
+                        <h3>Contest Stats</h3>
+                        <div className="profile-sidebar__stat-item">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffc01e" strokeWidth="2"><circle cx="12" cy="8" r="7" /><path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12" /></svg>
+                            <span>Global Rank</span>
+                            <strong className="profile-sidebar__rank">{p.contestStats?.globalRank || '--'}</strong>
+                        </div>
+                        <div className="profile-sidebar__stat-item">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d4920a" strokeWidth="2"><path d="M6 9H4.5a2.5 2.5 0 010-5C7 4 7 8 12 10c5-2 5-6 7.5-6a2.5 2.5 0 010 5H18l-6 13-6-13z" /></svg>
+                            <span>Total Score</span>
+                            <strong>{p.contestStats?.totalScore || 0}</strong>
+                        </div>
+                        <div className="profile-sidebar__stat-item">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2cbb5d" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                            <span>Solved</span>
+                            <strong>{p.contestStats?.solved || 0}</strong>
+                        </div>
+                        <div className="profile-sidebar__stat-item">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8c8c8c" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                            <span>Contests</span>
+                            <strong>{p.contestStats?.joined || 0}</strong>
+                        </div>
+                    </div>
+
+                    <div className="profile-sidebar__divider" />
                     <div className="profile-sidebar__lang">
                         <h3>Languages</h3>
                         <div className="profile-sidebar__lang-item">

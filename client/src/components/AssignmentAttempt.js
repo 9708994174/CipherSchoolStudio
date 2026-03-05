@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { useQuery } from '../contexts/QueryContext';
 import { useNavigation } from '../contexts/NavigationContext';
@@ -17,6 +17,7 @@ import {
   createPost,
   likePost,
   getEngagementStats,
+  submitContestAnswer
 } from '../services/api';
 import SchemaViewer from './SchemaViewer';
 import ResultsPanel from './ResultsPanel';
@@ -247,7 +248,9 @@ function AssignmentAttempt() {
 
   const { id } = useParams();
   const navigate = useNavigate();
-  console.log('[AssignmentAttempt] Rendering with id from useParams:', id);
+  const location = useLocation();
+  const contestId = new URLSearchParams(location.search).get('contest');
+  console.log('[AssignmentAttempt] Rendering with id:', id, 'contestId:', contestId);
   const [assignment, setAssignment] = useState(null);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState(null);
@@ -664,6 +667,20 @@ function AssignmentAttempt() {
       // Use authenticated user ID if available, otherwise use session-based userId
       const submitUserId = (isAuthenticated && user?.id) ? user.id : userId;
       const response = await submitQuery(id, currentQuery, submitUserId);
+
+      // If this is a contest submission and it passed validation, sync with contest backend
+      if (response.data?.passed && contestId) {
+        try {
+          await submitContestAnswer(contestId, {
+            questionId: id,
+            query: currentQuery,
+            timeTakenMs: 0 // In real app, would track time
+          });
+          console.log('[Contest] Score and leaderboard updated');
+        } catch (cErr) {
+          console.error('[Contest] Failed to sync score:', cErr);
+        }
+      }
 
       // Handle both success and failure responses
       const submissionData = response.data || {};
@@ -1249,7 +1266,7 @@ function AssignmentAttempt() {
                         <ul className="editorial-concepts">
                           {getEditorialTips(assignment).map((tip, i) => (
                             <li key={i}>
-                              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#2cbb5d" strokeWidth="2"><path d="M13 4L6 11 3 8"/></svg>
+                              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#2cbb5d" strokeWidth="2"><path d="M13 4L6 11 3 8" /></svg>
                               {tip}
                             </li>
                           ))}

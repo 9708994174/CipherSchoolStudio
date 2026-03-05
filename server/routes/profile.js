@@ -109,6 +109,27 @@ router.get('/', async (req, res) => {
             'SELECT COUNT(*) as cnt FROM discussions WHERE user_id = $1', [user.id]
         );
 
+        // Get contest stats
+        const { rows: contestStatsRows } = await pool.query(`
+          SELECT 
+            COALESCE(SUM(score), 0) as total_contest_score,
+            COALESCE(SUM(problems_solved), 0) as total_contest_solved,
+            COUNT(*) as contests_joined
+          FROM contest_participants
+          WHERE user_id = $1
+        `, [user.id]);
+        const cs = contestStatsRows[0] || {};
+
+        // Calculate global rank (based on total contest score)
+        const { rows: rankRows } = await pool.query(`
+          SELECT rank FROM (
+            SELECT user_id, RANK() OVER (ORDER BY COALESCE(SUM(score), 0) DESC, COALESCE(SUM(problems_solved), 0) DESC) as rank
+            FROM contest_participants
+            GROUP BY user_id
+          ) r WHERE user_id = $1
+        `, [user.id]);
+        const globalRank = rankRows[0]?.rank || '--';
+
         const s = statsRows[0] || {};
         const t = totalRows[0] || {};
 
@@ -134,6 +155,12 @@ router.get('/', async (req, res) => {
                 streak: { current: streak, max: maxStreak },
                 activeDays: Object.keys(solvedDays).length,
                 activity,
+                contestStats: {
+                    totalScore: parseInt(cs.total_contest_score) || 0,
+                    solved: parseInt(cs.total_contest_solved) || 0,
+                    joined: parseInt(cs.contests_joined) || 0,
+                    globalRank: globalRank
+                },
                 recentSubmissions: recentRows.map(r => ({
                     assignmentId: r.assignment_id,
                     title: r.title || `Problem #${r.assignment_id}`,
