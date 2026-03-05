@@ -260,7 +260,7 @@ function AssignmentList() {
   const [activityData, setActivityData] = useState({});
 
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated , user} = useAuth();
   const { setAssignmentsList, setCurrentAssignmentIndex } = useNavigation();
 
   const fetchAll = useCallback(async () => {
@@ -353,8 +353,9 @@ function AssignmentList() {
               </thead>
               <tbody>
                 {filtered.map((a, idx) => {
-                  const solvedProblems = JSON.parse(localStorage.getItem('solvedProblems') || '{}');
-                  const isSolved = solvedProblems[a._id];
+                  const solvedKey = isAuthenticated && user?.id ? `solvedProblems_${user.id}` : null;
+                  const solvedProblems = solvedKey ? JSON.parse(localStorage.getItem(solvedKey) || '{}') : {};
+                  const isSolved = isAuthenticated && solvedProblems[a._id];
                   return (
                     <tr key={a._id} className="prob-row" onClick={() => handleClick(a)}>
                       <td className="prob-row__num">

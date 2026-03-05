@@ -23,6 +23,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('authUserId');
   }, []);
 
   // Load user from localStorage on mount
@@ -33,7 +34,9 @@ export const AuthProvider = ({ children }) => {
     if (storedToken && storedUser) {
       try {
         setToken(storedToken);
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        if (parsedUser?.id) localStorage.setItem('authUserId', parsedUser.id);
       } catch (_) {
         // corrupted localStorage
         doLogout();
@@ -79,6 +82,7 @@ export const AuthProvider = ({ children }) => {
         setUser(data.user);
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('authUserId', data.user.id);
         return { success: true };
       } else {
         const errorMsg = data.error || data.message || 'Signup failed';
@@ -108,6 +112,7 @@ export const AuthProvider = ({ children }) => {
         setUser(data.user);
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('authUserId', data.user.id);
         return { success: true };
       } else {
         const errorMsg = data.error || data.message || 'Login failed';

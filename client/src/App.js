@@ -25,7 +25,8 @@ function StreakBadge() {
 
   const loadStreak = useCallback(() => {
     try {
-      const solved = JSON.parse(localStorage.getItem('solvedDays') || '{}');
+      const userId = localStorage.getItem('authUserId') || '';
+      const solved = JSON.parse(localStorage.getItem(userId ? `solvedDays_${userId}` : 'solvedDays') || '{}');
       const today = new Date().toISOString().slice(0, 10);
       setChecked(!!solved[today]);
 
@@ -88,7 +89,8 @@ function StreakBadge() {
     const d = new Date();
     d.setDate(d.getDate() - i);
     const k = d.toISOString().slice(0, 10);
-    const solved = JSON.parse(localStorage.getItem('solvedDays') || '{}');
+    const authId = localStorage.getItem('authUserId') || '';
+    const solved = JSON.parse(localStorage.getItem(authId ? `solvedDays_${authId}` : 'solvedDays') || '{}');
     last7.push({ key: k, day: d.toLocaleDateString('en', { weekday: 'short' }), filled: !!solved[k] });
   }
 
@@ -648,8 +650,9 @@ function TopNavBar() {
                       const active = String(a._id) === String(curId);
                       const diff = (a.difficulty || 'Easy').toLowerCase();
 
-                      const solvedProblems = JSON.parse(localStorage.getItem('solvedProblems') || '{}');
-                      const isSolved = solvedProblems[a._id];
+                      const userSolvedKey = isAuthenticated && user?.id ? `solvedProblems_${user.id}` : null;
+                      const solvedProblems = userSolvedKey ? JSON.parse(localStorage.getItem(userSolvedKey) || '{}') : {};
+                      const isSolved = isAuthenticated && solvedProblems[a._id];
 
                       return (
                         <button
@@ -820,6 +823,167 @@ function TopNavBar() {
         )}
       </div>
     </header>
+  );
+}
+
+
+// -----------------------------------------------------------------------------
+//  Contest Page
+// -----------------------------------------------------------------------------
+function ContestPage() {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  
+  const generateContests = (type, count, startNum) => {
+    const contests = [];
+    const now = new Date();
+    for (let i = 0; i < count; i++) {
+      const date = new Date(now);
+      if (type === 'weekly') {
+        date.setDate(date.getDate() - (i * 7) + 7);
+        date.setHours(8, 0, 0);
+      } else {
+        date.setDate(date.getDate() - (i * 14) + 14);
+        date.setHours(20, 0, 0);
+      }
+      const isPast = date < now;
+      contests.push({
+        id: startNum - i,
+        title: type === 'weekly' ? `Weekly Contest ${startNum - i}` : `Biweekly Contest ${startNum - i}`,
+        date: date,
+        type,
+        isPast,
+        problems: 4,
+        solved: 0,
+        duration: '90 min',
+      });
+    }
+    return contests;
+  };
+
+  const weeklyContests = generateContests('weekly', 8, 492);
+  const biweeklyContests = generateContests('biweekly', 4, 178);
+  const allContests = [...weeklyContests, ...biweeklyContests].sort((a, b) => b.date - a.date);
+  const upcoming = allContests.filter(c => !c.isPast).slice(0, 2);
+  const past = allContests.filter(c => c.isPast);
+
+  const [tab, setTab] = useState('past');
+
+  const formatDate = (d) => d.toLocaleDateString('en', { weekday: 'short', month: 'short', day: 'numeric' }) + ', ' + d.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
+
+  const getCountdown = (d) => {
+    const diff = d - new Date();
+    if (diff <= 0) return 'Started';
+    const days = Math.floor(diff / 86400000);
+    const hrs = Math.floor((diff % 86400000) / 3600000);
+    return days > 0 ? `${days}d ${hrs.toString().padStart(2,'0')}:${Math.floor((diff%3600000)/60000).toString().padStart(2,'0')}:00` : `${hrs}:${Math.floor((diff%3600000)/60000).toString().padStart(2,'0')}:${Math.floor((diff%60000)/1000).toString().padStart(2,'0')}`;
+  };
+
+  return (
+    <div className="contest-page">
+      <div className="contest-page__hero">
+        <svg className="contest-page__trophy" viewBox="0 0 64 80" width="80" height="100">
+          <path d="M16 8h32v4H16z" fill="#d4920a"/>
+          <path d="M12 12h40v24c0 12-8 20-20 20S12 48 12 36V12z" fill="#d4920a"/>
+          <path d="M20 12h24v20c0 8-5 14-12 14s-12-6-12-14V12z" fill="#b87d08"/>
+          <circle cx="32" cy="28" r="8" fill="rgba(255,255,255,.2)"/>
+          <path d="M8 12h4v12c0 4-2 6-4 6s-4-2-4-6v-6h4V12z" fill="#d4920a"/>
+          <path d="M52 12h4v6h-4v6c0 4-2 6-4 6s-4-2-4-6V12h8z" fill="#d4920a" transform="scale(-1,1) translate(-64,0)"/>
+          <rect x="24" y="56" width="16" height="4" rx="1" fill="#b87d08"/>
+          <rect x="20" y="60" width="24" height="6" rx="2" fill="#d4920a"/>
+        </svg>
+        <h1 className="contest-page__title">SQL Contest</h1>
+        <p className="contest-page__subtitle">Compete every week. Solve SQL challenges and see your ranking!</p>
+      </div>
+
+      {upcoming.length > 0 && (
+        <div className="contest-page__upcoming">
+          {upcoming.map(ct => (
+            <div key={ct.id} className={`contest-card contest-card--${ct.type}`}>
+              <div className="contest-card__countdown">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                {getCountdown(ct.date)}
+              </div>
+              <div className="contest-card__info">
+                <h3>{ct.title}</h3>
+                <p>{formatDate(ct.date)}</p>
+              </div>
+              <button className="contest-card__register" onClick={() => alert('Contest registration coming soon!')}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="contest-page__content">
+        <div className="contest-page__main">
+          <div className="contest-page__tabs">
+            <button className={`contest-page__tab ${tab === 'past' ? 'contest-page__tab--active' : ''}`} onClick={() => setTab('past')}>Past Contests</button>
+            <button className={`contest-page__tab ${tab === 'my' ? 'contest-page__tab--active' : ''}`} onClick={() => setTab('my')}>My Contests</button>
+          </div>
+          <div className="contest-page__list">
+            {tab === 'my' && !isAuthenticated ? (
+              <div className="contest-page__empty">Sign in to view your contest history</div>
+            ) : tab === 'my' ? (
+              <div className="contest-page__empty">You haven't participated in any contests yet</div>
+            ) : (
+              past.map(ct => (
+                <div key={ct.id} className="contest-row">
+                  <div className={`contest-row__icon contest-row__icon--${ct.type}`}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 8v4l2 2"/></svg>
+                  </div>
+                  <div className="contest-row__info">
+                    <span className="contest-row__title">{ct.title}</span>
+                    <span className="contest-row__date">{formatDate(ct.date)}</span>
+                  </div>
+                  <span className="contest-row__problems">{ct.solved} / {ct.problems}</span>
+                  <button className="contest-row__btn" onClick={() => alert('Virtual contest coming soon!')}>Virtual</button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div className="contest-page__leaderboard">
+          <div className="contest-page__lb-tabs">
+            <button className="contest-page__lb-tab contest-page__lb-tab--active">Global</button>
+          </div>
+          <div className="contest-page__lb-podium">
+            {[
+              { rank: 2, name: 'DataMaster', rating: 3644, color: '#8b8b8b' },
+              { rank: 1, name: 'SQLWizard', rating: 3702, color: '#d4920a' },
+              { rank: 3, name: 'QueryPro', rating: 3620, color: '#cd7f32' },
+            ].map(p => (
+              <div key={p.rank} className={`contest-podium contest-podium--${p.rank}`}>
+                <div className="contest-podium__avatar" style={{ borderColor: p.color }}>{p.name.charAt(0)}</div>
+                <span className="contest-podium__name">{p.name}</span>
+                <span className="contest-podium__rating" style={{ color: p.color }}>{p.rating}</span>
+              </div>
+            ))}
+          </div>
+          <div className="contest-page__lb-list">
+            {[
+              { rank: 4, name: 'JoinExpert', rating: 3611, attended: 107 },
+              { rank: 5, name: 'IndexPro', rating: 3599, attended: 146 },
+              { rank: 6, name: 'AggregateKing', rating: 3589, attended: 100 },
+              { rank: 7, name: 'WindowFnGuru', rating: 3506, attended: 88 },
+              { rank: 8, name: 'CTEMaster', rating: 3499, attended: 61 },
+            ].map(u => (
+              <div key={u.rank} className="contest-lb-row">
+                <span className="contest-lb-row__rank">{u.rank}</span>
+                <div className="contest-lb-row__avatar">{u.name.charAt(0)}</div>
+                <span className="contest-lb-row__name">{u.name}</span>
+                <div className="contest-lb-row__stats">
+                  <span>Rating: <strong>{u.rating}</strong></span>
+                  <span>Attended: {u.attended}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

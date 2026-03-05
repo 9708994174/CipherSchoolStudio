@@ -690,14 +690,15 @@ function AssignmentAttempt() {
         // Mark today as solved â†’ updates streak badge + calendar in real-time
         try {
           const today = new Date().toISOString().slice(0, 10);
-          const solvedDays = JSON.parse(localStorage.getItem('solvedDays') || '{}');
+          const solvedDays = JSON.parse(localStorage.getItem(user?.id ? `solvedDays_${user.id}` : 'solvedDays') || '{}');
           solvedDays[today] = (solvedDays[today] || 0) + 1;
-          localStorage.setItem('solvedDays', JSON.stringify(solvedDays));
+          localStorage.setItem(user?.id ? `solvedDays_${user.id}` : 'solvedDays', JSON.stringify(solvedDays));
 
           // Also mark the specific problem as solved
-          const solvedProblems = JSON.parse(localStorage.getItem('solvedProblems') || '{}');
+          const solvedKey = user?.id ? `solvedProblems_${user.id}` : 'solvedProblems';
+          const solvedProblems = JSON.parse(localStorage.getItem(solvedKey) || '{}');
           solvedProblems[id] = true;
-          localStorage.setItem('solvedProblems', JSON.stringify(solvedProblems));
+          localStorage.setItem(solvedKey, JSON.stringify(solvedProblems));
         } catch { }
         // Dispatch event so streak badge and heatmap update instantly
         window.dispatchEvent(new CustomEvent('problem-solved', { detail: { id } }));
