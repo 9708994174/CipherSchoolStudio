@@ -253,7 +253,7 @@ function TrendingSection({ assignments = [], onCompanyFilter, onTopicFilter }) {
 // ══════════════════════════════════════════════════════════════
 //  MAIN COMPONENT
 // ══════════════════════════════════════════════════════════════
-const NAV_TOPICS = ['All Topics', 'Basics', 'Joins', 'Aggregates', 'Subqueries', 'Window Fn', 'CTE'];
+const NAV_TOPICS = ['All Topics', 'Basics', 'Joins', 'Aggregates', 'Subqueries', 'Window Fn', 'CTE', 'Interview Mastery'];
 const DIFFICULTIES = ['All', 'Easy', 'Medium', 'Hard'];
 
 function AssignmentList() {
@@ -304,8 +304,21 @@ function AssignmentList() {
 
   useEffect(() => {
     let list = assignments;
+    console.log('[FILTER] total assignments:', list.length, 'navTopic:', navTopic, 'difficulty:', difficulty);
+    if (list.length > 0) {
+      const withCat = list.filter(a => a.category);
+      console.log('[FILTER] assignments with category:', withCat.length, withCat.length > 0 ? withCat[0].category : 'none');
+    }
     if (difficulty !== 'All') list = list.filter(a => a.difficulty === difficulty);
-    if (navTopic !== 'All Topics') list = list.filter(a => (a.title + a.question).toLowerCase().includes(navTopic.toLowerCase().replace(' fn', '')));
+    if (navTopic !== 'All Topics') {
+      if (navTopic === 'Interview Mastery') {
+        const masteryList = list.filter(a => a.category === 'SQL Interview Mastery');
+        console.log('[FILTER] Interview Mastery filtered:', masteryList.length);
+        list = masteryList;
+      } else {
+        list = list.filter(a => (a.title + a.question).toLowerCase().includes(navTopic.toLowerCase().replace(' fn', '')));
+      }
+    }
     if (sideTopic) list = list.filter(a => (a.title + a.question).toLowerCase().includes(sideTopic.toLowerCase().replace(' fn', '').replace('aggregate', 'group')));
     if (companyTopic) list = list.filter(a => (a.title || '').startsWith(companyTopic + ':'));
     if (search.trim()) list = list.filter(a => a.title.toLowerCase().includes(search.toLowerCase()));
@@ -375,12 +388,13 @@ function AssignmentList() {
                         )}
                       </td>
                       <td className="prob-row__title">
-                        <span className="prob-row__title-text">{a.title}</span>
+                        <span className={`prob-row__title-text ${a.category === 'SQL Interview Mastery' ? 'prob-row__title-text--premium' : ''}`}>{a.title}</span>
                       </td>
                       <td className="prob-row__tags prob-row__tags--hide-sm">
+                        {a.category === 'SQL Interview Mastery' && <span className="prob-tag prob-tag--mastery">Mastery</span>}
                         {getSqlTags(a).map(tag => <span key={tag} className="prob-tag">{tag}</span>)}
                       </td>
-                      <td className="prob-row__acceptance">{((String(a._id).length % 40) + 40).toFixed(1)}%</td>
+                      <td className="prob-row__acceptance">{(Number(a.acceptanceRate) || 0).toFixed(1)}%</td>
                       <td className={`prob-row__diff prob-row__diff--${a.difficulty.toLowerCase()}`}>{a.difficulty}</td>
                     </tr>
                   );

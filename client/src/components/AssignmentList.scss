@@ -578,6 +578,15 @@
     .prob-row:hover & {
       color: $yellow;
     }
+
+    &--premium {
+      color: #ffa116;
+      font-weight: 600;
+
+      .prob-row:hover & {
+        color: #ffb84d;
+      }
+    }
   }
 
   &__tags {
@@ -635,6 +644,19 @@
     background: rgba($yellow, .1);
     color: $yellow;
     border-color: rgba($yellow, .25);
+  }
+
+  &--mastery {
+    background: rgba(255, 161, 22, .12);
+    color: #ffa116;
+    border: 1px solid rgba(255, 161, 22, .2);
+    font-weight: 700;
+
+    .prob-row:hover & {
+      background: rgba(255, 161, 22, .18);
+      color: #ffa116;
+      border-color: rgba(255, 161, 22, .4);
+    }
   }
 }
 

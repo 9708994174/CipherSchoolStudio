@@ -9,15 +9,21 @@ const withMongoId = (row) => row ? { ...row, _id: String(row.id) } : row;
 router.get('/', async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, title, description, difficulty, question,
-              sample_tables AS "sampleTables",
-              expected_output AS "expectedOutput",
-              test_cases AS "testCases",
-              schema_name AS "schemaName",
-              created_at AS "createdAt",
-              updated_at AS "updatedAt"
-       FROM assignments
-       ORDER BY id ASC`
+      `SELECT a.id, a.title, a.description, a.difficulty, a.question, a.category,
+              a.sample_tables AS "sampleTables",
+              a.expected_output AS "expectedOutput",
+              a.test_cases AS "testCases",
+              a.schema_name AS "schemaName",
+              a.created_at AS "createdAt",
+              a.updated_at AS "updatedAt",
+              COALESCE(
+                (SELECT (COUNT(CASE WHEN is_completed THEN 1 END) * 100.0 / NULLIF(SUM(attempt_count), 0))
+                 FROM user_progress 
+                 WHERE assignment_id = a.id), 
+                 0
+              ) as "acceptanceRate"
+       FROM assignments a
+       ORDER BY a.id ASC`
     );
     res.json(result.rows.map(withMongoId));
   } catch (error) {
