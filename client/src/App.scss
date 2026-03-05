@@ -1654,11 +1654,13 @@
 .contest-card {
   flex: 1;
   border-radius: $r-lg;
-  padding: 20px;
+  padding: 28px 24px;
   position: relative;
   overflow: hidden;
   cursor: pointer;
   transition: transform .15s;
+
+  min-height: 100px;
 
   &:hover { transform: translateY(-3px); }
 
@@ -1687,7 +1689,7 @@
 
 .contest-card__info {
   h3 {
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 700;
     color: #fff;
     margin-bottom: 4px;
@@ -2127,4 +2129,20 @@
   font-size: 14px;
   color: $text-2;
   strong { color: #2cbb5d; font-weight: 700; }
+}
+
+.contest-detail-status {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 99px;
+  text-transform: capitalize;
+  &--upcoming { color: $yellow; background: rgba($yellow,.1); }
+  &--active { color: #2cbb5d; background: rgba(44,187,93,.1); }
+  &--ended { color: $text-3; background: rgba(255,255,255,.05); }
+}
+
+.contest-question-card--solved {
+  border-color: rgba(44,187,93,.3) !important;
+  background: rgba(44,187,93,.03);
 }

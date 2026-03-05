@@ -706,29 +706,55 @@
   background: $bg-panel;
   border: 1px solid $border;
   border-radius: $r-md;
-  padding: 14px;
+  padding: 16px;
 }
 
 .trending-card__header {
+  margin-bottom: 16px;
+}
+
+.trending-card__header-top {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 14px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
 }
 
 .trending-card__title {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .8px;
+  color: $text-1;
+}
+
+.trending-card__nav {
+  display: flex;
+  gap: 4px;
+}
+
+.trending-card__nav-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid $border;
+  background: $bg-card;
   color: $text-3;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .12s;
+  &:hover:not(:disabled) { border-color: $text-3; color: $text-1; }
+  &:disabled { opacity: .3; cursor: default; }
 }
 
 .trending-card__search-mini {
-  background: rgba(255, 255, 255, .04);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,.04);
   border: 1px solid $border;
-  border-radius: 6px;
-  padding: 4px 8px;
+  border-radius: 8px;
+  padding: 8px 12px;
 
   input {
     width: 100%;
@@ -736,54 +762,39 @@
     border: none;
     outline: none;
     color: $text-2;
-    font-size: 11px;
-    font-family: inherit;
-
-    &::placeholder {
-      color: #555;
-    }
-  }
-}
-
-.trending-card__list {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.trending-card__company-row,
-.trending-card__topic-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all .1s;
-
-  &:hover {
-    background: rgba(255, 255, 255, .04);
-  }
-
-  .trending-card__name {
     font-size: 13px;
-    color: $text-2;
-  }
-
-  .trending-card__count {
-    font-size: 11px;
-    font-weight: 700;
-    color: #d4920a;
-    background: rgba(212, 146, 10, .12);
-    border: 1px solid rgba(212, 146, 10, .3);
-    padding: 1px 8px;
-    border-radius: 4px;
-    font-variant-numeric: tabular-nums;
+    font-family: inherit;
+    &::placeholder { color: #555; }
   }
 }
 
-.trending-card__company-row:hover .trending-card__name {
-  color: $yellow;
+.trending-card__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  padding-top: 4px;
+}
+
+.trending-card__company-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: $text-2;
+  cursor: pointer;
+  transition: color .12s;
+  &:hover { color: $yellow; }
+}
+
+.trending-card__chip-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: #d4920a;
+  background: rgba(212,146,10,.15);
+  border: 1px solid rgba(212,146,10,.35);
+  padding: 1px 8px;
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
 }
 
 .trending-card__empty {
@@ -791,6 +802,7 @@
   color: $text-3;
   font-size: 12px;
   padding: 20px 0;
+  width: 100%;
 }
 
 .prob-clear-btn {

@@ -5,236 +5,56 @@ import { useNavigation } from '../contexts/NavigationContext';
 import { getAssignments, getUserActivity, getUserStats } from '../services/api';
 import './AssignmentList.scss';
 
-// ══════════════════════════════════════════════════════════════
-//  LEETCODE-STYLE MONTHLY ACTIVITY CALENDAR
-// ══════════════════════════════════════════════════════════════
-const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'];
-const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-
-function ActivityCalendar({ activityData }) {
-  const today = new Date();
-  const [viewMonth, setViewMonth] = useState(today.getMonth());
-  const [viewYear, setViewYear] = useState(today.getFullYear());
-
-  // Streak calc
-  let streak = 0;
-  const d = new Date(today);
-  while (true) {
-    const k = d.toISOString().slice(0, 10);
-    if (!activityData[k]) break;
-    streak++;
-    d.setDate(d.getDate() - 1);
-  }
-
-  const totalDays = Object.keys(activityData).filter(k => activityData[k] > 0).length;
-
-  const firstDay = new Date(viewYear, viewMonth, 1);
-  const lastDay = new Date(viewYear, viewMonth + 1, 0);
-  const startDow = firstDay.getDay();
-  const daysInMonth = lastDay.getDate();
-
-  const weeks = [];
-  let currentWeek = new Array(startDow).fill(null);
-  for (let day = 1; day <= daysInMonth; day++) {
-    currentWeek.push(day);
-    if (currentWeek.length === 7) {
-      weeks.push(currentWeek);
-      currentWeek = [];
-    }
-  }
-  if (currentWeek.length > 0) {
-    while (currentWeek.length < 7) currentWeek.push(null);
-    weeks.push(currentWeek);
-  }
-
-  const prevMonth = () => {
-    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); }
-    else setViewMonth(m => m - 1);
-  };
-  const nextMonth = () => {
-    const isCurrentMonth = viewMonth === today.getMonth() && viewYear === today.getFullYear();
-    if (isCurrentMonth) return;
-    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); }
-    else setViewMonth(m => m + 1);
-  };
-
-  const isCurrentMonth = viewMonth === today.getMonth() && viewYear === today.getFullYear();
-
-  return (
-    <div className="cal-lc">
-      <div className="cal-lc__streak-row">
-        <span className="cal-lc__streak">🔥 {streak} day streak</span>
-        <span className="cal-lc__total">{totalDays} active days</span>
-      </div>
-
-      <div className="cal-lc__nav">
-        <button className="cal-lc__arrow" onClick={prevMonth}>
-          <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
-            <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-        <span className="cal-lc__month-label">{MONTH_NAMES[viewMonth]} {viewYear}</span>
-        <button className="cal-lc__arrow" onClick={nextMonth} disabled={isCurrentMonth}>
-          <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
-            <path d="M6 12l4-4-4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-      </div>
-
-      <div className="cal-lc__dow-row">
-        {DOW.map((d, i) => <span key={i} className="cal-lc__dow">{d}</span>)}
-      </div>
-
-      <div className="cal-lc__grid">
-        {weeks.map((week, wi) => (
-          <div key={wi} className="cal-lc__week">
-            {week.map((day, di) => {
-              if (day === null) return <div key={di} className="cal-lc__cell cal-lc__cell--empty" />;
-              const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-              const count = activityData[dateStr] || 0;
-              const isToday = day === today.getDate() && isCurrentMonth;
-              const isFuture = new Date(viewYear, viewMonth, day) > today;
-              const solved = count > 0;
-              return (
-                <div key={di} className={`cal-lc__cell${isToday ? ' cal-lc__cell--today' : ''}${solved ? ' cal-lc__cell--solved' : ''}${isFuture ? ' cal-lc__cell--future' : ''}`}>
-                  <span className="cal-lc__day-num">{day}</span>
-                  {solved && !isFuture && <span className="cal-lc__dot" />}
-                </div>
-              );
-            })}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ══════════════════════════════════════════════════════════════
-//  SIDEBAR FILTERS
-// ══════════════════════════════════════════════════════════════
-const SQL_TOPICS_LIST = ['Basics', 'SELECT', 'WHERE', 'JOIN', 'Aggregate', 'Window Fn', 'CTE', 'Subqueries', 'Case Statements', 'DISTINCT', 'LIMIT'];
-
-function LeftSidebar({ assignments, stats, activityData, onTopicFilter }) {
-  const total = assignments.length;
-  const solved = stats.total || 0;
-  const pct = total > 0 ? Math.round((solved / total) * 100) : 0;
-  const [activeTopic, setActiveTopic] = useState(null);
-
-  const handleTopic = (t) => {
-    const next = activeTopic === t ? null : t;
-    setActiveTopic(next);
-    onTopicFilter(next);
-  };
-
-  return (
-    <aside className="prob-left-sidebar">
-      <div className="left-card">
-        <div className="left-card__title">Your Progress</div>
-        <div className="prog-donut-row">
-          <svg viewBox="0 0 80 80" className="prog-donut">
-            <circle cx="40" cy="40" r="30" fill="none" stroke="#2a2a2a" strokeWidth="8" />
-            <circle cx="40" cy="40" r="30" fill="none" stroke="#2cbb5d" strokeWidth="8" strokeDasharray={`${pct * 1.884} 188.4`} strokeDashoffset="47.1" strokeLinecap="round" style={{ transition: 'stroke-dasharray .6s ease' }} />
-            <text x="40" y="36" textAnchor="middle" fill="#fff" fontSize="14" fontWeight="700">{solved}</text>
-            <text x="40" y="48" textAnchor="middle" fill="#8c8c8c" fontSize="8">Solved</text>
-          </svg>
-          <div className="prog-bars">
-            {[
-              { label: 'Easy', val: stats.easy || 0, total: assignments.filter(a => a.difficulty === 'Easy').length, cls: 'easy' },
-              { label: 'Medium', val: stats.medium || 0, total: assignments.filter(a => a.difficulty === 'Medium').length, cls: 'med' },
-              { label: 'Hard', val: stats.hard || 0, total: assignments.filter(a => a.difficulty === 'Hard').length, cls: 'hard' },
-            ].map(({ label, val, total: t, cls }) => (
-              <div key={label} className="prog-bar-row">
-                <span className={`prog-bar-label prog-bar-label--${cls}`}>{label}</span>
-                <div className="prog-bar-track"><div className={`prog-bar-fill prog-bar-fill--${cls}`} style={{ width: t > 0 ? `${Math.round((val / t) * 100)}%` : '0%' }} /></div>
-                <span className={`prog-bar-count prog-bar-count--${cls}`}>{val}<span>/{t}</span></span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="left-card">
-        <div className="left-card__title">Recent Activity</div>
-        <ActivityCalendar activityData={activityData} />
-      </div>
-
-      <div className="left-card">
-        <div className="left-card__title">Topics</div>
-        <div className="topic-tags">
-          {SQL_TOPICS_LIST.map(t => (
-            <button key={t} className={`topic-tag ${activeTopic === t ? 'topic-tag--active' : ''}`} onClick={() => handleTopic(t)}>{t}</button>
-          ))}
-        </div>
-      </div>
-    </aside>
-  );
-}
-
-// ══════════════════════════════════════════════════════════════
-//  TRENDING SECTION (right sidebar)
-// ══════════════════════════════════════════════════════════════
 function TrendingSection({ assignments = [], onCompanyFilter }) {
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(0);
+  const perPage = 14;
 
   const clusters = useMemo(() => {
     const companies = {};
-    const topics = {};
-
     assignments.forEach(a => {
-      // Extraction
-      const compMatch = (a.title || '').match(/^(Google|Amazon|Meta|Uber|Microsoft|Airbnb|Netflix|Salesforce|Twitter|LinkedIn|Apple|Spotify|Bloomberg):/);
+      const compMatch = (a.title || '').match(/^(Google|Amazon|Meta|Uber|Microsoft|Airbnb|Netflix|Salesforce|Twitter|LinkedIn|Apple|Spotify|Bloomberg|Oracle|TikTok|Adobe|Snap|IBM|tcs|Goldman Sachs):/i);
       if (compMatch) {
         const c = compMatch[1];
         companies[c] = (companies[c] || 0) + 1;
       }
-
-      const topicMatch = (a.title || '').match(/\((.*?)\)$/);
-      if (topicMatch) {
-        const t = topicMatch[1];
-        topics[t] = (topics[t] || 0) + 1;
-      }
     });
-
-    return {
-      companies: Object.entries(companies).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count),
-      topics: Object.entries(topics).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count)
-    };
+    return Object.entries(companies)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
   }, [assignments]);
 
-  const filteredComps = clusters.companies.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
-  const filteredTops = clusters.topics.filter(t => t.name.toLowerCase().includes(search.toLowerCase()));
+  const filtered = clusters.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
+  const totalPages = Math.ceil(filtered.length / perPage);
+  const visible = filtered.slice(page * perPage, (page + 1) * perPage);
 
   return (
     <aside className="right-sidebar">
       <div className="trending-card">
         <div className="trending-card__header">
-          <h3 className="trending-card__title">Top Companies</h3>
+          <div className="trending-card__header-top">
+            <h3 className="trending-card__title">Trending Companies</h3>
+            <div className="trending-card__nav">
+              <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0} className="trending-card__nav-btn">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1} className="trending-card__nav-btn">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+            </div>
+          </div>
           <div className="trending-card__search-mini">
-            <input placeholder="Filter companies..." value={search} onChange={e => setSearch(e.target.value)} />
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input placeholder="Search for a company..." value={search} onChange={e => { setSearch(e.target.value); setPage(0); }} />
           </div>
         </div>
-        <div className="trending-card__list">
-          {filteredComps.map(c => (
-            <div key={c.name} className="trending-card__company-row" onClick={() => onCompanyFilter(c.name)}>
-              <span className="trending-card__name">{c.name}</span>
-              <span className="trending-card__count">{c.count}</span>
-            </div>
+        <div className="trending-card__grid">
+          {visible.map(c => (
+            <span key={c.name} className="trending-card__company-chip" onClick={() => onCompanyFilter(c.name)}>
+              {c.name} <span className="trending-card__chip-count">{c.count}</span>
+            </span>
           ))}
-        </div>
-      </div>
-
-      <div className="trending-card" style={{ marginTop: 16 }}>
-        <div className="trending-card__header">
-          <h3 className="trending-card__title">Popular Topics</h3>
-        </div>
-        <div className="trending-card__list">
-          {filteredTops.map(t => (
-            <div key={t.name} className="trending-card__topic-row">
-              <span className="trending-card__name">{t.name}</span>
-              <span className="trending-card__count">{t.count}</span>
-            </div>
-          ))}
+          {visible.length === 0 && <div className="trending-card__empty">No companies found</div>}
         </div>
       </div>
     </aside>
