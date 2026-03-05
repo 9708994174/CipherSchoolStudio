@@ -15,6 +15,7 @@ const authRoutes = require("./routes/auth")
 const userRoutes = require("./routes/user")
 const discussRoutes = require("./routes/discuss")
 const profileRoutes = require("./routes/profile")
+const contestRoutes = require("./routes/contest")
 
 const app = express()
 const PORT = process.env.PORT || 5000
@@ -85,6 +86,7 @@ app.use("/api/submit", submitRoutes)
 app.use("/api/user", userRoutes)
 app.use("/api/discuss", discussRoutes)
 app.use("/api/profile", profileRoutes)
+app.use("/api/contest", contestRoutes)
 
 app.get("/api/health", (req, res) => {
   res.json({

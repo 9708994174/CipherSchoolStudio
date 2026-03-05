@@ -135,4 +135,11 @@ export const getEngagementStats = (assignmentId) => api.get(`/discuss/global/sta
 export default api;
 
 
+// ── Contest API ───────────────────────────────────────────
+export const getContests = () => api.get('/contest');
+export const getContestById = (id) => api.get(`/contest/${id}`);
+export const joinContest = (id) => api.post(`/contest/${id}/join`);
+export const submitContestAnswer = (id, data) => api.post(`/contest/${id}/submit`, data);
+export const getContestLeaderboard = (id) => api.get(`/contest/${id}/leaderboard`);
+export const getContestHistory = () => api.get('/contest/user/history');
 

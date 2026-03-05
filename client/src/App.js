@@ -9,7 +9,7 @@ import Login from './components/Login';
 import Signup from './components/Signup';
 import Profile from './components/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
-import { getAssignments, getAllDiscussions, createPost as apiCreatePost, likePost as apiLikePost, getComments, postComment } from './services/api';
+import { getAssignments, getContests, getContestById, joinContest, submitContestAnswer, getContestLeaderboard, getContestHistory, getAllDiscussions, createPost as apiCreatePost, likePost as apiLikePost, getComments, postComment } from './services/api';
 import './App.scss';
 
 // =============================================================================
@@ -828,57 +828,153 @@ function TopNavBar() {
 
 
 // -----------------------------------------------------------------------------
-//  Contest Page
+//  Contest Page (Real API)
 // -----------------------------------------------------------------------------
 function ContestPage() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-  
-  const generateContests = (type, count, startNum) => {
-    const contests = [];
-    const now = new Date();
-    for (let i = 0; i < count; i++) {
-      const date = new Date(now);
-      if (type === 'weekly') {
-        date.setDate(date.getDate() - (i * 7) + 7);
-        date.setHours(8, 0, 0);
-      } else {
-        date.setDate(date.getDate() - (i * 14) + 14);
-        date.setHours(20, 0, 0);
-      }
-      const isPast = date < now;
-      contests.push({
-        id: startNum - i,
-        title: type === 'weekly' ? `Weekly Contest ${startNum - i}` : `Biweekly Contest ${startNum - i}`,
-        date: date,
-        type,
-        isPast,
-        problems: 4,
-        solved: 0,
-        duration: '90 min',
-      });
-    }
-    return contests;
+  const { isAuthenticated, user } = useAuth();
+  const [contests, setContests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState('past');
+  const [selectedContest, setSelectedContest] = useState(null);
+  const [contestDetail, setContestDetail] = useState(null);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [myHistory, setMyHistory] = useState([]);
+  const [joining, setJoining] = useState(false);
+
+  const fetchContests = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await getContests();
+      if (res.data?.success) setContests(res.data.contests || []);
+    } catch (err) {
+      console.error('Fetch contests error:', err);
+    } finally { setLoading(false); }
+  }, []);
+
+  const fetchHistory = useCallback(async () => {
+    if (!isAuthenticated) return;
+    try {
+      const res = await getContestHistory();
+      if (res.data?.success) setMyHistory(res.data.history || []);
+    } catch (err) { console.error('History error:', err); }
+  }, [isAuthenticated]);
+
+  useEffect(() => { fetchContests(); fetchHistory(); }, [fetchContests, fetchHistory]);
+
+  const loadContestDetail = async (id) => {
+    try {
+      const [detailRes, lbRes] = await Promise.all([
+        getContestById(id),
+        getContestLeaderboard(id)
+      ]);
+      if (detailRes.data?.success) setContestDetail(detailRes.data.contest);
+      if (lbRes.data?.success) setLeaderboard(lbRes.data.leaderboard || []);
+      setSelectedContest(id);
+    } catch (err) { console.error('Contest detail error:', err); }
   };
 
-  const weeklyContests = generateContests('weekly', 8, 492);
-  const biweeklyContests = generateContests('biweekly', 4, 178);
-  const allContests = [...weeklyContests, ...biweeklyContests].sort((a, b) => b.date - a.date);
-  const upcoming = allContests.filter(c => !c.isPast).slice(0, 2);
-  const past = allContests.filter(c => c.isPast);
+  const handleJoin = async (id) => {
+    if (!isAuthenticated) return alert('Please log in to join contests');
+    try {
+      setJoining(true);
+      await joinContest(id);
+      await loadContestDetail(id);
+    } catch (err) { console.error('Join error:', err); }
+    finally { setJoining(false); }
+  };
 
-  const [tab, setTab] = useState('past');
+  const now = new Date();
+  const upcoming = contests.filter(c => new Date(c.start_time) > now);
+  const past = contests.filter(c => new Date(c.end_time) < now);
 
-  const formatDate = (d) => d.toLocaleDateString('en', { weekday: 'short', month: 'short', day: 'numeric' }) + ', ' + d.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
+  const formatDate = (d) => {
+    const dt = new Date(d);
+    return dt.toLocaleDateString('en', { weekday: 'short', month: 'short', day: 'numeric' }) +
+      ', ' + dt.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
+  };
 
   const getCountdown = (d) => {
-    const diff = d - new Date();
+    const diff = new Date(d) - now;
     if (diff <= 0) return 'Started';
     const days = Math.floor(diff / 86400000);
     const hrs = Math.floor((diff % 86400000) / 3600000);
-    return days > 0 ? `${days}d ${hrs.toString().padStart(2,'0')}:${Math.floor((diff%3600000)/60000).toString().padStart(2,'0')}:00` : `${hrs}:${Math.floor((diff%3600000)/60000).toString().padStart(2,'0')}:${Math.floor((diff%60000)/1000).toString().padStart(2,'0')}`;
+    const mins = Math.floor((diff % 3600000) / 60000);
+    return days > 0 ? days + 'd ' + String(hrs).padStart(2,'0') + ':' + String(mins).padStart(2,'0') + ':00'
+      : String(hrs).padStart(2,'0') + ':' + String(mins).padStart(2,'0') + ':00';
   };
 
+  // Contest detail view
+  if (selectedContest && contestDetail) {
+    const myPart = contestDetail.myParticipation;
+    return (
+      <div className="contest-page">
+        <div className="contest-detail-header">
+          <button className="contest-detail-back" onClick={() => { setSelectedContest(null); setContestDetail(null); }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
+            Back
+          </button>
+          <h1>{contestDetail.title}</h1>
+          <div className="contest-detail-meta">
+            <span>{formatDate(contestDetail.start_time)}</span>
+            <span>{contestDetail.duration_minutes} min</span>
+            <span>{contestDetail.participant_count || contestDetail.participantCount || 0} participants</span>
+          </div>
+        </div>
+
+        <div className="contest-page__content">
+          <div className="contest-page__main">
+            <h3 style={{color: '#e8e8e8', marginBottom: 12, fontSize: 16}}>Questions ({contestDetail.questions?.length || 0})</h3>
+            {contestDetail.questions?.map((q, i) => (
+              <div key={q.id} className="contest-question-card">
+                <div className="contest-question-card__num">{i + 1}</div>
+                <div className="contest-question-card__body">
+                  <span className="contest-question-card__title">{q.title}</span>
+                  <p className="contest-question-card__desc">{q.description}</p>
+                </div>
+                <span className={'contest-question-card__diff contest-question-card__diff--' + q.difficulty.toLowerCase()}>{q.difficulty}</span>
+              </div>
+            ))}
+
+            {!myPart && contestDetail.status !== 'ended' && (
+              <button className="contest-join-btn" onClick={() => handleJoin(contestDetail.id)} disabled={joining}>
+                {joining ? 'Joining...' : 'Join Contest'}
+              </button>
+            )}
+            {myPart && (
+              <div className="contest-my-score">
+                <span>Your Score: <strong>{myPart.score}</strong></span>
+                <span>Solved: <strong>{myPart.problems_solved}/{contestDetail.questions?.length || 0}</strong></span>
+              </div>
+            )}
+          </div>
+
+          <div className="contest-page__leaderboard">
+            <h3 style={{color: '#e8e8e8', marginBottom: 12, fontSize: 16}}>Leaderboard</h3>
+            {leaderboard.length === 0 ? (
+              <div className="contest-page__empty">No participants yet</div>
+            ) : (
+              <div className="contest-page__lb-list">
+                {leaderboard.map(u => (
+                  <div key={u.rank} className="contest-lb-row">
+                    <span className="contest-lb-row__rank">{u.rank}</span>
+                    <div className="contest-lb-row__avatar">{(u.username || 'A').charAt(0).toUpperCase()}</div>
+                    <span className="contest-lb-row__name">{u.username}</span>
+                    <div className="contest-lb-row__stats">
+                      <span>Score: <strong>{u.score}</strong></span>
+                      <span>Solved: {u.problemsSolved}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Main contests list view
   return (
     <div className="contest-page">
       <div className="contest-page__hero">
@@ -898,17 +994,17 @@ function ContestPage() {
 
       {upcoming.length > 0 && (
         <div className="contest-page__upcoming">
-          {upcoming.map(ct => (
-            <div key={ct.id} className={`contest-card contest-card--${ct.type}`}>
+          {upcoming.slice(0, 2).map(ct => (
+            <div key={ct.id} className={'contest-card contest-card--' + ct.type} onClick={() => loadContestDetail(ct.id)}>
               <div className="contest-card__countdown">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                {getCountdown(ct.date)}
+                {getCountdown(ct.start_time)}
               </div>
               <div className="contest-card__info">
                 <h3>{ct.title}</h3>
-                <p>{formatDate(ct.date)}</p>
+                <p>{formatDate(ct.start_time)}</p>
               </div>
-              <button className="contest-card__register" onClick={() => alert('Contest registration coming soon!')}>
+              <button className="contest-card__register" onClick={(e) => { e.stopPropagation(); handleJoin(ct.id); }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>
               </button>
             </div>
@@ -919,26 +1015,44 @@ function ContestPage() {
       <div className="contest-page__content">
         <div className="contest-page__main">
           <div className="contest-page__tabs">
-            <button className={`contest-page__tab ${tab === 'past' ? 'contest-page__tab--active' : ''}`} onClick={() => setTab('past')}>Past Contests</button>
-            <button className={`contest-page__tab ${tab === 'my' ? 'contest-page__tab--active' : ''}`} onClick={() => setTab('my')}>My Contests</button>
+            <button className={'contest-page__tab ' + (tab === 'past' ? 'contest-page__tab--active' : '')} onClick={() => setTab('past')}>Past Contests</button>
+            <button className={'contest-page__tab ' + (tab === 'my' ? 'contest-page__tab--active' : '')} onClick={() => setTab('my')}>My Contests</button>
           </div>
           <div className="contest-page__list">
-            {tab === 'my' && !isAuthenticated ? (
+            {loading ? (
+              <div className="contest-page__empty">Loading contests...</div>
+            ) : tab === 'my' && !isAuthenticated ? (
               <div className="contest-page__empty">Sign in to view your contest history</div>
             ) : tab === 'my' ? (
-              <div className="contest-page__empty">You haven't participated in any contests yet</div>
+              myHistory.length === 0 ? (
+                <div className="contest-page__empty">You haven't participated in any contests yet</div>
+              ) : (
+                myHistory.map(h => (
+                  <div key={h.contest_id} className="contest-row" onClick={() => loadContestDetail(h.contest_id)}>
+                    <div className={'contest-row__icon contest-row__icon--' + h.type}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 8v4l2 2"/></svg>
+                    </div>
+                    <div className="contest-row__info">
+                      <span className="contest-row__title">{h.title}</span>
+                      <span className="contest-row__date">{formatDate(h.start_time)}</span>
+                    </div>
+                    <span className="contest-row__problems">{h.problems_solved} / 2</span>
+                    <span className="contest-row__problems">Score: {h.score}</span>
+                  </div>
+                ))
+              )
             ) : (
               past.map(ct => (
-                <div key={ct.id} className="contest-row">
-                  <div className={`contest-row__icon contest-row__icon--${ct.type}`}>
+                <div key={ct.id} className="contest-row" onClick={() => loadContestDetail(ct.id)}>
+                  <div className={'contest-row__icon contest-row__icon--' + ct.type}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 8v4l2 2"/></svg>
                   </div>
                   <div className="contest-row__info">
                     <span className="contest-row__title">{ct.title}</span>
-                    <span className="contest-row__date">{formatDate(ct.date)}</span>
+                    <span className="contest-row__date">{formatDate(ct.start_time)}</span>
                   </div>
-                  <span className="contest-row__problems">{ct.solved} / {ct.problems}</span>
-                  <button className="contest-row__btn" onClick={() => alert('Virtual contest coming soon!')}>Virtual</button>
+                  <span className="contest-row__problems">0 / 2</span>
+                  <button className="contest-row__btn" onClick={(e) => { e.stopPropagation(); loadContestDetail(ct.id); }}>Virtual</button>
                 </div>
               ))
             )}
@@ -946,46 +1060,16 @@ function ContestPage() {
         </div>
 
         <div className="contest-page__leaderboard">
-          <div className="contest-page__lb-tabs">
-            <button className="contest-page__lb-tab contest-page__lb-tab--active">Global</button>
-          </div>
-          <div className="contest-page__lb-podium">
-            {[
-              { rank: 2, name: 'DataMaster', rating: 3644, color: '#8b8b8b' },
-              { rank: 1, name: 'SQLWizard', rating: 3702, color: '#d4920a' },
-              { rank: 3, name: 'QueryPro', rating: 3620, color: '#cd7f32' },
-            ].map(p => (
-              <div key={p.rank} className={`contest-podium contest-podium--${p.rank}`}>
-                <div className="contest-podium__avatar" style={{ borderColor: p.color }}>{p.name.charAt(0)}</div>
-                <span className="contest-podium__name">{p.name}</span>
-                <span className="contest-podium__rating" style={{ color: p.color }}>{p.rating}</span>
-              </div>
-            ))}
-          </div>
-          <div className="contest-page__lb-list">
-            {[
-              { rank: 4, name: 'JoinExpert', rating: 3611, attended: 107 },
-              { rank: 5, name: 'IndexPro', rating: 3599, attended: 146 },
-              { rank: 6, name: 'AggregateKing', rating: 3589, attended: 100 },
-              { rank: 7, name: 'WindowFnGuru', rating: 3506, attended: 88 },
-              { rank: 8, name: 'CTEMaster', rating: 3499, attended: 61 },
-            ].map(u => (
-              <div key={u.rank} className="contest-lb-row">
-                <span className="contest-lb-row__rank">{u.rank}</span>
-                <div className="contest-lb-row__avatar">{u.name.charAt(0)}</div>
-                <span className="contest-lb-row__name">{u.name}</span>
-                <div className="contest-lb-row__stats">
-                  <span>Rating: <strong>{u.rating}</strong></span>
-                  <span>Attended: {u.attended}</span>
-                </div>
-              </div>
-            ))}
+          <h3 style={{color: '#e8e8e8', marginBottom: 12, fontSize: 16}}>Global Ranking</h3>
+          <div className="contest-page__empty" style={{fontSize: 12}}>
+            Participate in contests to appear on the leaderboard
           </div>
         </div>
       </div>
     </div>
   );
 }
+
 
 function App() {
   return (
