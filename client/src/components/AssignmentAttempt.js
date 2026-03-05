@@ -309,6 +309,8 @@ function AssignmentAttempt() {
   const [solBody, setSolBody] = useState('');
   const [posting, setPosting] = useState(false);
   const [engagementStats, setEngagementStats] = useState({ likes: 0, discussions: 0 });
+  const [schemaCollapsed, setSchemaCollapsed] = useState(false);
+  const [activeUsers, setActiveUsers] = useState(0);
 
   const loadDiscussions = useCallback(async () => {
     if (!id) return;
@@ -325,6 +327,20 @@ function AssignmentAttempt() {
   }, [id]);
 
   useEffect(() => { loadDiscussions(); }, [loadDiscussions]);
+
+  // Simulate active users polling (in production, use WebSocket)
+  useEffect(() => {
+    if (!id) return;
+    // Initial active users based on engagement
+    setActiveUsers(Math.max(1, Math.floor((engagementStats.discussions || 0) * 0.3 + 1)));
+    const interval = setInterval(() => {
+      setActiveUsers(prev => {
+        const delta = Math.random() > 0.5 ? 1 : -1;
+        return Math.max(1, prev + delta);
+      });
+    }, 15000); // Update every 15 seconds
+    return () => clearInterval(interval);
+  }, [id, engagementStats.discussions]);
 
   const handlePostDiscussion = async () => {
     if (!postBody.trim()) return;
@@ -1154,7 +1170,13 @@ function AssignmentAttempt() {
                   <div className="problem-panel__description-scroll">
                     <div className="problem-panel__header">
                       <h2 className="problem-panel__title">{assignment.title}</h2>
-                      <span className={`problem-panel__difficulty problem-panel__difficulty--${assignment.difficulty.toLowerCase()}`}>{assignment.difficulty}</span>
+                      <div className="problem-panel__header-right">
+                        <span className="problem-panel__active-users" title="Students currently solving">
+                          <span className="problem-panel__active-dot" />
+                          {activeUsers} solving now
+                        </span>
+                        <span className={`problem-panel__difficulty problem-panel__difficulty--${assignment.difficulty.toLowerCase()}`}>{assignment.difficulty}</span>
+                      </div>
                     </div>
                     <div className="problem-panel__tags">
                       <button className="problem-panel__tag-btn">Topics</button>
@@ -1165,11 +1187,17 @@ function AssignmentAttempt() {
                       {assignment.description && <p className="problem-panel__description-text">{assignment.description}</p>}
                     </div>
                     {/* Schema */}
-                    <div className="problem-panel__schema">
+                    <div className={`problem-panel__schema ${schemaCollapsed ? 'problem-panel__schema--collapsed' : ''}`}>
                       <div className="problem-panel__schema-header">
                         <button className="problem-panel__schema-tab problem-panel__schema-tab--active">SQL Schema</button>
+                        <button className="problem-panel__schema-toggle" onClick={() => setSchemaCollapsed(!schemaCollapsed)} title={schemaCollapsed ? 'Expand schema' : 'Collapse schema'}>
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
+                            {schemaCollapsed ? <path d="M3 5l3 3 3-3" /> : <path d="M3 7l3-3 3 3" />}
+                          </svg>
+                          {schemaCollapsed ? 'Show' : 'Hide'}
+                        </button>
                       </div>
-                      <SchemaViewer tables={assignment.sampleTables} />
+                      {!schemaCollapsed && <SchemaViewer tables={assignment.sampleTables} />}
                     </div>
                     {/* Engagement - Moved OUTSIDE scrollable area below */}
                   </div>
@@ -1197,33 +1225,53 @@ function AssignmentAttempt() {
 
               {activeTab === 'editorial' && (
                 <div className="problem-panel__editorial">
-                  <h3>Editorial</h3>
+                  <div className="editorial-header">
+                    <h3>Editorial</h3>
+                    <span className="editorial-badge">Official</span>
+                  </div>
                   <div className="editorial-content">
-                    <div className="editorial-section">
-                      <h4>Approach</h4>
-                      <p>{assignment.editorialApproach || `This problem requires you to write a SQL query to ${(assignment.question || '').toLowerCase().replace(/write a sql query to /i, '').slice(0, 120) || 'retrieve data from the database'}.`}</p>
+                    <div className="editorial-card">
+                      <div className="editorial-card__num">1</div>
+                      <div className="editorial-card__body">
+                        <h4>Approach</h4>
+                        <p>{assignment.editorialApproach || `This problem requires you to write a SQL query to ${(assignment.question || '').toLowerCase().replace(/write a sql query to /i, '').slice(0, 120) || 'retrieve data from the database'}.`}</p>
+                      </div>
                     </div>
-                    <div className="editorial-section">
-                      <h4>Key Concepts</h4>
-                      <ul>
-                        {getEditorialTips(assignment).map((tip, i) => <li key={i}>{tip}</li>)}
-                      </ul>
+                    <div className="editorial-card">
+                      <div className="editorial-card__num">2</div>
+                      <div className="editorial-card__body">
+                        <h4>Key Concepts</h4>
+                        <ul className="editorial-concepts">
+                          {getEditorialTips(assignment).map((tip, i) => (
+                            <li key={i}>
+                              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#2cbb5d" strokeWidth="2"><path d="M13 4L6 11 3 8"/></svg>
+                              {tip}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
-                    <div className="editorial-section">
-                      <h4> Algorithm</h4>
-                      <ol>
-                        <li>Identify all required tables from the schema</li>
-                        <li>Determine the columns you need to SELECT</li>
-                        <li>Apply appropriate JOINs if multiple tables are involved</li>
-                        <li>Add WHERE / HAVING clauses to filter results</li>
-                        <li>Use ORDER BY / GROUP BY as needed</li>
-                      </ol>
+                    <div className="editorial-card">
+                      <div className="editorial-card__num">3</div>
+                      <div className="editorial-card__body">
+                        <h4>Step-by-Step Algorithm</h4>
+                        <ol className="editorial-steps">
+                          <li><span>Identify</span> all required tables from the schema</li>
+                          <li><span>Select</span> the columns you need to return</li>
+                          <li><span>Join</span> tables if multiple are involved</li>
+                          <li><span>Filter</span> rows with WHERE / HAVING clauses</li>
+                          <li><span>Order</span> and group results as needed</li>
+                        </ol>
+                      </div>
                     </div>
-                    <div className="editorial-section editorial-section--complexity">
-                      <h4>Complexity</h4>
-                      <div className="complexity-badges">
-                        <span className="complexity-badge complexity-badge--time">Time: O(n)</span>
-                        <span className="complexity-badge complexity-badge--space">Space: O(n)</span>
+                    <div className="editorial-complexity-row">
+                      <div className="editorial-complexity-card">
+                        <span className="editorial-complexity-label">Time Complexity</span>
+                        <span className="editorial-complexity-value">O(n)</span>
+                      </div>
+                      <div className="editorial-complexity-card">
+                        <span className="editorial-complexity-label">Space Complexity</span>
+                        <span className="editorial-complexity-value">O(n)</span>
                       </div>
                     </div>
                   </div>
@@ -1596,7 +1644,7 @@ function AssignmentAttempt() {
             <div className="hint-card__glow" />
             <div className="hint-card__header">
               <div className="hint-card__icon-wrap">
-                <span className="hint-card__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                <span className="hint-card__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg></span>
               </div>
               <div>
                 <h3 className="hint-card__title">Hint</h3>

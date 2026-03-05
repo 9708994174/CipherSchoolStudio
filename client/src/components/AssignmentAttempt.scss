@@ -375,6 +375,8 @@
 
 .problem-panel__schema-header {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
   border-bottom: 1px solid $border;
   background: $bg-card;
 }
@@ -2401,4 +2403,227 @@ pre {
       background: #d63a36;
     }
   }
+}
+
+// -- Active Users Badge
+.problem-panel__header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.problem-panel__active-users {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #2cbb5d;
+  background: rgba(44, 187, 93, .08);
+  border: 1px solid rgba(44, 187, 93, .2);
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.problem-panel__active-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2cbb5d;
+  display: inline-block;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .5; transform: scale(.8); }
+}
+
+// -- Collapsible Schema
+.problem-panel__schema--collapsed {
+  .problem-panel__schema-header {
+    border-bottom: none;
+  }
+}
+
+.problem-panel__schema-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: $text-3;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 6px 10px;
+  transition: color .12s;
+
+  &:hover {
+    color: $yellow;
+  }
+}
+
+// -- Question top spacing
+.problem-panel__description-scroll {
+  padding-top: 20px !important;
+}
+
+// -- Professional Editorial
+.editorial-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid $border;
+
+  h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: $text-1;
+    margin: 0;
+  }
+}
+
+.editorial-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: $yellow;
+  background: rgba($yellow, .1);
+  border: 1px solid rgba($yellow, .25);
+  padding: 3px 10px;
+  border-radius: 99px;
+}
+
+.editorial-card {
+  display: flex;
+  gap: 14px;
+  background: $bg-card;
+  border: 1px solid $border;
+  border-radius: $r-md;
+  padding: 18px;
+  margin-bottom: 12px;
+  transition: border-color .15s;
+
+  &:hover {
+    border-color: $border-2;
+  }
+}
+
+.editorial-card__num {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 50%;
+  background: rgba($yellow, .12);
+  color: $yellow;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  border: 1px solid rgba($yellow, .25);
+}
+
+.editorial-card__body {
+  flex: 1;
+  min-width: 0;
+
+  h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: $text-1;
+    margin-bottom: 8px;
+  }
+
+  p {
+    font-size: 13px;
+    line-height: 1.7;
+    color: $text-3;
+  }
+}
+
+.editorial-concepts {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    color: $text-2;
+    line-height: 1.6;
+    padding: 4px 0;
+
+    svg {
+      margin-top: 3px;
+      flex-shrink: 0;
+    }
+  }
+}
+
+.editorial-steps {
+  padding-left: 5px;
+  margin: 0;
+  counter-reset: step-counter;
+  list-style: none;
+
+  li {
+    counter-increment: step-counter;
+    font-size: 13px;
+    color: $text-2;
+    line-height: 1.7;
+    padding: 4px 0;
+    padding-left: 8px;
+    border-left: 2px solid $border;
+    margin-left: 4px;
+
+    &:last-child {
+      border-left-color: transparent;
+    }
+
+    span {
+      color: $yellow;
+      font-weight: 600;
+    }
+  }
+}
+
+.editorial-complexity-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.editorial-complexity-card {
+  flex: 1;
+  background: $bg-card;
+  border: 1px solid $border;
+  border-radius: $r-md;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.editorial-complexity-label {
+  font-size: 11px;
+  color: $text-3;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  font-weight: 500;
+}
+
+.editorial-complexity-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: #2cbb5d;
+  font-family: 'SF Mono', 'Fira Code', monospace;
 }
