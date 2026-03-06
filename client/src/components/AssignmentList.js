@@ -304,16 +304,10 @@ function AssignmentList() {
 
   useEffect(() => {
     let list = assignments;
-    console.log('[FILTER] total assignments:', list.length, 'navTopic:', navTopic, 'difficulty:', difficulty);
-    if (list.length > 0) {
-      const withCat = list.filter(a => a.category);
-      console.log('[FILTER] assignments with category:', withCat.length, withCat.length > 0 ? withCat[0].category : 'none');
-    }
     if (difficulty !== 'All') list = list.filter(a => a.difficulty === difficulty);
     if (navTopic !== 'All Topics') {
       if (navTopic === 'Interview Mastery') {
         const masteryList = list.filter(a => a.category === 'SQL Interview Mastery');
-        console.log('[FILTER] Interview Mastery filtered:', masteryList.length);
         list = masteryList;
       } else {
         list = list.filter(a => (a.title + a.question).toLowerCase().includes(navTopic.toLowerCase().replace(' fn', '')));

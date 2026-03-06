@@ -352,6 +352,7 @@
   line-height: 1.75;
   color: $text-2;
   font-size: 14px;
+  font-weight: 500;
 
   p {
     margin-bottom: 10px;
@@ -359,7 +360,7 @@
 }
 
 .problem-panel__description-text {
-  color: $text-3;
+  color: $text-2;
   font-size: 13px;
   line-height: 1.6;
 }
@@ -2437,8 +2438,17 @@ pre {
 }
 
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: .5; transform: scale(.8); }
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: .5;
+    transform: scale(.8);
+  }
 }
 
 // -- Collapsible Schema
